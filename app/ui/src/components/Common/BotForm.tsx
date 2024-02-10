@@ -33,9 +33,9 @@ type Props = {
   setSelectedSource: React.Dispatch<React.SetStateAction<any>>;
   form: FormInstance<any>;
   showEmbeddingAndModels: boolean;
+  newSelectedSource?: any;
 };
-// @ts-ignore
-function classNames(...classes) {
+function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -436,7 +436,7 @@ export const BotForm = ({
           form={form}
           className="space-y-6"
           initialValues={{
-            embedding: "openai",
+            embedding: "dialoqbase_eb_text-embedding-ada-002",
             model: "gpt-3.5-turbo-dbase",
             maxDepth: 2,
             maxLinks: 10,
@@ -549,7 +549,10 @@ export const BotForm = ({
             <Select
               showSearch
               filterOption={(input, option) =>
-                (option?.label ? option?.label?.toLowerCase() : "").includes(
+                (option?.label?.toLowerCase() ?? "").includes(
+                  input?.toLowerCase()
+                ) ||
+                (option?.value?.toLowerCase() ?? "").includes(
                   input?.toLowerCase()
                 )
               }
@@ -574,7 +577,12 @@ export const BotForm = ({
             <Select
               showSearch
               filterOption={(input, option) =>
-                (option?.label ?? "").includes(input)
+                (option?.label?.toLowerCase() ?? "").includes(
+                  input?.toLowerCase()
+                ) ||
+                (option?.value?.toLowerCase() ?? "").includes(
+                  input?.toLowerCase()
+                )
               }
               filterSort={(optionA, optionB) =>
                 (optionA?.label ?? "")
