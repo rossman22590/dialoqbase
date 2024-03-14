@@ -85,6 +85,7 @@ model DialoqbaseSettings {
   noOfBotsPerUser       Int     @default(10)
   allowUserToCreateBots Boolean @default(true)
   allowUserToRegister   Boolean @default(false)
+  numberOfDocuments     Int     @default(10)
 }
 
 model BotIntegration {
@@ -110,20 +111,22 @@ model BotIntegration {
 }
 
 model BotTelegramHistory {
-  id          Int     @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   chat_id     Int?
   new_chat_id String?
   identifier  String?
   human       String?
   bot         String?
+  createdAt   DateTime? @default(now())
 }
 
 model BotDiscordHistory {
-  id         Int     @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   chat_id    String?
   identifier String?
   human      String?
   bot        String?
+  createdAt  DateTime? @default(now())
 }
 
 model BotAppearance {
@@ -158,12 +161,14 @@ model BotPlaygroundMessage {
 }
 
 model BotWhatsappHistory {
-  id         Int     @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   chat_id    String?
   from       String?
   identifier String?
+  bot_id     String?
   human      String?
   bot        String?
+  createdAt  DateTime? @default(now())
 }
 
 model botWebHistory {
@@ -189,4 +194,13 @@ model DialoqbaseModels {
   hide             Boolean  @default(false)
   deleted          Boolean  @default(false)
   createdAt        DateTime @default(now())
+}
+
+model BotApiHistory {
+  id         Int       @id @default(autoincrement())
+  api_key    String
+  bot_id     String?
+  human      String?
+  bot        String?
+  createdAt  DateTime? @default(now())
 }

@@ -1,11 +1,13 @@
-import { ChatAnthropic } from "langchain/chat_models/anthropic";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { ChatGooglePaLM } from "langchain/chat_models/googlepalm";
-import { HuggingFaceInference } from "langchain/llms/hf";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatOpenAI } from "@langchain/openai";
+import { ChatGooglePaLM } from "@langchain/community/chat_models/googlepalm";
+import { HuggingFaceInference } from "@langchain/community/llms/hf";
 import { DialoqbaseFireworksModel } from "../models/fireworks";
-import { OpenAI } from "langchain/llms/openai";
+import { OpenAI } from "@langchain/openai";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { ChatOllama } from "langchain/chat_models/ollama";
+import { ChatOllama } from "@langchain/community/chat_models/ollama";
+import { Replicate } from "@langchain/community/llms/replicate";
+import { ChatGroq } from "@langchain/groq"
 
 export const chatModelProvider = (
   provider: string,
@@ -15,12 +17,8 @@ export const chatModelProvider = (
 ) => {
   modelName = modelName.replace("-dbase", "");
 
-  console.log("provider", provider);
-  console.log("modelName", modelName);
-
   switch (provider.toLowerCase()) {
     case "openai":
-      console.log("using openai", otherFields);
       return new ChatOpenAI({
         modelName: modelName,
         temperature: temperature,
@@ -31,21 +29,18 @@ export const chatModelProvider = (
         },
       });
     case "anthropic":
-      console.log("using anthropic");
       return new ChatAnthropic({
         modelName: modelName,
         temperature: temperature,
         ...otherFields,
       });
     case "google-bison":
-      console.log("using google");
       return new ChatGooglePaLM({
         temperature: temperature,
         apiKey: process.env.GOOGLE_API_KEY,
         ...otherFields,
       });
     case "huggingface-api":
-      console.log("using huggingface-api");
       return new HuggingFaceInference({
         modelName: modelName,
         temperature: temperature,
@@ -59,7 +54,6 @@ export const chatModelProvider = (
         ...otherFields,
       });
     case "openai-instruct":
-      console.log("using openai-instruct");
       return new OpenAI({
         modelName: modelName,
         temperature: temperature,
@@ -69,10 +63,10 @@ export const chatModelProvider = (
         },
       });
     case "local":
-      console.log("using local");
       return new ChatOpenAI({
         modelName: modelName,
         temperature: temperature,
+        openAIApiKey: otherFields.apiKey || process.env.OPENAI_API_KEY,
         ...otherFields,
         configuration: {
           baseURL: otherFields.baseURL,
@@ -85,17 +79,30 @@ export const chatModelProvider = (
         },
       });
     case "google":
-      console.log("using google");
       return new ChatGoogleGenerativeAI({
         modelName: modelName,
         maxOutputTokens: 2048,
         apiKey: process.env.GOOGLE_API_KEY,
+        ...otherFields,
       });
     case "ollama":
-      console.log("using ollama");
       return new ChatOllama({
         baseUrl: otherFields.baseURL,
         model: modelName,
+        ...otherFields,
+      });
+    case "replicate":
+      return new Replicate({
+        model: modelName,
+        temperature: temperature,
+        apiKey: otherFields.apiKey,
+        ...otherFields,
+      });
+    case "groq":
+      return new ChatGroq({
+        model: modelName,
+        temperature: temperature,
+        ...otherFields,
       });
     default:
       console.log("using default");

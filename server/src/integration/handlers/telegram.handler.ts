@@ -3,7 +3,7 @@ import { embeddings } from "../../utils/embeddings";
 import { DialoqbaseVectorStore } from "../../utils/store";
 import { chatModelProvider } from "../../utils/models";
 import { DialoqbaseHybridRetrival } from "../../utils/hybrid";
-import { BaseRetriever } from "langchain/schema/retriever";
+import { BaseRetriever } from "@langchain/core/retrievers";
 import { createChain } from "../../chain";
 const prisma = new PrismaClient();
 
@@ -46,7 +46,23 @@ export const telegramBotHandler = async (
     const temperature = bot.temperature;
 
     const sanitizedQuestion = message.trim().replaceAll("\n", " ");
-    const embeddingModel = embeddings(bot.embedding);
+    const embeddingInfo = await prisma.dialoqbaseModels.findFirst({
+      where: {
+        model_id: bot.embedding,
+        hide: false,
+        deleted: false,
+      },
+    });
+
+    if (!embeddingInfo) {
+      return "Opps! Embedding not found";
+    }
+
+    const embeddingModel = embeddings(
+      embeddingInfo.model_provider!.toLowerCase(),
+      embeddingInfo.model_id,
+      embeddingInfo?.config
+    );
 
     let retriever: BaseRetriever;
 

@@ -1,15 +1,20 @@
-export const apiKeyValidaton = (embeddingsType: string) => {
-  switch (embeddingsType.toLocaleLowerCase()) {
+export const apiKeyValidaton = (modelType: string) => {
+  switch (modelType.toLocaleLowerCase()) {
     case "transformer":
     case "jina":
-      return true;
-    case "jina-api":
-      return process.env.JINA_API_KEY ? process.env.JINA_API_KEY.length > 0 : false;
+    case "ollama":
+    case "local":
+    case "replicate":
     case "supabase":
       return true;
+    case "jina-api":
+      return process.env.JINA_API_KEY
+        ? process.env.JINA_API_KEY.length > 0
+        : false;
     case "google-bison":
     case "google-gecko":
     case "google":
+    case "google palm":
       return process.env.GOOGLE_API_KEY
         ? process.env.GOOGLE_API_KEY.length > 0
         : false;
@@ -40,20 +45,17 @@ export const apiKeyValidaton = (embeddingsType: string) => {
       return process.env.FIREWORKS_API_KEY
         ? process.env.FIREWORKS_API_KEY.length > 0
         : false;
-    case "ollama":
-      return process.env.OLLAMA_EMBEDDING_API_URL && process.env.OLLAMA_EMBEDDING_MODEL
-        ? process.env.OLLAMA_EMBEDDING_API_URL.length > 0 && process.env.OLLAMA_EMBEDDING_MODEL.length > 0
+    case "groq":
+      return process.env.GROQ_API_KEY
+        ? process.env.GROQ_API_KEY.length > 0
         : false;
-
-    case "local":
-      return true;
     default:
       return false;
   }
 };
 
-export const apiKeyValidatonMessage = (embeddingsType: string) => {
-  switch (embeddingsType.toLowerCase()) {
+export const apiKeyValidatonMessage = (modelType: string) => {
+  switch (modelType.toLowerCase()) {
     case "openai":
     case "openai-instruct":
       return "Please add OPENAI_API_KEY to your .env file";
@@ -66,6 +68,7 @@ export const apiKeyValidatonMessage = (embeddingsType: string) => {
     case "google-bison":
     case "google-gecko":
     case "google":
+    case "google palm":
       return "Please add GOOGLE_API_KEY to your .env file";
     case "anthropic":
       return "Please add ANTHROPIC_API_KEY to your .env file";
@@ -73,7 +76,11 @@ export const apiKeyValidatonMessage = (embeddingsType: string) => {
       return "Please add FIREWORKS_API_KEY to your .env file";
     case "jina-api":
       return "Please add JINA_API_KEY to your .env file";
+    case "groq":
+      return "Please add GROQ_API_KEY to your .env file";
+    // case "replicate":
+    //   return "Please add REPLICATE_API_TOKEN to your .env file";
     default:
-      return "Unable to validate API key"
+      return "Unable to validate API key";
   }
 };

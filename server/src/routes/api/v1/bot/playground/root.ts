@@ -5,14 +5,18 @@ import {
   getPlaygroundHistoryByBotId,
   getPlaygroundHistoryByBotIdAndHistoryId,
   updateBotAudioSettingsHandler,
-} from "./handlers";
+  deleteBotByPlaygroundId,
+  updateBotPlaygroundTitleById
+} from "../../../../../handlers/api/v1/bot/playground";
 import {
   audioSettingsSchema,
   chatPlaygroundHistoryIdSchema,
   chatPlaygroundHistorySchema,
   chatRequestSchema,
   chatRequestStreamSchema,
-} from "./schema";
+  deleteBotByPlaygroundIdSchema,
+  updateBotPlaygroundTitleByIdSchema,
+} from "../../../../../schema/api/v1/bot/playground";
 
 const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
   fastify.post(
@@ -59,6 +63,24 @@ const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       onRequest: [fastify.authenticate],
     },
     updateBotAudioSettingsHandler
+  );
+
+  fastify.delete(
+    "/history/:id",
+    {
+      onRequest: [fastify.authenticate],
+      schema: deleteBotByPlaygroundIdSchema
+    },
+    deleteBotByPlaygroundId
+  );
+
+  fastify.put(
+    "/history/:id",
+    {
+      onRequest: [fastify.authenticate],
+      schema: updateBotPlaygroundTitleByIdSchema
+    },
+    updateBotPlaygroundTitleById
   );
 };
 
