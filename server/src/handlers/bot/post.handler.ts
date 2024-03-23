@@ -3,7 +3,7 @@ import { ChatRequestBody } from "./types";
 import { DialoqbaseVectorStore } from "../../utils/store";
 import { embeddings } from "../../utils/embeddings";
 import { chatModelProvider } from "../../utils/models";
-import { BaseRetriever } from "langchain/schema/retriever";
+import { BaseRetriever } from "@langchain/core/retrievers";
 import { DialoqbaseHybridRetrival } from "../../utils/hybrid";
 import { Document } from "langchain/document";
 import { createChain, groupMessagesByConversation } from "../../chain";
@@ -307,7 +307,6 @@ export const chatRequestStreamHandler = async (
 
     if (bot.bot_protect) {
       if (!request.session.get("is_bot_allowed")) {
-        console.log("not allowed");
 
         reply.raw.setHeader("Content-Type", "text/event-stream");
 

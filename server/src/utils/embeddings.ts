@@ -1,10 +1,10 @@
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { CohereEmbeddings } from "langchain/embeddings/cohere";
-import { HuggingFaceInferenceEmbeddings } from "langchain/embeddings/hf";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { CohereEmbeddings } from "@langchain/cohere";
+import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
 import { TransformersEmbeddings } from "../embeddings/transformer-embedding";
-import { GooglePaLMEmbeddings } from "langchain/embeddings/googlepalm";
+import { GooglePaLMEmbeddings } from "@langchain/community/embeddings/googlepalm";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
-import { OllamaEmbeddings } from "langchain/embeddings/ollama";
+import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
 
 export const embeddings = (
   provider: string,
@@ -19,7 +19,7 @@ export const embeddings = (
       });
     case "cohere":
       return new CohereEmbeddings({
-        modelName,
+        model: modelName,
       });
     case "huggingface-api":
       return new HuggingFaceInferenceEmbeddings();
@@ -80,6 +80,15 @@ export const embeddings = (
           },
         },
       });
+    case "fireworks":
+      return new OpenAIEmbeddings({
+        modelName,
+        openAIApiKey: process.env.FIREWORKS_API_KEY!,
+        configuration: {
+          baseURL: "https://api.fireworks.ai/inference/v1",
+          apiKey: process.env.FIREWORKS_API_KEY!,
+        },
+      });
     default:
       console.log("Using Default Embeddings");
       return new OpenAIEmbeddings();
@@ -96,4 +105,5 @@ export const supportedEmbeddings = [
   "supabase",
   "jina",
   "google",
+  "fireworks",
 ];
