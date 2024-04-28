@@ -1,4 +1,4 @@
-<h1 align="center">⚡Dialoqbase ⚡</h1>  
+<h1 align="center">⚡Dialoqbase ⚡</h1>   
 <p align="center">
  Create chatbots with ease
 </p>
