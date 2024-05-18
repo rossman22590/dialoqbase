@@ -1,4 +1,12 @@
-import { Form, Input, notification, Select, Slider, Switch } from "antd";
+import {
+  Form,
+  Input,
+  InputNumber,
+  notification,
+  Select,
+  Slider,
+  Switch,
+} from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../../services/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -155,6 +163,9 @@ export const SettingsCard: React.FC<BotSettings> = ({
             bot_protect: data.bot_protect,
             use_rag: data.use_rag,
             bot_model_api_key: data.bot_model_api_key,
+            noOfDocumentsToRetrieve: data.noOfDocumentsToRetrieve,
+            noOfChatHistoryInContext: data.noOfChatHistoryInContext,
+            semanticSearchSimilarityScore: data.semanticSearchSimilarityScore,
           }}
           form={form}
           requiredMark={false}
@@ -252,11 +263,86 @@ export const SettingsCard: React.FC<BotSettings> = ({
                   />
                 </Form.Item>
 
-                <Form.Item label={"Embedding Method"} name="embedding">
+                <Form.Item
+                  label={"Embedding Method"}
+                  name="embedding"
+                  help={
+                    <>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        If you change the embedding method, make sure to
+                        re-fetch the data source or choose a model with the same
+                        dimensions
+                      </p>
+                    </>
+                  }
+                >
                   <Select
-                    disabled
                     placeholder="Select an embedding method"
                     options={embeddingModel}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="noOfDocumentsToRetrieve"
+                  label="Number of documents to retrieve"
+                  rules={[
+                    {
+                      required: true,
+                      message:
+                        "Please input a number of documents to retrieve!",
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    min={0}
+                    style={{ width: "100%" }}
+                    placeholder="Enter number of documents to retrieve"
+                  />
+                </Form.Item>
+                {/* <Form.Item
+                  name="noOfChatHistoryInContext"
+                  label="Number of chat history in context"
+                  rules={[
+                    {
+                      required: true,
+                      message:
+                        "Please input a number of chat history in context!",
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    min={0}
+                    style={{ width: "100%" }}
+                    placeholder="Enter number of chat history in context"
+                  />
+                </Form.Item> */}
+                <Form.Item
+                  label={"Semantic Search Similarity Score"}
+                  name="semanticSearchSimilarityScore"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input a similarity score!",
+                    },
+                  ]}
+                >
+                  <Select
+                    placeholder="Select a similarity score"
+                    options={[
+                      { label: "Consider all documents", value: "none" },
+                      {
+                        label: "Similarity Score >= 0.2",
+                        value: "0.2",
+                      },
+                      {
+                        label: "Similarity Score >= 0.5",
+                        value: "0.5",
+                      },
+                      {
+                        label: "Similarity Score >= 0.7",
+                        value: "0.7",
+                      },
+                    ]}
                   />
                 </Form.Item>
 
@@ -272,6 +358,7 @@ export const SettingsCard: React.FC<BotSettings> = ({
                 >
                   <Input.TextArea size="large" rows={5} placeholder="" />
                 </Form.Item>
+
                 <div className="flex flex-row justify-start gap-4">
                   <button
                     type="button"
