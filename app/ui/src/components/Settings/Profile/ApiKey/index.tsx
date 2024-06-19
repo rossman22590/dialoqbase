@@ -107,7 +107,7 @@ export const UserApiKey = () => {
         </h2>
 
         <p className="mt-1 text-sm leading-6 text-gray-500 dark:text-gray-200">
-          Manage your Dialoqbase API key
+          Manage your Botcraft Pro API key
         </p>
       </div>
 
