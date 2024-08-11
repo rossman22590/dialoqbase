@@ -13,6 +13,9 @@ import swaggerUi from "@fastify/swagger-ui";
 import { pathToFileURL } from "url";
 import { Worker } from "bullmq";
 import { parseRedisUrl } from "./utils/redis";
+import { CronJob } from 'cron';
+import { processDatasourceCron } from "./cron/index";
+
 declare module "fastify" {
   interface Session {
     is_bot_allowed: boolean;
@@ -33,17 +36,14 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
   void fastify.register(fastifyMultipart, {
     limits: {
-      files: 10,
-      fileSize: 100 * 1024 * 1024,
-    },
+      fileSize: 1 * 1024 * 1024 * 1024,
+    }
   });
 
   void fastify.register(swagger);
 
   void fastify.register(swaggerUi, {
     routePrefix: "/docs",
-    staticCSP: true,
-    transformStaticCSP: (header: string) => header,
     theme: {
       title: "Dialoqbase API Docs",
     },
@@ -106,8 +106,17 @@ const worker = new Worker("vector", workerUrl, {
   useWorkerThreads: workerThreads === "true",
 });
 
+const job = new CronJob(
+  process.env.DB_CRON_TIME || '0 0 0 * * *',
+  processDatasourceCron,
+  null,
+  true,
+  process.env.DB_CRON_TIMEZONE
+);
+
 process.on("SIGINT", async () => {
   await worker.close();
+  job.stop();
   process.exit();
 });
 

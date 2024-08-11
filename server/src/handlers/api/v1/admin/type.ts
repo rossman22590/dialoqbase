@@ -4,6 +4,8 @@ export type UpdateDialoqbaseSettingsRequest = {
     allowUserToCreateBots: boolean;
     allowUserToRegister: boolean;
     usePuppeteerFetch: boolean;
+    fileUploadSizeLimit: number;
+    refetchDatasource: boolean;
   };
 };
 
@@ -40,14 +42,14 @@ export type SaveModelFromInputedUrlRequest = {
     stream_available: boolean;
     api_key?: string;
     api_type:
-      | "openai"
-      | "ollama"
-      | "replicate"
-      | "openai-api"
-      | "google"
-      | "anthropic"
-      | "groq"
-      ;
+    | "openai"
+    | "ollama"
+    | "replicate"
+    | "openai-api"
+    | "google"
+    | "anthropic"
+    | "groq"
+    ;
   };
 };
 

@@ -21,6 +21,7 @@ export type BotSettings = {
     semanticSearchSimilarityScore: string;
     inactivityTimeout: number;
     autoResetSession: boolean;
+    autoSyncDataSources: boolean;
   };
   chatModel: {
     label: string;
@@ -40,3 +41,19 @@ export type BotIntegrationAPI = {
     api_key: string | null;
   };
 };
+
+
+export type BotConfig = {
+  chatModel: {
+    label: string;
+    value: string;
+    stream: string;
+  }[];
+  embeddingModel: {
+    label: string;
+    value: string;
+  }[];
+  defaultChatModel?: string;
+  defaultEmbeddingModel?: string;
+  fileUploadSizeLimit: number;
+}
