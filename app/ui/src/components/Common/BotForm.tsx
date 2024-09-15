@@ -178,12 +178,12 @@ export const BotForm = ({
           <p className="text-sm text-gray-500">
             If you find any issues, please report them on{" "}
             <a
-              href={`https://github.com/n4ze3m/dialoqbase/issues/new?title=file%20upload%20issue&type=bug&labels=bug`}
+              href={`https://myapps.ai`}
               target="_blank"
               rel="noreferrer"
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
-              GitHub
+              Support
             </a>
             .
           </p>
@@ -243,12 +243,12 @@ export const BotForm = ({
           <p className="text-sm text-gray-500">
             If you find any issues, please report them on{" "}
             <a
-              href="https://github.com/n4ze3m/dialoqbase/issues/new?title=Crawler%20issue&labels=bug"
+              href={`https://myapps.ai`}
               target="_blank"
               rel="noreferrer"
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
-              GitHub
+              Support
             </a>
             .
           </p>
@@ -304,12 +304,12 @@ export const BotForm = ({
           <p className="text-sm text-gray-500">
             If you find any issues, please report them on{" "}
             <a
-              href="https://github.com/n4ze3m/dialoqbase/issues/new?title=Github%20issue&labels=bug"
+              href={`https://myapps.ai`}
               target="_blank"
               rel="noreferrer"
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
-              GitHub
+              Support
             </a>
             .
           </p>
@@ -608,14 +608,14 @@ export const BotForm = ({
 
               <p className="text-sm text-gray-500">
                 If you find any issues, please report them on{" "}
-                <a
-                  href="https://github.com/n4ze3m/dialoqbase/issues/new?title=Github%20issue&labels=bug"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  GitHub
-                </a>
+            <a
+              href={`https://myapps.ai`}
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-indigo-600 hover:text-indigo-500"
+            >
+              Support
+            </a>
                 .
               </p>
             </>
