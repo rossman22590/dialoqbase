@@ -8,18 +8,11 @@ RUN apt-get update && apt-get install -y \
 # Install pnpm
 RUN npm install -g pnpm
 
-# Server stage
-FROM base AS server
-COPY server/package.json server/pnpm-lock.yaml ./
+# Build stage
+FROM base AS build
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
-COPY server .
-RUN pnpm build
-
-# Client build stage
-FROM base AS client
-COPY app/package.json app/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-COPY app .
+COPY . .
 RUN pnpm build
 
 # Final stage
@@ -46,10 +39,10 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
     && rm -rf /var/lib/apt/lists/*
 
 # Copy built artifacts
-COPY --from=server /app/dist ./dist
-COPY --from=server /app/prisma ./prisma
-COPY --from=server /app/package.json ./package.json
-COPY --from=client /app/dist ./public
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/public ./public
 
 # Install production dependencies
 RUN npm install --production
