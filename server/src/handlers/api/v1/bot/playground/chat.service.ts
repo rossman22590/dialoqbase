@@ -44,13 +44,33 @@ export const createRetriever = async (bot: any, embeddingModel: any) => {
 };
 
 export const getBotConfig = (bot: any, modelinfo: any) => {
-  const botConfig: any = (modelinfo.config as {}) || {};
+  let botConfig: any = {};
+
+  // Parse bot.botConfig if it's a string
+  if (typeof bot.botConfig === 'string') {
+    try {
+      botConfig = JSON.parse(bot.botConfig);
+    } catch (error) {
+      console.error('Error parsing bot.botConfig:', error);
+    }
+  } else if (typeof bot.botConfig === 'object') {
+    botConfig = bot.botConfig;
+  }
+
+  // Merge with modelinfo.config
+  botConfig = { ...modelinfo.config, ...botConfig };
+
+  // Add API key for OpenAI if provided
   if (
     bot.provider.toLowerCase() === "openai" &&
     bot.bot_model_api_key?.trim()
   ) {
-    botConfig.configuration = { apiKey: bot.bot_model_api_key };
+    botConfig.configuration = { 
+      ...botConfig.configuration,
+      apiKey: bot.bot_model_api_key.trim()
+    };
   }
+
   return botConfig;
 };
 
