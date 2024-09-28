@@ -66,6 +66,9 @@ COPY --from=build /app/app/script/dist/chat.min.js ./public/chat.min.js
 RUN yarn config set registry https://registry.npmjs.org/ && \
     yarn config set network-timeout 1200000 && \
     yarn install --production --frozen-lockfile
+    
+# Expose common ports
+EXPOSE 3000 8080
 
 # Start the application
 CMD ["yarn", "start"]
