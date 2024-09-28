@@ -25,7 +25,7 @@ WORKDIR /app
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
-ENV PORT=8080
+ENV PORT=3000
 # Install dependencies
 RUN apt update && apt install -y wget gnupg dirmngr unzip
 # Install dependencies and google chrome based on architecture
