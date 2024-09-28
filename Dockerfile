@@ -1,6 +1,8 @@
 # Base stage
 FROM node:18-slim AS base
 WORKDIR /app
+
+# Install necessary tools and dependencies
 RUN apt-get update && apt-get install -y \
     g++ make python3 wget gnupg dirmngr unzip \
     git git-lfs openssh-client curl jq cmake sqlite3 openssl psmisc
@@ -8,11 +10,19 @@ RUN apt-get update && apt-get install -y \
 # Install pnpm
 RUN npm install -g pnpm
 
+# Install rspack globally
+RUN npm install -g @rspack/cli
+
 # Build stage
 FROM base AS build
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
+
+# Install TypeScript globally
+RUN npm install -g typescript
+
+# Build the application
 RUN pnpm build
 
 # Final stage
