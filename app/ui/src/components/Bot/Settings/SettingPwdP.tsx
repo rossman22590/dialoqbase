@@ -22,7 +22,7 @@ export const SettingsPwdP: React.FC<Props> = ({
     return response.data;
   };
 
-  const { mutate, isLoading } = useMutation(onFinish, {
+  const { mutate } = useMutation(onFinish, {  // Removed isLoading from destructuring
     onSuccess: () => {
       client.invalidateQueries(["getBotSettings", params.id]);
 
@@ -44,7 +44,6 @@ export const SettingsPwdP: React.FC<Props> = ({
     },
   });
   
-  // Return an empty form with all the logic but no UI
   return (
     <Form
       form={form}
