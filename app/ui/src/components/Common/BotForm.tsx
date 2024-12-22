@@ -178,7 +178,7 @@ export const BotForm = ({
           <p className="text-sm text-gray-500">
             If you find any issues, please report them on{" "}
             <a
-              href={`https://myapps.ai`}
+              href={`https://support.myapps.ai`}
               target="_blank"
               rel="noreferrer"
               className="font-medium text-indigo-600 hover:text-indigo-500"
@@ -243,7 +243,7 @@ export const BotForm = ({
           <p className="text-sm text-gray-500">
             If you find any issues, please report them on{" "}
             <a
-              href={`https://myapps.ai`}
+              href={`https://support.myapps.ai`}
               target="_blank"
               rel="noreferrer"
               className="font-medium text-indigo-600 hover:text-indigo-500"
@@ -304,7 +304,7 @@ export const BotForm = ({
           <p className="text-sm text-gray-500">
             If you find any issues, please report them on{" "}
             <a
-              href={`https://myapps.ai`}
+              href={`https://support.myapps.ai`}
               target="_blank"
               rel="noreferrer"
               className="font-medium text-indigo-600 hover:text-indigo-500"
@@ -609,7 +609,7 @@ export const BotForm = ({
               <p className="text-sm text-gray-500">
                 If you find any issues, please report them on{" "}
             <a
-              href={`https://myapps.ai`}
+              href={`https://support.myapps.ai`}
               target="_blank"
               rel="noreferrer"
               className="font-medium text-indigo-600 hover:text-indigo-500"
