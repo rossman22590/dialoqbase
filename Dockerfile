@@ -1,4 +1,5 @@
-FROM node:18-slim AS base
+# Use Node.js 20 as the base image
+FROM node:20-slim AS base
 WORKDIR /app
 RUN apt update && apt install -y \
     g++ make python3 wget gnupg dirmngr unzip
@@ -18,7 +19,7 @@ COPY . .
 RUN pnpm install && pnpm build
 
 # Final stage
-FROM node:18-slim
+FROM node:20-slim
 WORKDIR /app
 
 # Set environment variables
