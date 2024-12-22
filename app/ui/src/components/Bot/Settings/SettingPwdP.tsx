@@ -13,69 +13,36 @@ export const SettingsPwdP: React.FC<Props> = ({
   publicBotPwd,
   publicBotPwdProtected,
 }) => {
-  // Early return for older bots
-  if (!publicBotPwd && !publicBotPwdProtected) {
-    return null;
-  }
-
   const params = useParams<{ id: string }>();
   const [form] = Form.useForm();
   const isEnabled = Form.useWatch("publicBotPwdProtected", form);
   const client = useQueryClient();
-
   const onFinish = async (values: any) => {
-    try {
-      // Add validation check before making the API call
-      if (!params.id || !values) {
-        throw new Error("Invalid parameters");
-      }
-
-      const response = await api.put(`/bot/${params.id}/password`, values);
-      
-      // Validate response
-      if (!response || !response.data) {
-        throw new Error("Invalid response");
-      }
-
-      return response.data;
-    } catch (error) {
-      // Handle older bot authentication errors silently
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        console.debug("Bot password protection not supported for this bot");
-        return null;
-      }
-      throw error; // Re-throw other errors to be handled by mutation
-    }
+    const response = await api.put(`/bot/${params.id}/password`, values);
+    return response.data;
   };
 
-  const { mutate } = useMutation(onFinish, {
-    onSuccess: (data) => {
-      // Only update queries and show notification if operation was successful
-      if (data) {
-        client.invalidateQueries(["getBotSettings", params.id]);
-        notification.success({
-          message: "Bot settings updated successfully",
-        });
-      }
+  const { mutate, isLoading } = useMutation(onFinish, {
+    onSuccess: () => {
+      client.invalidateQueries(["getBotSettings", params.id]);
+
+      notification.success({
+        message: "Bot settings updated successfully",
+      });
     },
     onError: (error: any) => {
-      // Only show error notifications for new bots
-      if (publicBotPwd || publicBotPwdProtected) {
-        if (axios.isAxiosError(error)) {
-          const message = error.response?.data?.message || "Something went wrong";
-          notification.error({
-            message,
-          });
-          return;
-        }
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message || "Something went wrong";
         notification.error({
-          message: "Something went wrong",
+          message,
         });
+        return;
       }
+      notification.error({
+        message: "Something went wrong",
+      });
     },
   });
-
-  // Only render form for supported bots
   return (
     <Form
       form={form}
@@ -86,28 +53,58 @@ export const SettingsPwdP: React.FC<Props> = ({
       layout="vertical"
       onFinish={mutate}
     >
-      <div className="hidden">
-        <Form.Item
-          name="publicBotPwdProtected"
-          valuePropName="checked"
-        >
-          <Switch />
-        </Form.Item>
+      {/* <div className="px-4 py-5 bg-white  border sm:rounded-lg sm:p-6 dark:bg-[#1e1e1e] dark:border-gray-700">
+        <div className="md:grid md:grid-cols-3 md:gap-6">
+          <div className="md:col-span-1">
+            <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+              Password Protection
+            </h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Proctect bot's public access with a password.
+            </p>
+          </div>
+          <div className="mt-5 space-y-6 md:col-span-2 md:mt-0">
+            <Form.Item
+              name="publicBotPwdProtected"
+              valuePropName="checked"
+              label="Enable Password Protection"
+            >
+              <Switch />
+            </Form.Item>
 
-        <Form.Item
-          name="publicBotPwd"
-          rules={[
-            {
-              required: isEnabled,
-              message: "Please input your password!",
-            },
-          ]}
-        >
-          <Input.Password
-            disabled={!isEnabled}
-          />
-        </Form.Item>
-      </div>
+            <Form.Item
+              name="publicBotPwd"
+              label="Password"
+              rules={[
+                {
+                  required: isEnabled,
+                  message: "Please input your password!",
+                },
+              ]}
+            >
+              <Input.Password
+                placeholder="Password"
+                disabled={!isEnabled}
+                size="large"
+              />
+            </Form.Item>
+
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              This feature is in preview and only works with web interface for
+              now
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 text-right">
+          <button
+            type="submit"
+            className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            {isLoading ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </div> */}
     </Form>
   );
 };
