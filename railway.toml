@@ -1,0 +1,11 @@
+# railway.toml
+
+[build]
+  builder = "docker" # This is usually the default
+
+[nixpacks.providers]
+  node = "20" # Or "20.x.x", "lts", "latest"
+
+# You might also have start commands, etc.
+# [deploy]
+#   startCommand = "yarn start"
