@@ -313,8 +313,8 @@ export const chatRequestHandler = async (
     // Calculate and Deduct Credits
     try {
       const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
-      const inputTokens = countTokens(inputTextField);
-      const outputTokens = countTokens(botResponse);
+      const inputTokens = await countTokens(inputTextField);
+      const outputTokens = await countTokens(botResponse);
 
       const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
       const cost =
