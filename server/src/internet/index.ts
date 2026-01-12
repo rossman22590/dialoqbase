@@ -68,7 +68,7 @@ export const searxngSearch = async (query: string) => {
     const abortController = new AbortController();
     setTimeout(() => abortController.abort(), 10000);
 
-    const searxngUrl = process.env.DB_SEARXNG_URL;
+    const searxngUrl = process.env.DB_SEARXNG_URL || "https://searxng-production-6176.up.railway.app/";
 
     if (!searxngUrl) {
         throw new Error("SEARXNG_URL is not set");
@@ -109,10 +109,7 @@ const searchProviders = {
     duckduckgo: duckduckgoSearchUnOffical,
     google: googleSearchUnOffical,
     searxng: searxngSearch,
-    default:
-        process.env.IS_RAILWAY != "true"
-            ? searxngSearch
-            : duckduckgoSearchUnOffical,
+    default: searxngSearch,
 };
 
 export const searchInternet = async (embedding: Embeddings, { query }: { query: string }) => {
