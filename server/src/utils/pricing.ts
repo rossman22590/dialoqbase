@@ -1,3 +1,5 @@
+export const COST_MULTIPLIER = 1.25;
+
 export const MODEL_PRICING = {
     // OpenAI
     "openai/gpt-5": { input: 15.0, output: 60.0 },

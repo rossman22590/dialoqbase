@@ -10,7 +10,7 @@ import { createChain, groupMessagesByConversation } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
 import { nextTick } from "../../utils/nextTick";
 import { jwtBotVerify } from "../../utils/jwt";
-import { MODEL_PRICING } from "../../utils/pricing";
+import { COST_MULTIPLIER, MODEL_PRICING } from "../../utils/pricing";
 import { countTokens } from "../../utils/tokenizer";
 
 export const chatRequestHandler = async (
@@ -318,10 +318,11 @@ export const chatRequestHandler = async (
       const outputTokens = await countTokens(botResponse);
 
       const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
-      const cost =
+      const baseCost =
         (Number(pricing.input) * inputTokens) / 1000000 +
         (Number(pricing.output) * outputTokens) / 1000000 +
         Number(pricing.request ?? 0);
+      const cost = baseCost * COST_MULTIPLIER;
 
       if (!usesOwnKey) {
         await request.server.prisma.userCredit.update({
@@ -800,10 +801,11 @@ export const chatRequestStreamHandler = async (
       const outputTokens = await countTokens(response);
 
       const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
-      const cost =
+      const baseCost =
         (Number(pricing.input) * inputTokens) / 1000000 +
         (Number(pricing.output) * outputTokens) / 1000000 +
         Number(pricing.request ?? 0);
+      const cost = baseCost * COST_MULTIPLIER;
 
       if (!usesOwnKey) {
         await request.server.prisma.userCredit.update({

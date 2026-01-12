@@ -9,7 +9,7 @@ import { DialoqbaseHybridRetrival } from "../../utils/hybrid";
 import { createChain, groupMessagesByConversation } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
 import { nextTick } from "../../utils/nextTick";
-import { MODEL_PRICING } from "../../utils/pricing";
+import { COST_MULTIPLIER, MODEL_PRICING } from "../../utils/pricing";
 import { countTokens } from "../../utils/tokenizer";
 
 const recordApiUsage = async (
@@ -26,10 +26,11 @@ const recordApiUsage = async (
   const inputTokens = await countTokens(inputText);
   const outputTokens = await countTokens(outputText);
   const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
-  const cost =
+  const baseCost =
     (Number(pricing.input) * inputTokens) / 1000000 +
     (Number(pricing.output) * outputTokens) / 1000000 +
     Number(pricing.request ?? 0);
+  const cost = baseCost * COST_MULTIPLIER;
 
   if (!usesOwnKey) {
     await prisma.userCredit.update({

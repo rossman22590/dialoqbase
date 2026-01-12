@@ -85,8 +85,8 @@ export const embeddings = (
           apiKey: resolvedApiKey || process.env.OPENAI_API_KEY,
           defaultHeaders: {
             "HTTP-Referer":
-              process.env.LOCAL_REFER_URL || "https://dialoqbase.n4ze3m.com/",
-            "X-Title": process.env.LOCAL_TITLE || "Dialoqbase",
+              process.env.LOCAL_REFER_URL || "https://myapps.ai",
+            "X-Title": process.env.LOCAL_TITLE || "Botcraft",
           },
         },
       });
