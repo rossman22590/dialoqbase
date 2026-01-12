@@ -49,20 +49,37 @@ export default function UsageRoot() {
         if (!transactions) {
             return [];
         }
-        return transactions.map((t: any) => ({
-            ...t,
-            amount: Number(t.amount),
-            createdAt: t.createdAt || t.created_at,
-        }));
+        return transactions.map((t: any) => {
+            let metadata = t.metadata;
+            if (typeof metadata === "string") {
+                try {
+                    metadata = JSON.parse(metadata);
+                } catch {
+                    metadata = undefined;
+                }
+            }
+            return {
+                ...t,
+                metadata,
+                amount: Number(t.amount),
+                createdAt: t.createdAt || t.created_at,
+            };
+        });
     }, [transactions]);
 
     const filteredTransactions = useMemo(() => {
         if (!isBotUsage) {
             return normalizedTransactions;
         }
-        return normalizedTransactions.filter(
-            (t: any) => t?.metadata?.bot_id === botId
-        );
+        return normalizedTransactions.filter((t: any) => {
+            const metadata = t?.metadata || {};
+            const botMatch =
+                metadata.bot_id ||
+                metadata.botId ||
+                metadata.bot_public_id ||
+                metadata.botPublicId;
+            return botMatch && String(botMatch) === String(botId);
+        });
     }, [normalizedTransactions, isBotUsage, botId]);
 
     const usageTransactions = useMemo(() => {
