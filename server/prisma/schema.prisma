@@ -91,6 +91,7 @@ model User {
   bots            Bot[]
   apiKeys         UserApiKey[]
   credit          UserCredit?
+  transactions    UserTransaction[]
 }
 
 model UserCredit {
@@ -100,6 +101,17 @@ model UserCredit {
   User      User     @relation(fields: [user_id], references: [user_id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model UserTransaction {
+  id          String   @id @default(uuid())
+  user_id     Int
+  amount      Decimal  @db.Decimal(10, 4)
+  type        String
+  description String?
+  metadata    Json?    @default("{}") @db.Json
+  createdAt   DateTime @default(now())
+  User        User     @relation(fields: [user_id], references: [user_id])
 }
 
 model DialoqbaseSettings {

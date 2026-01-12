@@ -9,7 +9,8 @@ import {
   createNewApiKey,
   deleteApiKey,
   getAllApiKeyByUser,
-  getUserCreditsHandler
+  getUserCreditsHandler,
+  getUserTransactionsHandler
 } from "../../../../handlers/api/v1/user";
 import {
   isRegisterationAllowedSchema,
@@ -154,6 +155,33 @@ const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       },
     },
     getUserCreditsHandler
+  );
+
+  fastify.get(
+    "/transactions",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        tags: ["User"],
+        summary: "Get user transactions",
+        response: {
+          200: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                amount: { type: "number" },
+                type: { type: "string" },
+                description: { type: "string" },
+                createdAt: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    },
+    getUserTransactionsHandler
   );
 };
 

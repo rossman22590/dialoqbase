@@ -2,6 +2,7 @@ import {
   CubeIcon,
   UserCircleIcon,
   UsersIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { useIsAdmin } from "../hooks/useIsAdmin";
 import { Link, useLocation } from "react-router-dom";
@@ -50,49 +51,55 @@ export const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <div className="mx-auto max-w-7xl lg:flex lg:gap-x-16 lg:px-8">
-        {adminInfo?.is_admin && (
-          <aside className="flex lg:rounded-md bg-white lg:h-52 lg:p-4 lg:mt-20 overflow-x-auto lg:border border-b  py-4 lg:block lg:w-64 lg:flex-none  dark:bg-[#171717] dark:border-gray-600">
-            <nav className="flex-none  px-4 sm:px-6 lg:px-0">
-              <ul
-                role="list"
-                className="flex gap-x-3 gap-y-1 whitespace-nowrap lg:flex-col"
-              >
-                <LinkComponent
-                  href="/settings"
-                  name="General"
-                  icon={UserCircleIcon}
-                  current={location.pathname}
-                />
-                <LinkComponent
-                  href="/settings/application"
-                  name="Application"
-                  icon={CubeIcon}
-                  current={location.pathname}
-                />
+        <aside className="flex lg:rounded-md bg-white lg:h-52 lg:p-4 lg:mt-20 overflow-x-auto lg:border border-b  py-4 lg:block lg:w-64 lg:flex-none  dark:bg-[#171717] dark:border-gray-600">
+          <nav className="flex-none  px-4 sm:px-6 lg:px-0">
+            <ul
+              role="list"
+              className="flex gap-x-3 gap-y-1 whitespace-nowrap lg:flex-col"
+            >
+              <LinkComponent
+                href="/settings"
+                name="General"
+                icon={UserCircleIcon}
+                current={location.pathname}
+              />
+              <LinkComponent
+                href="/settings/usage"
+                name="Usage"
+                icon={ChartBarIcon}
+                current={location.pathname}
+              />
+              {adminInfo?.is_admin && (
+                <>
+                  <LinkComponent
+                    href="/settings/application"
+                    name="Application"
+                    icon={CubeIcon}
+                    current={location.pathname}
+                  />
 
-                <LinkComponent
-                  href="/settings/teams"
-                  name="Teams"
-                  icon={UsersIcon}
-                  current={location.pathname}
-                />
+                  <LinkComponent
+                    href="/settings/teams"
+                    name="Teams"
+                    icon={UsersIcon}
+                    current={location.pathname}
+                  />
 
-                <LinkComponent
-                  href="/settings/model"
-                  name="Model"
-                  current={location.pathname}
-                  icon={AiIcon}
-                />
-              </ul>
-            </nav>
-          </aside>
-        )}
+                  <LinkComponent
+                    href="/settings/model"
+                    name="Model"
+                    current={location.pathname}
+                    icon={AiIcon}
+                  />
+                </>
+              )}
+            </ul>
+          </nav>
+        </aside>
 
         <main
           className={
-            adminInfo?.is_admin
-              ? "px-4 py-16 sm:px-6 lg:flex-auto lg:px-0 lg:py-20"
-              : "px-4 py-16 sm:px-6 lg:flex-auto lg:px-0 lg:py-20 lg:mx-auto lg:max-w-2xl"
+            "px-4 py-16 sm:px-6 lg:flex-auto lg:px-0 lg:py-20 lg:mx-auto lg:max-w-2xl"
           }
         >
           <div className="mx-auto max-w-2xl space-y-16 sm:space-y-10 lg:mx-0 lg:max-w-none">

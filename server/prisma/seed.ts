@@ -307,9 +307,11 @@ const removeTensorflowSupport = async () => {
 // };
 
 const updateGeminiStreamingToTrue = async () => {
-  await prisma.dialoqbaseModels.update({
+  await prisma.dialoqbaseModels.updateMany({
     where: {
-      model_id: "gemini-pro",
+      model_id: {
+        in: ["google/gemini-2.5-pro", "google/gemini-2.5-flash"],
+      },
     },
     data: {
       stream_available: true,
