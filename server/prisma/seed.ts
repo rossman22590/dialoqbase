@@ -101,10 +101,37 @@ const LLMS: {
       config: "{}",
     },
     {
-      name: "Mixtral 8x22B Instruct",
-      model_id: "mistralai/mixtral-8x22b-instruct",
+      name: "Mistral Large 2512",
+      model_id: "mistralai/mistral-large-2512",
       model_type: "chat",
       model_provider: "Mistral",
+      stream_available: true,
+      local_model: false,
+      config: "{}",
+    },
+    {
+      name: "Ministral 3 14B 2512",
+      model_id: "mistralai/ministral-14b-2512",
+      model_type: "chat",
+      model_provider: "Mistral",
+      stream_available: true,
+      local_model: false,
+      config: "{}",
+    },
+    {
+      name: "MiniMax M2.1",
+      model_id: "minimax/minimax-m2.1",
+      model_type: "chat",
+      model_provider: "MiniMax",
+      stream_available: true,
+      local_model: false,
+      config: "{}",
+    },
+    {
+      name: "GLM 4.7 (Z.AI)",
+      model_id: "z-ai/glm-4.7",
+      model_type: "chat",
+      model_provider: "Z.AI",
       stream_available: true,
       local_model: false,
       config: "{}",
@@ -127,48 +154,6 @@ const EMBEDDING_MODELS: {
       model_type: "embedding",
     },
     {
-      model_id: "dialoqbase_eb_small",
-      name: "Cohere",
-      model_provider: "Cohere",
-      model_type: "embedding",
-    },
-    {
-      model_id: "dialoqbase_eb_Xenova/all-MiniLM-L6-v2",
-      name: "all-MiniLM-L6-v2 (cpu)",
-      model_type: "embedding",
-      model_provider: "Transformer",
-    },
-    {
-      model_id: "dialoqbase_eb_dialoqbase-ollama",
-      name: "Ollama Embeddings",
-      model_type: "embedding",
-      model_provider: "Ollama",
-    },
-    {
-      model_id: "dialoqbase_eb_models/embedding-gecko-001",
-      name: "Google text-gecko-001",
-      model_type: "embedding",
-      model_provider: "Google PaLM",
-    },
-    {
-      model_id: "dialoqbase_eb_jina-embeddings-v2-base-en",
-      name: "jina-embeddings-v2-base-en (API)",
-      model_type: "embedding",
-      model_provider: "Jina",
-    },
-    {
-      model_id: "dialoqbase_eb_Xenova/jina-embeddings-v2-small-en",
-      name: "jina-embeddings-v2-small-en (cpu)",
-      model_type: "embedding",
-      model_provider: "Transformer",
-    },
-    {
-      model_id: "dialoqbase_eb_embedding-001",
-      name: "Google embedding-001",
-      model_type: "embedding",
-      model_provider: "Google",
-    },
-    {
       model_id: "dialoqbase_eb_text-embedding-3-small",
       name: "text-embedding-3-small (OpenAI)",
       model_type: "embedding",
@@ -179,13 +164,7 @@ const EMBEDDING_MODELS: {
       name: "text-embedding-3-large (OpenAI)",
       model_type: "embedding",
       model_provider: "OpenAI",
-    },
-    {
-      model_provider: "Fireworks",
-      model_type: "embedding",
-      model_id: "dialoqbase_eb_nomic-ai/nomic-embed-text-v1.5",
-      name: "nomic-ai/nomic-embed-text-v1.5 (Fireworks)",
-    },
+    }
   ];
 
 const newModels = async () => {

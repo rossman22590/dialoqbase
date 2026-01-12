@@ -9,7 +9,10 @@ export const availableChatModels = [
   { value: "x-ai/grok-4.1-fast", label: "Grok 4.1 Fast (xAI)" },
   { value: "meta-llama/llama-4-maverick", label: "Llama 4 Maverick (Meta)" },
   { value: "meta-llama/llama-4-scout", label: "Llama 4 Scout (Meta)" },
-  { value: "mistralai/mixtral-8x22b-instruct", label: "Mixtral 8x22B Instruct" }
+  { value: "mistralai/mistral-large-2512", label: "Mistral Large 2512" },
+  { value: "mistralai/ministral-14b-2512", label: "Ministral 3 14B 2512" },
+  { value: "minimax/minimax-m2.1", label: "MiniMax M2.1" },
+  { value: "z-ai/glm-4.7", label: "GLM 4.7 (Z.AI)" }
 ];
 
 export const streamingSupportedModels = [
@@ -23,7 +26,10 @@ export const streamingSupportedModels = [
   "x-ai/grok-4.1-fast",
   "meta-llama/llama-4-maverick",
   "meta-llama/llama-4-scout",
-  "mistralai/mixtral-8x22b-instruct"
+  "mistralai/mistral-large-2512",
+  "mistralai/ministral-14b-2512",
+  "minimax/minimax-m2.1",
+  "z-ai/glm-4.7"
 ];
 
 export const isStreamingSupported = (model: string) => {

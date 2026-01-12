@@ -16,7 +16,11 @@ export const embeddings = (
   switch (provider.toLocaleLowerCase()) {
     case "openai":
       return new OpenAIEmbeddings({
-        modelName,
+        modelName: `openai/${modelName}`,
+        openAIApiKey: process.env.OPENROUTER_API_KEY,
+        configuration: {
+          baseURL: "https://openrouter.ai/api/v1",
+        },
       });
     case "cohere":
       return new CohereEmbeddings({

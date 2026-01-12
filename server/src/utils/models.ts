@@ -76,22 +76,20 @@ export const chatModelProvider = (
 
 
 export const streamingSupportedModels = [
-  "openai/gpt-3.5-turbo",
-  "openai/gpt-4",
-  "openai/gpt-4-turbo",
-  "openai/gpt-4o",
-  "openai/gpt-4o-mini",
-  "anthropic/claude-3-opus",
-  "anthropic/claude-3.5-sonnet",
-  "anthropic/claude-3-haiku",
-  "google/gemini-pro-1.5",
-  "google/gemini-flash-1.5",
-  "meta-llama/llama-3-8b-instruct",
-  "meta-llama/llama-3-70b-instruct",
-  "meta-llama/llama-3.1-8b-instruct",
-  "meta-llama/llama-3.1-70b-instruct",
-  "mistralai/mistral-large",
-  "mistralai/mixtral-8x22b-instruct"
+  "openai/gpt-5",
+  "openai/gpt-5.2",
+  "anthropic/claude-opus-4.5",
+  "anthropic/claude-sonnet-4.5",
+  "anthropic/claude-haiku-4.5",
+  "google/gemini-2.5-pro",
+  "google/gemini-2.5-flash",
+  "x-ai/grok-4.1-fast",
+  "meta-llama/llama-4-maverick",
+  "meta-llama/llama-4-scout",
+  "mistralai/mistral-large-2512",
+  "mistralai/ministral-14b-2512",
+  "minimax/minimax-m2.1",
+  "z-ai/glm-4.7"
 ];
 
 export const isStreamingSupported = (model: string) => {
@@ -99,26 +97,28 @@ export const isStreamingSupported = (model: string) => {
 };
 
 export const notChatModels = [
-  // Deprecated or legacy models can be listed here if needed, but for now we keep it empty or with legacy values if strictly needed.
-  // Keeping legacy entries just in case, but they aren't in our new lists.
+  "dialoqbase_eb_text-embedding-ada-002",
+  "dialoqbase_eb_text-embedding-3-small",
+  "dialoqbase_eb_text-embedding-3-large"
 ];
 
 export const supportedModels = [
-  "openai/gpt-3.5-turbo",
-  "openai/gpt-4",
-  "openai/gpt-4-turbo",
-  "openai/gpt-4o",
-  "openai/gpt-4o-mini",
-  "anthropic/claude-3-opus",
-  "anthropic/claude-3.5-sonnet",
-  "anthropic/claude-3-haiku",
-  "google/gemini-pro-1.5",
-  "google/gemini-flash-1.5",
-  "meta-llama/llama-3-8b-instruct",
-  "meta-llama/llama-3-70b-instruct",
-  "meta-llama/llama-3.1-8b-instruct",
-  "meta-llama/llama-3.1-70b-instruct",
-  "mistralai/mistral-large",
-  "mistralai/mixtral-8x22b-instruct"
+  "openai/gpt-5",
+  "openai/gpt-5.2",
+  "anthropic/claude-opus-4.5",
+  "anthropic/claude-sonnet-4.5",
+  "anthropic/claude-haiku-4.5",
+  "google/gemini-2.5-pro",
+  "google/gemini-2.5-flash",
+  "x-ai/grok-4.1-fast",
+  "meta-llama/llama-4-maverick",
+  "meta-llama/llama-4-scout",
+  "mistralai/mistral-large-2512",
+  "mistralai/ministral-14b-2512",
+  "minimax/minimax-m2.1",
+  "z-ai/glm-4.7",
+  "dialoqbase_eb_text-embedding-ada-002",
+  "dialoqbase_eb_text-embedding-3-small",
+  "dialoqbase_eb_text-embedding-3-large"
 ];
 
