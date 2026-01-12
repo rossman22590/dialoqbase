@@ -1,10 +1,12 @@
-import { getEncoding } from "js-tiktoken";
+let encoding: any;
 
-const encoding = getEncoding("cl100k_base");
-
-export const countTokens = (text: string): number => {
+export const countTokens = async (text: string): Promise<number> => {
     if (!text) return 0;
     try {
+        if (!encoding) {
+            const { getEncoding } = await import("js-tiktoken");
+            encoding = getEncoding("cl100k_base");
+        }
         return encoding.encode(text).length;
     } catch (e) {
         console.warn("Token counting failed, using fallback", e);
