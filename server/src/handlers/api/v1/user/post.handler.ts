@@ -206,7 +206,7 @@ export const registerUserHandler = async (
         password: hashedPassword,
         credit: {
           create: {
-            balance: 500,
+            balance: 100,
           },
         },
       },
