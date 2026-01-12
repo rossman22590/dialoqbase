@@ -135,6 +135,42 @@ const LLMS: {
       stream_available: true,
       local_model: false,
       config: "{}",
+    },
+    {
+      name: "Perplexity: Sonar Pro Search",
+      model_id: "perplexity/sonar-pro-search",
+      model_type: "chat",
+      model_provider: "Perplexity",
+      stream_available: true,
+      local_model: false,
+      config: "{}",
+    },
+    {
+      name: "Perplexity: Sonar Reasoning Pro",
+      model_id: "perplexity/sonar-reasoning-pro",
+      model_type: "chat",
+      model_provider: "Perplexity",
+      stream_available: true,
+      local_model: false,
+      config: "{}",
+    },
+    {
+      name: "Perplexity: Sonar Pro",
+      model_id: "perplexity/sonar-pro",
+      model_type: "chat",
+      model_provider: "Perplexity",
+      stream_available: true,
+      local_model: false,
+      config: "{}",
+    },
+    {
+      name: "Perplexity: Sonar Deep Research",
+      model_id: "perplexity/sonar-deep-research",
+      model_type: "chat",
+      model_provider: "Perplexity",
+      stream_available: true,
+      local_model: false,
+      config: "{}",
     }
   ];
 

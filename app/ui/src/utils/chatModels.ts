@@ -12,7 +12,11 @@ export const availableChatModels = [
   { value: "mistralai/mistral-large-2512", label: "Mistral Large 2512" },
   { value: "mistralai/ministral-14b-2512", label: "Ministral 3 14B 2512" },
   { value: "minimax/minimax-m2.1", label: "MiniMax M2.1" },
-  { value: "z-ai/glm-4.7", label: "GLM 4.7 (Z.AI)" }
+  { value: "z-ai/glm-4.7", label: "GLM 4.7 (Z.AI)" },
+  { value: "perplexity/sonar-pro-search", label: "Perplexity: Sonar Pro Search" },
+  { value: "perplexity/sonar-reasoning-pro", label: "Perplexity: Sonar Reasoning Pro" },
+  { value: "perplexity/sonar-pro", label: "Perplexity: Sonar Pro" },
+  { value: "perplexity/sonar-deep-research", label: "Perplexity: Sonar Deep Research" }
 ];
 
 export const streamingSupportedModels = [
@@ -29,7 +33,11 @@ export const streamingSupportedModels = [
   "mistralai/mistral-large-2512",
   "mistralai/ministral-14b-2512",
   "minimax/minimax-m2.1",
-  "z-ai/glm-4.7"
+  "z-ai/glm-4.7",
+  "perplexity/sonar-pro-search",
+  "perplexity/sonar-reasoning-pro",
+  "perplexity/sonar-pro",
+  "perplexity/sonar-deep-research"
 ];
 
 export const isStreamingSupported = (model: string) => {

@@ -118,6 +118,10 @@ export const supportedModels = [
   "mistralai/ministral-14b-2512",
   "minimax/minimax-m2.1",
   "z-ai/glm-4.7",
+  "perplexity/sonar-pro-search",
+  "perplexity/sonar-reasoning-pro",
+  "perplexity/sonar-pro",
+  "perplexity/sonar-deep-research",
   "dialoqbase_eb_text-embedding-ada-002",
   "dialoqbase_eb_text-embedding-3-small",
   "dialoqbase_eb_text-embedding-3-large"

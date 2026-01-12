@@ -49,8 +49,23 @@ export const apiKeyValidaton = (modelType: string) => {
       return process.env.GROQ_API_KEY
         ? process.env.GROQ_API_KEY.length > 0
         : false;
+    case "perplexity":
+    case "z.ai":
+    case "mistral":
+    case "minimax":
+    case "xai":
+    case "meta":
+    case "openai":
+    case "anthropic":
+    case "google":
+      return process.env.OPENROUTER_API_KEY
+        ? process.env.OPENROUTER_API_KEY.length > 0
+        : false;
     default:
-      return false;
+      // Fallback: If we have an OpenRouter key, assume it's valid for unknown providers (since we route everything there)
+      return process.env.OPENROUTER_API_KEY
+        ? process.env.OPENROUTER_API_KEY.length > 0
+        : false;
   }
 };
 
