@@ -9,6 +9,8 @@ import { chatModelProvider } from "../../../../../utils/models";
 import { createChain, groupMessagesByConversation } from "../../../../../chain";
 import { getModelInfo } from "../../../../../utils/get-model-info";
 import { nextTick } from "../../../../../utils/nextTick";
+import { MODEL_PRICING } from "../../../../../utils/pricing";
+import { countTokens } from "../../../../../utils/tokenizer";
 
 async function getBotAndEmbedding(request: FastifyRequest<ChatAPIRequest>) {
   const bot_id = request.params.id;
@@ -109,6 +111,16 @@ async function handleChatRequest(
   try {
     const { message, history } = request.body;
     const { bot, embeddingModel } = await getBotAndEmbedding(request);
+
+    // Credit Check
+    const userCredit = await request.server.prisma.userCredit.findUnique({
+      where: { user_id: request.user.user_id },
+    });
+
+    if (!userCredit || userCredit.balance.lessThan(0)) {
+      return reply.status(402).send({ message: "Insufficient credits. Please top up." });
+    }
+
     let knowledge_base_ids: string[] = [];
 
     if (
@@ -178,6 +190,30 @@ async function handleChatRequest(
         bot: response,
       },
     });
+
+    // Calculate and Deduct Credits
+    try {
+      const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
+      const inputTokens = countTokens(inputTextField);
+      const outputTokens = countTokens(response);
+
+      const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
+      const cost =
+        (Number(pricing.input) * inputTokens) / 1000000 +
+        (Number(pricing.output) * outputTokens) / 1000000 +
+        (pricing.request || 0);
+
+      await request.server.prisma.userCredit.update({
+        where: { user_id: request.user.user_id },
+        data: {
+          balance: {
+            decrement: cost
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Failed to deduct credits", err);
+    }
 
     const result = {
       bot: { text: response, sourceDocuments: documents },

@@ -1,4 +1,4 @@
-import { Form, Input, Modal, Table, Tag, Tooltip, notification } from "antd";
+import { Form, Input, Modal, Table, Tag, Tooltip, notification, Select, InputNumber } from "antd";
 import React from "react";
 import api from "../../services/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -6,12 +6,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SettingsLayout } from "../../Layout/SettingsLayout";
 import { SkeletonLoading } from "../../components/Common/SkeletonLoading";
 import { useNavigate } from "react-router-dom";
-import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { KeyIcon, TrashIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 
 export default function SettingsTeamsRoot() {
   const [newUser] = Form.useForm();
   const [resetPassword] = Form.useForm();
+  const [creditForm] = Form.useForm();
   const navigate = useNavigate();
 
   const [resetPasswordModal, setResetPasswordModal] = React.useState(false);
@@ -20,6 +21,9 @@ export default function SettingsTeamsRoot() {
   const [newUserModal, setNewUserModal] = React.useState(false);
   const [deleteUserModal, setDeleteUserModal] = React.useState(false);
   const [deleteUserId, setDeleteUserId] = React.useState(0);
+
+  const [creditModal, setCreditModal] = React.useState(false);
+  const [creditUserId, setCreditUserId] = React.useState(0);
 
   const queryClient = useQueryClient();
 
@@ -145,6 +149,42 @@ export default function SettingsTeamsRoot() {
     }
   );
 
+  const onUpdateCredits = async (values: any) => {
+    const response = await api.post("/admin/user-credits", {
+      ...values,
+      user_id: creditUserId,
+    });
+    return response.data;
+  };
+
+  const { mutateAsync: updateCreditsMutation, isLoading: updateCreditsLoading } = useMutation(
+    onUpdateCredits,
+    {
+      onSuccess: (data) => {
+        setCreditModal(false);
+        creditForm.resetFields();
+        notification.success({
+          message: "Success",
+          description: data.message,
+        });
+      },
+      onError: (error) => {
+        if (axios.isAxiosError(error)) {
+          const message = error.response?.data?.message;
+          notification.error({
+            message: "Error",
+            description: message,
+          });
+          return;
+        }
+        notification.error({
+          message: "Error",
+          description: "Something went wrong",
+        });
+      },
+    }
+  );
+
   return (
     <SettingsLayout>
       {status === "success" && (
@@ -207,6 +247,18 @@ export default function SettingsTeamsRoot() {
                               className="text-red-400 hover:text-red-500"
                             >
                               <KeyIcon className="h-5 w-5" />
+                            </button>
+                          </Tooltip>
+                          <Tooltip title="Manage Credits">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCreditUserId(user.user_id);
+                                setCreditModal(true);
+                              }}
+                              className="text-green-400 hover:text-green-500"
+                            >
+                              <CurrencyDollarIcon className="h-5 w-5" />
                             </button>
                           </Tooltip>
                           {!user.is_admin && (
@@ -351,6 +403,49 @@ export default function SettingsTeamsRoot() {
                 {deleteUserLoading ? "Deleting..." : "Delete"}
               </button>
             </div>
+          </Modal>
+
+          <Modal
+            title="Manage User Credits"
+            open={creditModal}
+            onCancel={() => setCreditModal(false)}
+            footer={null}
+          >
+            <Form
+              form={creditForm}
+              layout="vertical"
+              onFinish={(values) => updateCreditsMutation(values)}
+              initialValues={{ type: "add", amount: 10 }}
+            >
+              <Form.Item
+                label="Action"
+                name="type"
+                rules={[{ required: true, message: "Please select an action!" }]}
+              >
+                <Select>
+                  <Select.Option value="add">Add Credits</Select.Option>
+                  <Select.Option value="remove">Remove Credits</Select.Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                label="Amount ($)"
+                name="amount"
+                rules={[{ required: true, message: "Please input the amount!" }]}
+              >
+                <InputNumber style={{ width: "100%" }} min={0.0001} step={0.0001} precision={4} />
+              </Form.Item>
+
+              <div className="flex justify-end">
+                <button
+                  disabled={updateCreditsLoading}
+                  type="submit"
+                  className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                  {updateCreditsLoading ? "Updating..." : "Update Credits"}
+                </button>
+              </div>
+            </Form>
           </Modal>
         </>
       )}

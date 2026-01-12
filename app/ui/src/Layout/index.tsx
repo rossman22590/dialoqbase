@@ -1,9 +1,10 @@
 import { Disclosure } from "@headlessui/react";
 import React from "react";
-import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import Avatar from "../components/Common/Avatar";
 import { ApplicationMenu } from "./ApplicationMenu";
+import { useQuery } from "@tanstack/react-query";
+import api from "../services/api";
 
 //@ts-ignore
 function classNames(...classes) {
@@ -24,6 +25,15 @@ export default function DashboardLayout({
       navigate("/login");
     }
   }, [isLogged]);
+
+  const { data: creditData } = useQuery(["getUserCredits"], async () => {
+    const response = await api.get("/user/credits");
+    return response.data;
+  }, {
+    enabled: isLogged,
+    refetchOnWindowFocus: true
+  });
+
   return (
     <>
       <div className="min-h-full">
@@ -52,51 +62,57 @@ export default function DashboardLayout({
                       {`v${__APP_VERSION__}`}
                     </span>
                   </Link>
-                  <div className=" ml-6 flex items-center">
-                    <ApplicationMenu />
-                  </div>
+                </span>
+              </Link>
+              <div className=" ml-6 flex items-center">
+                <div className="mr-4 text-sm font-medium text-gray-700 dark:text-gray-200 border px-3 py-1 rounded-full border-gray-300 dark:border-gray-600">
+                  Credits: ${Number(creditData?.balance || 0).toFixed(4)}
                 </div>
+                <ApplicationMenu />
               </div>
-
-              <Disclosure.Panel className="sm:hidden">
-                <div className="border-t border-gray-200 pt-4 pb-3">
-                  <div className="flex items-center px-4">
-                    <div className="flex-shrink-0">
-                      <Avatar username={profile?.username || "admin"} />
-                    </div>
-                    <div className="ml-3">
-                      <div className="text-base font-medium text-gray-800">
-                        {profile?.username}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-3 space-y-1">
-                    <Disclosure.Button
-                      as={Link}
-                      to="/settings"
-                      className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                    >
-                      Settings
-                    </Disclosure.Button>
-                    <Disclosure.Button
-                      onClick={() => {
-                        logout();
-                        navigate("/login");
-                      }}
-                      className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                    >
-                      Sign out
-                    </Disclosure.Button>
-                  </div>
-                </div>
-              </Disclosure.Panel>
-            </>
-          )}
-        </Disclosure>
-        <div>
-          <main>{children}</main>
-        </div>
+            </div>
       </div>
+
+      <Disclosure.Panel className="sm:hidden">
+        <div className="border-t border-gray-200 pt-4 pb-3">
+          <div className="flex items-center px-4">
+            <div className="flex-shrink-0">
+              <Avatar username={profile?.username || "admin"} />
+            </div>
+            <div className="ml-3">
+              <div className="text-base font-medium text-gray-800">
+                {profile?.username}
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 space-y-1">
+            <Disclosure.Button
+              as={Link}
+              to="/settings"
+              className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+            >
+              Settings
+            </Disclosure.Button>
+            <Disclosure.Button
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+              className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+            >
+              Sign out
+            </Disclosure.Button>
+          </div>
+        </div>
+      </Disclosure.Panel>
+    </>
+  )
+}
+        </Disclosure >
+  <div>
+    <main>{children}</main>
+  </div>
+      </div >
     </>
   );
 }

@@ -90,6 +90,16 @@ model User {
   isSuspended     Boolean      @default(false)
   bots            Bot[]
   apiKeys         UserApiKey[]
+  credit          UserCredit?
+}
+
+model UserCredit {
+  id        Int      @id @default(autoincrement())
+  user_id   Int      @unique
+  balance   Decimal  @default(500.0000) @db.Decimal(10, 4)
+  User      User     @relation(fields: [user_id], references: [user_id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model DialoqbaseSettings {

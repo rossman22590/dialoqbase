@@ -4,6 +4,7 @@ import {
   ResetUserPasswordByAdminRequest,
   UpdateDialoqbaseSettingsRequest,
   UpdateDialoqbaseRAGSettingsRequest,
+  UpdateUserCreditsRequest,
 } from "./type";
 import { getSettings } from "../../../../utils/common";
 import * as bcrypt from "bcryptjs";
@@ -180,5 +181,61 @@ export const updateDialoqbaseRAGSettingsHandler = async (
 
   return {
     message: "RAG settings updated successfully",
+  };
+};
+
+export const updateUserCreditsHandler = async (
+  request: FastifyRequest<UpdateUserCreditsRequest>,
+  reply: FastifyReply
+) => {
+  const prisma = request.server.prisma;
+  const user = request.user;
+
+  if (!user.is_admin) {
+    return reply.status(403).send({ message: "Forbidden" });
+  }
+
+  const { user_id, amount, type } = request.body;
+
+  const userCredit = await prisma.userCredit.findUnique({
+    where: { user_id },
+  });
+
+  if (!userCredit) {
+    // Should not happen if registered correctly, but handle gracefully
+    if (type === "add") {
+      await prisma.userCredit.create({
+        data: {
+          user_id,
+          balance: amount
+        }
+      });
+    } else {
+      return reply.status(404).send({ message: "User credit account not found" });
+    }
+  } else {
+    if (type === "add") {
+      await prisma.userCredit.update({
+        where: { user_id },
+        data: {
+          balance: {
+            increment: amount
+          }
+        }
+      });
+    } else {
+      await prisma.userCredit.update({
+        where: { user_id },
+        data: {
+          balance: {
+            decrement: amount
+          }
+        }
+      });
+    }
+  }
+
+  return {
+    message: "User credits updated successfully",
   };
 };

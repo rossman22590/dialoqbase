@@ -11,6 +11,8 @@ import {
   handleErrorResponse,
   saveChatHistory,
 } from "./chat.service";
+import { MODEL_PRICING } from "../../../../../utils/pricing";
+import { countTokens } from "../../../../../utils/tokenizer";
 
 export const chatRequestHandler = async (
   request: FastifyRequest<ChatRequestBody>,
@@ -31,6 +33,19 @@ export const chatRequestHandler = async (
         history,
         message,
         "You are in the wrong place, buddy."
+      );
+    }
+
+    // Credit Check
+    const userCredit = await prisma.userCredit.findUnique({
+      where: { user_id: request.user.user_id },
+    });
+
+    if (!userCredit || userCredit.balance.lessThan(0)) {
+      return handleErrorResponse(
+        history,
+        message,
+        "Insufficient credits. Please top up."
       );
     }
 
@@ -118,6 +133,31 @@ export const chatRequestHandler = async (
       documents
     );
 
+    // Calculate and Deduct Credits
+    try {
+      // Approximate history tokens by concatenating all text
+      const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
+      const inputTokens = countTokens(inputTextField);
+      const outputTokens = countTokens(botResponse);
+
+      const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
+      const cost =
+        (Number(pricing.input) * inputTokens) / 1000000 +
+        (Number(pricing.output) * outputTokens) / 1000000 +
+        (pricing.request || 0);
+
+      await request.server.prisma.userCredit.update({
+        where: { user_id: request.user.user_id },
+        data: {
+          balance: {
+            decrement: cost
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Failed to deduct credits in playground", err);
+    }
+
     return {
       bot: { text: botResponse, sourceDocuments: documents },
       history: [
@@ -156,6 +196,19 @@ export const chatRequestStreamHandler = async (
         history,
         message,
         "You are in the wrong place, buddy."
+      );
+    }
+
+    // Credit Check
+    const userCredit = await prisma.userCredit.findUnique({
+      where: { user_id: request.user.user_id },
+    });
+
+    if (!userCredit || userCredit.balance.lessThan(0)) {
+      return handleErrorResponse(
+        history,
+        message,
+        "Insufficient credits. Please top up."
       );
     }
 
@@ -270,6 +323,30 @@ export const chatRequestStreamHandler = async (
       history_id,
       documents
     );
+
+    // Calculate and Deduct Credits
+    try {
+      const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
+      const inputTokens = countTokens(inputTextField);
+      const outputTokens = countTokens(response);
+
+      const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
+      const cost =
+        (Number(pricing.input) * inputTokens) / 1000000 +
+        (Number(pricing.output) * outputTokens) / 1000000 +
+        (pricing.request || 0);
+
+      await request.server.prisma.userCredit.update({
+        where: { user_id: request.user.user_id },
+        data: {
+          balance: {
+            decrement: cost
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Failed to deduct credits in playground stream", err);
+    }
 
     reply.sse({
       event: "result",

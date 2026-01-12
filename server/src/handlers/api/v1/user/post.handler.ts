@@ -204,6 +204,11 @@ export const registerUserHandler = async (
         username: request.body.username,
         email: request.body.email,
         password: hashedPassword,
+        credit: {
+          create: {
+            balance: 500,
+          },
+        },
       },
     });
 

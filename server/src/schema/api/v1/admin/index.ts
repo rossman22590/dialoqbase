@@ -210,3 +210,32 @@ export const deleteUserSchema: FastifySchema = {
     },
   },
 };
+
+export const updateUserCreditsSchema: FastifySchema = {
+  tags: ["Admin"],
+  summary: "API to update user credits by admin",
+  headers: {
+    type: "object",
+    properties: {
+      Authorization: { type: "string" },
+    },
+    required: ["Authorization"],
+  },
+  body: {
+    type: "object",
+    properties: {
+      user_id: { type: "number" },
+      amount: { type: "number" },
+      type: { type: "string", enum: ["add", "remove"] },
+    },
+    required: ["user_id", "amount", "type"],
+  },
+  response: {
+    200: {
+      type: "object",
+      properties: {
+        message: { type: "string" },
+      },
+    },
+  },
+};

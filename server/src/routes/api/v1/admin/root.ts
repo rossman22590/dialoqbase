@@ -12,7 +12,8 @@ import {
   hideModelHandler,
   saveEmbedddingModelFromInputedUrlHandler,
   updateDialoqbaseRAGSettingsHandler,
-  adminDeleteUserHandler
+  adminDeleteUserHandler,
+  updateUserCreditsHandler
 } from "../../../../handlers/api/v1/admin";
 import {
   dialoqbaseSettingsSchema,
@@ -21,7 +22,8 @@ import {
   registerUserByAdminSchema,
   resetUserPasswordByAdminSchema,
   updateDialoqbaseRAGSettings,
-  deleteUserSchema
+  deleteUserSchema,
+  updateUserCreditsSchema
 } from "../../../../schema/api/v1/admin";
 
 import {
@@ -151,6 +153,15 @@ const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       onRequest: [fastify.authenticateAdmin],
     },
     adminDeleteUserHandler
+  );
+
+  fastify.post(
+    "/user-credits",
+    {
+      schema: updateUserCreditsSchema,
+      onRequest: [fastify.authenticateAdmin],
+    },
+    updateUserCreditsHandler
   );
 };
 

@@ -82,3 +82,11 @@ export type DeleteUserRequest = {
     user_id: number;
   };
 };
+
+export type UpdateUserCreditsRequest = {
+  Body: {
+    user_id: number;
+    amount: number;
+    type: "add" | "remove";
+  };
+};

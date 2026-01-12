@@ -8,7 +8,8 @@ import {
   userLoginHandler,
   createNewApiKey,
   deleteApiKey,
-  getAllApiKeyByUser
+  getAllApiKeyByUser,
+  getUserCreditsHandler
 } from "../../../../handlers/api/v1/user";
 import {
   isRegisterationAllowedSchema,
