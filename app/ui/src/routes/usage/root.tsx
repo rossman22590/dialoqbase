@@ -14,6 +14,7 @@ import {
 import { Bar } from "react-chartjs-2";
 import { useMemo } from "react";
 import dayjs from "dayjs";
+import { useParams } from "react-router-dom";
 
 ChartJS.register(
     CategoryScale,
@@ -25,6 +26,9 @@ ChartJS.register(
 );
 
 export default function UsageRoot() {
+    const { id: botId } = useParams<{ id?: string }>();
+    const isBotUsage = Boolean(botId);
+
     const { data: credits, isLoading: isCreditsLoading } = useQuery(
         ["getCredits"],
         async () => {
@@ -34,12 +38,36 @@ export default function UsageRoot() {
     );
 
     const { data: transactions, isLoading: isTransactionsLoading } = useQuery(
-        ["getTransactions"],
+        ["getTransactions", botId],
         async () => {
             const response = await api.get("/user/transactions");
             return response.data;
         }
     );
+
+    const normalizedTransactions = useMemo(() => {
+        if (!transactions) {
+            return [];
+        }
+        return transactions.map((t: any) => ({
+            ...t,
+            amount: Number(t.amount),
+            createdAt: t.createdAt || t.created_at,
+        }));
+    }, [transactions]);
+
+    const filteredTransactions = useMemo(() => {
+        if (!isBotUsage) {
+            return normalizedTransactions;
+        }
+        return normalizedTransactions.filter(
+            (t: any) => t?.metadata?.bot_id === botId
+        );
+    }, [normalizedTransactions, isBotUsage, botId]);
+
+    const usageTransactions = useMemo(() => {
+        return filteredTransactions.filter((t: any) => t.type === "usage");
+    }, [filteredTransactions]);
 
     const options = {
         responsive: true,
@@ -49,26 +77,42 @@ export default function UsageRoot() {
             },
             title: {
                 display: true,
-                text: "Daily Usage (Last 7 Days)",
+                text: isBotUsage
+                    ? "Daily Bot Usage (Last 7 Days)"
+                    : "Daily Usage (Last 7 Days)",
             },
         },
     };
 
-    const labels = useMemo(() => {
-        // Generate last 7 days labels
-        return Array.from({ length: 7 }, (_, i) => {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            return d.toLocaleDateString();
-        }).reverse();
+    const chartDays = useMemo(() => {
+        return Array.from({ length: 7 }, (_, i) =>
+            dayjs().subtract(6 - i, "day")
+        );
     }, []);
+
+    const labels = useMemo(() => {
+        return chartDays.map((d) => d.format("MMM D"));
+    }, [chartDays]);
+
+    const usagePerDay = useMemo(() => {
+        return chartDays.map((day) => {
+            const total = usageTransactions.reduce((sum: number, t: any) => {
+                const createdAt = t.createdAt ? dayjs(t.createdAt) : null;
+                if (!createdAt || !createdAt.isSame(day, "day")) {
+                    return sum;
+                }
+                return sum + Math.abs(Number(t.amount || 0));
+            }, 0);
+            return Number(total.toFixed(4));
+        });
+    }, [chartDays, usageTransactions]);
 
     const chartData = {
         labels,
         datasets: [
             {
                 label: "Credits Used",
-                data: labels.map(() => Math.random() * 10), // Mock data for valid graph, replace with actual logic if available
+                data: usagePerDay,
                 backgroundColor: "rgba(53, 162, 235, 0.5)",
             },
         ],
@@ -77,9 +121,12 @@ export default function UsageRoot() {
     const columns = [
         {
             title: "Date",
-            dataIndex: "created_at",
-            key: "created_at",
-            render: (text: string) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
+            dataIndex: "createdAt",
+            key: "createdAt",
+            render: (_: string, record: any) =>
+                dayjs(record.createdAt || record.created_at).format(
+                    "YYYY-MM-DD HH:mm:ss"
+                ),
         },
         {
             title: "Type",
@@ -108,14 +155,14 @@ export default function UsageRoot() {
     return (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                Usage & Billing
+                {isBotUsage ? "Bot Usage" : "Usage & Billing"}
             </h1>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 {/* Battery / Credit Status Card */}
                 <div className="bg-white dark:bg-[#171717] overflow-hidden shadow rounded-lg border dark:border-gray-700 p-6 col-span-1">
                     <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                        Balance
+                        {isBotUsage ? "Account Balance" : "Balance"}
                     </h3>
                     {isCreditsLoading ? (
                         <Skeleton active paragraph={{ rows: 2 }} />
@@ -142,7 +189,7 @@ export default function UsageRoot() {
                     )}
                 </div>
 
-                {/* Usage Chart (Mocked for now as backend endpoint might need aggregation) */}
+            {/* Usage Chart */}
                 <div className="bg-white dark:bg-[#171717] overflow-hidden shadow rounded-lg border dark:border-gray-700 p-6 col-span-2">
                     <Bar options={options} data={chartData} />
                 </div>
@@ -157,7 +204,7 @@ export default function UsageRoot() {
                 </div>
                 <div className="p-4">
                     <Table
-                        dataSource={transactions || []}
+                        dataSource={filteredTransactions}
                         columns={columns}
                         loading={isTransactionsLoading}
                         rowKey="id"

@@ -59,16 +59,16 @@ export const chatModelProvider = (
     modelName: openRouterModel,
     tiktokenModelName: "gpt-4",
     temperature: temperature,
-    openAIApiKey: process.env.OPENROUTER_API_KEY,
+    openAIApiKey: otherFields?.configuration?.apiKey || process.env.OPENROUTER_API_KEY,
     ...otherFields,
     configuration: {
       baseURL: "https://openrouter.ai/api/v1",
-      apiKey: process.env.OPENROUTER_API_KEY,
+      apiKey: otherFields?.configuration?.apiKey || process.env.OPENROUTER_API_KEY,
       defaultHeaders: {
         "HTTP-Referer": process.env.LOCAL_REFER_URL || "https://myapps.ai/", // Optional. Site URL for rankings on openrouter.ai.
         "X-Title": process.env.LOCAL_TITLE || "Botcraft", // Optional. Site title for rankings on openrouter.ai.
       },
-      ...otherFields.configuration,
+      ...otherFields?.configuration,
     },
   };
 

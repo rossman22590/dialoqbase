@@ -109,6 +109,14 @@ const router = createHashRouter([
     ),
   },
   {
+    path: "/bot/:id/usage",
+    element: (
+      <BotLayout>
+        <UsageRoot />
+      </BotLayout>
+    ),
+  },
+  {
     path: "/bot/:id/integrations",
     element: (
       <BotLayout>
@@ -174,16 +182,6 @@ const router = createHashRouter([
       <DashboardLayout>
         <QueryBoundaries>
           <SettingsModelRoot />
-        </QueryBoundaries>
-      </DashboardLayout>
-    ),
-  },
-  {
-    path: "/settings/usage",
-    element: (
-      <DashboardLayout>
-        <QueryBoundaries>
-          <UsageRoot />
         </QueryBoundaries>
       </DashboardLayout>
     ),

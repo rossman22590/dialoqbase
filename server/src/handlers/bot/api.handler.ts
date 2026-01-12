@@ -333,12 +333,10 @@ export const chatRequestAPIHandler = async (
       }
 
       const botConfig: any = (modelinfo.config as {}) || {};
-      if (bot.provider.toLowerCase() === "openai") {
-        if (bot.bot_model_api_key && bot.bot_model_api_key.trim() !== "") {
-          botConfig.configuration = {
-            apiKey: bot.bot_model_api_key,
-          };
-        }
+      if (bot.bot_model_api_key && bot.bot_model_api_key.trim() !== "") {
+        botConfig.configuration = {
+          apiKey: bot.bot_model_api_key.trim(),
+        };
       }
 
       const model = chatModelProvider(bot.provider, bot.model, temperature, {

@@ -428,7 +428,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
                   name="bot_model_api_key"
                   label="Chat Model API Key"
                   help="Enter your API key here. If you don't have one, you can leave this field blank."
-                  tooltip="Enter your API key to use your own chat model. Currently, only OpenAI API keys are supported."
+                  tooltip="Enter your API key to use your own chat model. OpenRouter API keys are supported for all models."
                 >
                   <Input.Password
                     size="large"

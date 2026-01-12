@@ -61,11 +61,8 @@ export const getBotConfig = (bot: any, modelinfo: any) => {
   botConfig = { ...modelinfo.config, ...botConfig };
 
   // Add API key for OpenAI if provided
-  if (
-    bot.provider.toLowerCase() === "openai" &&
-    bot.bot_model_api_key?.trim()
-  ) {
-    botConfig.configuration = { 
+  if (bot.bot_model_api_key?.trim()) {
+    botConfig.configuration = {
       ...botConfig.configuration,
       apiKey: bot.bot_model_api_key.trim()
     };

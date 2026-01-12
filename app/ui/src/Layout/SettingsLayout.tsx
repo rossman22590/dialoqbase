@@ -1,9 +1,4 @@
-import {
-  CubeIcon,
-  UserCircleIcon,
-  UsersIcon,
-  ChartBarIcon,
-} from "@heroicons/react/24/outline";
+import { CubeIcon, UserCircleIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { useIsAdmin } from "../hooks/useIsAdmin";
 import { Link, useLocation } from "react-router-dom";
 import { AiIcon } from "../components/Icons/AiIcon";
@@ -61,12 +56,6 @@ export const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
                 href="/settings"
                 name="General"
                 icon={UserCircleIcon}
-                current={location.pathname}
-              />
-              <LinkComponent
-                href="/settings/usage"
-                name="Usage"
-                icon={ChartBarIcon}
                 current={location.pathname}
               />
               {adminInfo?.is_admin && (

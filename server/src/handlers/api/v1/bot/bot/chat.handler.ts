@@ -93,11 +93,8 @@ async function getModel(bot, prisma) {
   }
 
   const botConfig: any = (modelinfo.config as {}) || {};
-  if (
-    bot.provider.toLowerCase() === "openai" &&
-    bot.bot_model_api_key?.trim()
-  ) {
-    botConfig.configuration = { apiKey: bot.bot_model_api_key };
+  if (bot.bot_model_api_key?.trim()) {
+    botConfig.configuration = { apiKey: bot.bot_model_api_key.trim() };
   }
 
   return chatModelProvider(bot.provider, bot.model, bot.temperature, botConfig);
@@ -208,6 +205,20 @@ async function handleChatRequest(
         data: {
           balance: {
             decrement: cost
+          }
+        }
+      });
+
+      await request.server.prisma.userTransaction.create({
+        data: {
+          user_id: request.user.user_id,
+          amount: -cost,
+          type: "usage",
+          description: `Chat usage for bot: ${bot.name}`,
+          metadata: {
+            bot_id: bot.id,
+            input_tokens: inputTokens,
+            output_tokens: outputTokens,
           }
         }
       });

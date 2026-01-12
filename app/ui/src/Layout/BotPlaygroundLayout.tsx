@@ -10,13 +10,16 @@ import {
   SparklesIcon,
   ChatBubbleLeftRightIcon,
   MagnifyingGlassIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 
 import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { Tooltip } from "antd";
 import { ApplicationMenu } from "./ApplicationMenu";
 import { useSettings } from "../hooks/useSettings";
+import api from "../services/api";
 
 const navigation = [
   {
@@ -61,6 +64,12 @@ const navigation = [
     icon: CogIcon,
     key: "settings",
   },
+  {
+    name: "Usage",
+    href: "/bot/:id/usage",
+    icon: ChartBarIcon,
+    key: "usage",
+  },
 ];
 
 //@ts-ignore
@@ -81,6 +90,18 @@ export default function BotPlaygroundLayout({
 
   const { isLogged } = useAuth();
   const settings = useSettings();
+
+  const { data: creditData } = useQuery(
+    ["getUserCredits"],
+    async () => {
+      const response = await api.get("/user/credits");
+      return response.data;
+    },
+    {
+      enabled: isLogged,
+      refetchOnWindowFocus: true,
+    }
+  );
 
   React.useEffect(() => {
     if (!isLogged) {
@@ -280,6 +301,9 @@ export default function BotPlaygroundLayout({
 
             <div className="flex flex-1 justify-end px-4">
               <div className="ml-4 flex items-center md:ml-6">
+                <div className="mr-4 text-sm font-medium text-gray-700 dark:text-gray-200 border px-3 py-1 rounded-full border-gray-300 dark:border-gray-600">
+                  Credits: ${Number(creditData?.balance || 0).toFixed(4)}
+                </div>
                 <ApplicationMenu />
               </div>
             </div>
