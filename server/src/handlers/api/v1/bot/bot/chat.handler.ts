@@ -133,7 +133,7 @@ async function handleChatRequest(
     );
 
     const chain = createChain({
-      llm: isStreaming ? model.withStreaming() : model,
+      llm: model,
       question_llm: model,
       question_template: bot.questionGeneratorPrompt,
       response_template: bot.qaPrompt,
