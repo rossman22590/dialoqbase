@@ -21,7 +21,7 @@ export const textQueueController = async (
       },
     },
   ]);
-  
+
   const embeddingInfo = await getModelInfo({
     model: source.embedding,
     prisma,
@@ -36,7 +36,7 @@ export const textQueueController = async (
     embeddings(
       embeddingInfo.model_provider!.toLowerCase(),
       embeddingInfo.model_id,
-      embeddingInfo?.config
+      { ...((embeddingInfo?.config as any) || {}), apiKey: source.bot_model_api_key }
     ),
     {
       botId: source.botId,

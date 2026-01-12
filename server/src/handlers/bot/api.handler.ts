@@ -9,6 +9,56 @@ import { DialoqbaseHybridRetrival } from "../../utils/hybrid";
 import { createChain, groupMessagesByConversation } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
 import { nextTick } from "../../utils/nextTick";
+import { MODEL_PRICING } from "../../utils/pricing";
+import { countTokens } from "../../utils/tokenizer";
+
+const recordApiUsage = async (
+  prisma,
+  bot,
+  inputText: string,
+  outputText: string,
+  description: string,
+  usesOwnKey: boolean
+) => {
+  if (!bot.user_id) {
+    return;
+  }
+  const inputTokens = await countTokens(inputText);
+  const outputTokens = await countTokens(outputText);
+  const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
+  const cost =
+    (Number(pricing.input) * inputTokens) / 1000000 +
+    (Number(pricing.output) * outputTokens) / 1000000 +
+    Number(pricing.request ?? 0);
+
+  if (!usesOwnKey) {
+    await prisma.userCredit.update({
+      where: { user_id: bot.user_id },
+      data: {
+        balance: {
+          decrement: cost,
+        },
+      },
+    });
+  }
+
+  await prisma.userTransaction.create({
+    data: {
+      user_id: bot.user_id,
+      amount: usesOwnKey ? 0 : -cost,
+      type: "usage",
+      description,
+      metadata: {
+        bot_id: bot.id,
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        estimated_cost: cost,
+        used_own_key: usesOwnKey,
+        source: "api",
+      },
+    },
+  });
+};
 
 /**
  * Handles the chat request API endpoint for a bot.
@@ -42,6 +92,18 @@ export const chatRequestAPIHandler = async (
         });
       }
 
+      const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
+      if (!usesOwnKey && bot.user_id) {
+        const userCredit = await prisma.userCredit.findUnique({
+          where: { user_id: bot.user_id },
+        });
+        if (!userCredit || userCredit.balance.lessThan(0)) {
+          return reply
+            .status(402)
+            .send({ message: "Insufficient credits. Please top up." });
+        }
+      }
+
       const temperature = bot.temperature;
 
       const sanitizedQuestion = message.trim().replaceAll("\n", " ");
@@ -60,7 +122,7 @@ export const chatRequestAPIHandler = async (
       const embeddingModel = embeddings(
         embeddingInfo.model_provider!.toLowerCase(),
         embeddingInfo.model_id,
-        embeddingInfo?.config
+        { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
       );
 
       reply.raw.on("close", () => {
@@ -79,7 +141,13 @@ export const chatRequestAPIHandler = async (
         });
       }
 
-      const botConfig = (modelinfo.config as {}) || {};
+      const botConfig: any = (modelinfo.config as {}) || {};
+      if (bot.bot_model_api_key && bot.bot_model_api_key.trim() !== "") {
+        botConfig.configuration = {
+          ...botConfig.configuration,
+          apiKey: bot.bot_model_api_key.trim(),
+        };
+      }
       let retriever: BaseRetriever;
       let resolveWithDocuments: (value: Document[]) => void;
       const documentPromise = new Promise<Document[]>((resolve) => {
@@ -182,6 +250,21 @@ export const chatRequestAPIHandler = async (
         },
       });
 
+      try {
+        const inputTextField =
+          history.map((h: any) => h.text).join(" ") + " " + message;
+        await recordApiUsage(
+          prisma,
+          bot,
+          inputTextField,
+          response,
+          `API stream usage for bot: ${bot.name}`,
+          usesOwnKey
+        );
+      } catch (err) {
+        console.error("Failed to deduct credits for API stream", err);
+      }
+
       reply.sse({
         event: "result",
         id: "",
@@ -234,6 +317,18 @@ export const chatRequestAPIHandler = async (
         });
       }
 
+      const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
+      if (!usesOwnKey && bot.user_id) {
+        const userCredit = await prisma.userCredit.findUnique({
+          where: { user_id: bot.user_id },
+        });
+        if (!userCredit || userCredit.balance.lessThan(0)) {
+          return reply
+            .status(402)
+            .send({ message: "Insufficient credits. Please top up." });
+        }
+      }
+
       const temperature = bot.temperature;
 
       const sanitizedQuestion = message.trim().replaceAll("\n", " ");
@@ -266,7 +361,7 @@ export const chatRequestAPIHandler = async (
       const embeddingModel = embeddings(
         embeddingInfo.model_provider!.toLowerCase(),
         embeddingInfo.model_id,
-        embeddingInfo?.config
+        { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
       );
 
       let retriever: BaseRetriever;
@@ -335,6 +430,7 @@ export const chatRequestAPIHandler = async (
       const botConfig: any = (modelinfo.config as {}) || {};
       if (bot.bot_model_api_key && bot.bot_model_api_key.trim() !== "") {
         botConfig.configuration = {
+          ...botConfig.configuration,
           apiKey: bot.bot_model_api_key.trim(),
         };
       }
@@ -371,6 +467,21 @@ export const chatRequestAPIHandler = async (
           bot: botResponse,
         },
       });
+
+      try {
+        const inputTextField =
+          history.map((h: any) => h.text).join(" ") + " " + message;
+        await recordApiUsage(
+          prisma,
+          bot,
+          inputTextField,
+          botResponse,
+          `API chat usage for bot: ${bot.name}`,
+          usesOwnKey
+        );
+      } catch (err) {
+        console.error("Failed to deduct credits for API chat", err);
+      }
 
       return {
         bot: {

@@ -89,8 +89,8 @@ export const getModelFromUrl = async (url: string, apiKey?: string) => {
     const response = await axios.get(`${url}/models`, {
       headers: {
         "HTTP-Referer":
-          process.env.LOCAL_REFER_URL || "https://dialoqbase.n4ze3m.com/",
-        "X-Title": process.env.LOCAL_TITLE || "Dialoqbase",
+          process.env.LOCAL_REFER_URL || "https://myapps.ai",
+        "X-Title": process.env.LOCAL_TITLE || "BotCraft",
         Authorization: apiKey && `Bearer ${apiKey}`,
       },
     });

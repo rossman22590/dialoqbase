@@ -37,16 +37,19 @@ export const chatRequestHandler = async (
     }
 
     // Credit Check
-    const userCredit = await prisma.userCredit.findUnique({
-      where: { user_id: request.user.user_id },
-    });
+    const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
+    if (!usesOwnKey) {
+      const userCredit = await prisma.userCredit.findUnique({
+        where: { user_id: request.user.user_id },
+      });
 
-    if (!userCredit || userCredit.balance.lessThan(0)) {
-      return handleErrorResponse(
-        history,
-        message,
-        "Insufficient credits. Please top up."
-      );
+      if (!userCredit || userCredit.balance.lessThan(0)) {
+        return handleErrorResponse(
+          history,
+          message,
+          "Insufficient credits. Please top up."
+        );
+      }
     }
 
 
@@ -86,7 +89,7 @@ export const chatRequestHandler = async (
     const embeddingModel = embeddings(
       embeddingInfo.model_provider!.toLowerCase(),
       embeddingInfo.model_id,
-      embeddingInfo?.config
+      { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
     );
 
     const retriever = await createRetriever(bot, embeddingModel);
@@ -146,11 +149,29 @@ export const chatRequestHandler = async (
         (Number(pricing.output) * outputTokens) / 1000000 +
         Number(pricing.request ?? 0);
 
-      await request.server.prisma.userCredit.update({
-        where: { user_id: request.user.user_id },
+      if (!usesOwnKey) {
+        await request.server.prisma.userCredit.update({
+          where: { user_id: request.user.user_id },
+          data: {
+            balance: {
+              decrement: cost,
+            },
+          },
+        });
+      }
+
+      await request.server.prisma.userTransaction.create({
         data: {
-          balance: {
-            decrement: cost
+          user_id: request.user.user_id,
+          amount: usesOwnKey ? 0 : -cost,
+          type: "usage",
+          description: `Playground chat usage for bot: ${bot.name}`,
+          metadata: {
+            bot_id: bot.id,
+            input_tokens: inputTokens,
+            output_tokens: outputTokens,
+            estimated_cost: cost,
+            used_own_key: usesOwnKey,
           }
         }
       });
@@ -200,16 +221,19 @@ export const chatRequestStreamHandler = async (
     }
 
     // Credit Check
-    const userCredit = await prisma.userCredit.findUnique({
-      where: { user_id: request.user.user_id },
-    });
+    const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
+    if (!usesOwnKey) {
+      const userCredit = await prisma.userCredit.findUnique({
+        where: { user_id: request.user.user_id },
+      });
 
-    if (!userCredit || userCredit.balance.lessThan(0)) {
-      return handleErrorResponse(
-        history,
-        message,
-        "Insufficient credits. Please top up."
-      );
+      if (!userCredit || userCredit.balance.lessThan(0)) {
+        return handleErrorResponse(
+          history,
+          message,
+          "Insufficient credits. Please top up."
+        );
+      }
     }
 
 
@@ -255,7 +279,7 @@ export const chatRequestStreamHandler = async (
     const embeddingModel = embeddings(
       embeddingInfo.model_provider!.toLowerCase(),
       embeddingInfo.model_id,
-      embeddingInfo?.config
+      { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
     );
 
     const retriever = await createRetriever(bot, embeddingModel);
@@ -336,11 +360,29 @@ export const chatRequestStreamHandler = async (
         (Number(pricing.output) * outputTokens) / 1000000 +
         Number(pricing.request ?? 0);
 
-      await request.server.prisma.userCredit.update({
-        where: { user_id: request.user.user_id },
+      if (!usesOwnKey) {
+        await request.server.prisma.userCredit.update({
+          where: { user_id: request.user.user_id },
+          data: {
+            balance: {
+              decrement: cost,
+            },
+          },
+        });
+      }
+
+      await request.server.prisma.userTransaction.create({
         data: {
-          balance: {
-            decrement: cost
+          user_id: request.user.user_id,
+          amount: usesOwnKey ? 0 : -cost,
+          type: "usage",
+          description: `Playground stream usage for bot: ${bot.name}`,
+          metadata: {
+            bot_id: bot.id,
+            input_tokens: inputTokens,
+            output_tokens: outputTokens,
+            estimated_cost: cost,
+            used_own_key: usesOwnKey,
           }
         }
       });

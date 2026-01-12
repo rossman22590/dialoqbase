@@ -16,7 +16,7 @@ export const websiteQueueController = async (
 ) => {
 
   let type = "text/html";
-  
+
   try {
     const response = await axios.get(source.content!);
     type = response.headers["content-type"];
@@ -58,7 +58,7 @@ export const websiteQueueController = async (
       embeddings(
         embeddingInfo.model_provider!.toLowerCase(),
         embeddingInfo.model_id,
-        embeddingInfo?.config
+        { ...((embeddingInfo?.config as any) || {}), apiKey: source.bot_model_api_key }
       ),
       {
         botId: source.botId,

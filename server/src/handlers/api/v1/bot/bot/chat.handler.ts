@@ -38,7 +38,7 @@ async function getBotAndEmbedding(request: FastifyRequest<ChatAPIRequest>) {
   const embeddingModel = embeddings(
     embeddingInfo.model_provider!.toLowerCase(),
     embeddingInfo.model_id,
-    embeddingInfo?.config
+    { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
   );
 
   return { bot, embeddingModel };
@@ -108,14 +108,19 @@ async function handleChatRequest(
   try {
     const { message, history } = request.body;
     const { bot, embeddingModel } = await getBotAndEmbedding(request);
+    const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
 
     // Credit Check
-    const userCredit = await request.server.prisma.userCredit.findUnique({
-      where: { user_id: request.user.user_id },
-    });
+    if (!usesOwnKey) {
+      const userCredit = await request.server.prisma.userCredit.findUnique({
+        where: { user_id: request.user.user_id },
+      });
 
-    if (!userCredit || userCredit.balance.lessThan(0)) {
-      return reply.status(402).send({ message: "Insufficient credits. Please top up." });
+      if (!userCredit || userCredit.balance.lessThan(0)) {
+        return reply
+          .status(402)
+          .send({ message: "Insufficient credits. Please top up." });
+      }
     }
 
     let knowledge_base_ids: string[] = [];
@@ -198,27 +203,31 @@ async function handleChatRequest(
       const cost =
         (Number(pricing.input) * inputTokens) / 1000000 +
         (Number(pricing.output) * outputTokens) / 1000000 +
-        (pricing.request || 0);
+        Number(pricing.request ?? 0);
 
-      await request.server.prisma.userCredit.update({
-        where: { user_id: request.user.user_id },
-        data: {
-          balance: {
-            decrement: cost
-          }
-        }
-      });
+      if (!usesOwnKey) {
+        await request.server.prisma.userCredit.update({
+          where: { user_id: request.user.user_id },
+          data: {
+            balance: {
+              decrement: cost,
+            },
+          },
+        });
+      }
 
       await request.server.prisma.userTransaction.create({
         data: {
           user_id: request.user.user_id,
-          amount: -cost,
+          amount: usesOwnKey ? 0 : -cost,
           type: "usage",
           description: `Chat usage for bot: ${bot.name}`,
           metadata: {
             bot_id: bot.id,
             input_tokens: inputTokens,
             output_tokens: outputTokens,
+            estimated_cost: cost,
+            used_own_key: usesOwnKey,
           }
         }
       });

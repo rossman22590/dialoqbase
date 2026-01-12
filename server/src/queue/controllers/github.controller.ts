@@ -43,7 +43,7 @@ export const githubQueueController = async (
     embeddings(
       embeddingInfo.model_provider!.toLowerCase(),
       embeddingInfo.model_id,
-      embeddingInfo?.config
+      { ...((embeddingInfo?.config as any) || {}), apiKey: source.bot_model_api_key }
     ),
     {
       botId: source.botId,

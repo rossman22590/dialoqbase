@@ -8,4 +8,5 @@ export interface QSource extends BotSource {
   chunkOverlap: number;
   usePuppeteerFetch?: boolean;
   doNotClosePuppeteer?: boolean;
+  bot_model_api_key?: string;
 }

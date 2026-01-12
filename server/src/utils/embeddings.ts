@@ -13,11 +13,16 @@ export const embeddings = (
 ) => {
   modelName = modelName.replace("dialoqbase_eb_", "");
   modelName = modelName.replace(/_dialoqbase_[0-9]+$/, "");
+  const apiKey =
+    typeof otherFields?.apiKey === "string"
+      ? otherFields.apiKey.trim()
+      : otherFields?.apiKey;
+  const resolvedApiKey = apiKey || undefined;
   switch (provider.toLocaleLowerCase()) {
     case "openai":
       return new OpenAIEmbeddings({
         modelName: `openai/${modelName}`,
-        openAIApiKey: process.env.OPENROUTER_API_KEY,
+        openAIApiKey: resolvedApiKey || process.env.OPENROUTER_API_KEY,
         configuration: {
           baseURL: "https://openrouter.ai/api/v1",
         },
@@ -73,11 +78,11 @@ export const embeddings = (
     case "local":
       return new OpenAIEmbeddings({
         modelName,
-        openAIApiKey: otherFields.apiKey || process.env.OPENAI_API_KEY,
+        openAIApiKey: resolvedApiKey || process.env.OPENAI_API_KEY,
         ...otherFields,
         configuration: {
           baseURL: otherFields.baseURL,
-          apiKey: otherFields.apiKey || process.env.OPENAI_API_KEY,
+          apiKey: resolvedApiKey || process.env.OPENAI_API_KEY,
           defaultHeaders: {
             "HTTP-Referer":
               process.env.LOCAL_REFER_URL || "https://dialoqbase.n4ze3m.com/",

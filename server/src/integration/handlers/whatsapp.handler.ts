@@ -84,7 +84,7 @@ export const whatsappBotHandler = async (
     const embeddingModel = embeddings(
       embeddingInfo.model_provider!.toLowerCase(),
       embeddingInfo.model_id,
-      embeddingInfo?.config
+      { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
     );
 
     let retriever: BaseRetriever;

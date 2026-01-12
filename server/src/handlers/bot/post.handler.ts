@@ -138,28 +138,31 @@ export const chatRequestHandler = async (
     }
 
     // Credit Check
-    const userCredit = await prisma.userCredit.findUnique({
-      where: { user_id: bot.user_id },
-    });
+    const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
+    if (!usesOwnKey) {
+      const userCredit = await prisma.userCredit.findUnique({
+        where: { user_id: bot.user_id },
+      });
 
-    if (!userCredit || userCredit.balance.lessThan(0)) {
-      return {
-        bot: {
-          text: "Insufficient credits. Please contact the administrator.",
-          sourceDocuments: [],
-        },
-        history: [
-          ...history,
-          {
-            type: "human",
-            text: message,
-          },
-          {
-            type: "ai",
+      if (!userCredit || userCredit.balance.lessThan(0)) {
+        return {
+          bot: {
             text: "Insufficient credits. Please contact the administrator.",
+            sourceDocuments: [],
           },
-        ],
-      };
+          history: [
+            ...history,
+            {
+              type: "human",
+              text: message,
+            },
+            {
+              type: "ai",
+              text: "Insufficient credits. Please contact the administrator.",
+            },
+          ],
+        };
+      }
     }
 
     const temperature = bot.temperature;
@@ -194,7 +197,7 @@ export const chatRequestHandler = async (
     const embeddingModel = embeddings(
       embeddingInfo.model_provider!.toLowerCase(),
       embeddingInfo.model_id,
-      embeddingInfo?.config
+      { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
     );
     let retriever: BaseRetriever;
     let resolveWithDocuments: (value: Document[]) => void;
@@ -320,11 +323,29 @@ export const chatRequestHandler = async (
         (Number(pricing.output) * outputTokens) / 1000000 +
         Number(pricing.request ?? 0);
 
-      await request.server.prisma.userCredit.update({
-        where: { user_id: bot.user_id },
+      if (!usesOwnKey) {
+        await request.server.prisma.userCredit.update({
+          where: { user_id: bot.user_id },
+          data: {
+            balance: {
+              decrement: cost,
+            },
+          },
+        });
+      }
+
+      await request.server.prisma.userTransaction.create({
         data: {
-          balance: {
-            decrement: cost
+          user_id: bot.user_id,
+          amount: usesOwnKey ? 0 : -cost,
+          type: "usage",
+          description: `Public chat usage for bot: ${bot.name}`,
+          metadata: {
+            bot_id: bot.id,
+            input_tokens: inputTokens,
+            output_tokens: outputTokens,
+            estimated_cost: cost,
+            used_own_key: usesOwnKey,
           }
         }
       });
@@ -417,37 +438,40 @@ export const chatRequestStreamHandler = async (
     }
 
     // Credit Check
-    const userCredit = await prisma.userCredit.findUnique({
-      where: { user_id: bot.user_id },
-    });
-
-    if (!userCredit || userCredit.balance.lessThan(0)) {
-      reply.raw.setHeader("Content-Type", "text/event-stream");
-
-      reply.sse({
-        event: "result",
-        id: "",
-        data: JSON.stringify({
-          bot: {
-            text: "Insufficient credits. Please contact the administrator.",
-            sourceDocuments: [],
-          },
-          history: [
-            ...history,
-            {
-              type: "human",
-              text: message,
-            },
-            {
-              type: "ai",
-              text: "Insufficient credits. Please contact the administrator.",
-            },
-          ],
-        }),
+    const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
+    if (!usesOwnKey) {
+      const userCredit = await prisma.userCredit.findUnique({
+        where: { user_id: bot.user_id },
       });
-      await nextTick();
 
-      return reply.raw.end();
+      if (!userCredit || userCredit.balance.lessThan(0)) {
+        reply.raw.setHeader("Content-Type", "text/event-stream");
+
+        reply.sse({
+          event: "result",
+          id: "",
+          data: JSON.stringify({
+            bot: {
+              text: "Insufficient credits. Please contact the administrator.",
+              sourceDocuments: [],
+            },
+            history: [
+              ...history,
+              {
+                type: "human",
+                text: message,
+              },
+              {
+                type: "ai",
+                text: "Insufficient credits. Please contact the administrator.",
+              },
+            ],
+          }),
+        });
+        await nextTick();
+
+        return reply.raw.end();
+      }
     }
 
     if (bot.bot_protect) {
@@ -607,7 +631,7 @@ export const chatRequestStreamHandler = async (
     const embeddingModel = embeddings(
       embeddingInfo.model_provider!.toLowerCase(),
       embeddingInfo.model_id,
-      embeddingInfo?.config
+      { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
     );
 
     let retriever: BaseRetriever;
@@ -781,11 +805,29 @@ export const chatRequestStreamHandler = async (
         (Number(pricing.output) * outputTokens) / 1000000 +
         Number(pricing.request ?? 0);
 
-      await request.server.prisma.userCredit.update({
-        where: { user_id: bot.user_id },
+      if (!usesOwnKey) {
+        await request.server.prisma.userCredit.update({
+          where: { user_id: bot.user_id },
+          data: {
+            balance: {
+              decrement: cost,
+            },
+          },
+        });
+      }
+
+      await request.server.prisma.userTransaction.create({
         data: {
-          balance: {
-            decrement: cost
+          user_id: bot.user_id,
+          amount: usesOwnKey ? 0 : -cost,
+          type: "usage",
+          description: `Public stream usage for bot: ${bot.name}`,
+          metadata: {
+            bot_id: bot.id,
+            input_tokens: inputTokens,
+            output_tokens: outputTokens,
+            estimated_cost: cost,
+            used_own_key: usesOwnKey,
           }
         }
       });

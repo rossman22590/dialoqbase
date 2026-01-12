@@ -36,10 +36,16 @@ export default async function queueHandler(job: SandboxedJob) {
             status: "PROCESSING",
           },
         });
-        const { chunkOverlap, chunkSize , usePuppeteerFetch} = await getRagSettings(prisma);
+        const { chunkOverlap, chunkSize, usePuppeteerFetch } = await getRagSettings(prisma);
+        const bot = await prisma.bot.findUnique({
+          where: {
+            id: source.botId,
+          },
+        });
         source.chunkOverlap = chunkOverlap;
         source.chunkSize = chunkSize;
         source.usePuppeteerFetch = usePuppeteerFetch;
+        source.bot_model_api_key = bot?.bot_model_api_key || undefined;
         switch (source.type.toLowerCase()) {
           case "website":
             await websiteQueueController(source, prisma);
@@ -82,7 +88,7 @@ export default async function queueHandler(job: SandboxedJob) {
           case "sitemap":
             await sitemapQueueController(source);
             break;
-          case  "zip":
+          case "zip":
             await zipQueueController(source, prisma);
             break;
           case "json":
