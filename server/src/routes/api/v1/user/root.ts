@@ -136,6 +136,25 @@ const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
     deleteApiKey
   );
 
+  fastify.get(
+    "/credits",
+    {
+      onRequest: [fastify.authenticate],
+      schema: {
+        tags: ["User"],
+        summary: "Get user credits",
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              balance: { type: "number" },
+            },
+          },
+        },
+      },
+    },
+    getUserCreditsHandler
+  );
 };
 
 export default root;
