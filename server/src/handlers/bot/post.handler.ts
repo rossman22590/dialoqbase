@@ -10,6 +10,8 @@ import { createChain, groupMessagesByConversation } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
 import { nextTick } from "../../utils/nextTick";
 import { jwtBotVerify } from "../../utils/jwt";
+import { MODEL_PRICING } from "../../utils/pricing";
+import { countTokens } from "../../utils/tokenizer";
 
 export const chatRequestHandler = async (
   request: FastifyRequest<ChatRequestBody>,
@@ -133,6 +135,31 @@ export const chatRequestHandler = async (
           ],
         };
       }
+    }
+
+    // Credit Check
+    const userCredit = await prisma.userCredit.findUnique({
+      where: { user_id: bot.user_id },
+    });
+
+    if (!userCredit || userCredit.balance.lessThan(0)) {
+      return {
+        bot: {
+          text: "Insufficient credits. Please contact the administrator.",
+          sourceDocuments: [],
+        },
+        history: [
+          ...history,
+          {
+            type: "human",
+            text: message,
+          },
+          {
+            type: "ai",
+            text: "Insufficient credits. Please contact the administrator.",
+          },
+        ],
+      };
     }
 
     const temperature = bot.temperature;
@@ -283,6 +310,30 @@ export const chatRequestHandler = async (
       },
     });
 
+    // Calculate and Deduct Credits
+    try {
+      const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
+      const inputTokens = countTokens(inputTextField);
+      const outputTokens = countTokens(botResponse);
+
+      const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
+      const cost =
+        (Number(pricing.input) * inputTokens) / 1000000 +
+        (Number(pricing.output) * outputTokens) / 1000000 +
+        (pricing.request || 0);
+
+      await request.server.prisma.userCredit.update({
+        where: { user_id: bot.user_id },
+        data: {
+          balance: {
+            decrement: cost
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Failed to deduct credits in public chat", err);
+    }
+
     return {
       bot: {
         chat_id: chatId.id,
@@ -365,6 +416,40 @@ export const chatRequestStreamHandler = async (
           },
         ],
       };
+    }
+
+    // Credit Check
+    const userCredit = await prisma.userCredit.findUnique({
+      where: { user_id: bot.user_id },
+    });
+
+    if (!userCredit || userCredit.balance.lessThan(0)) {
+      reply.raw.setHeader("Content-Type", "text/event-stream");
+
+      reply.sse({
+        event: "result",
+        id: "",
+        data: JSON.stringify({
+          bot: {
+            text: "Insufficient credits. Please contact the administrator.",
+            sourceDocuments: [],
+          },
+          history: [
+            ...history,
+            {
+              type: "human",
+              text: message,
+            },
+            {
+              type: "ai",
+              text: "Insufficient credits. Please contact the administrator.",
+            },
+          ],
+        }),
+      });
+      await nextTick();
+
+      return reply.raw.end();
     }
 
     if (bot.bot_protect) {
@@ -687,6 +772,30 @@ export const chatRequestStreamHandler = async (
         }),
       },
     });
+
+    // Calculate and Deduct Credits
+    try {
+      const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
+      const inputTokens = countTokens(inputTextField);
+      const outputTokens = countTokens(response);
+
+      const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
+      const cost =
+        (Number(pricing.input) * inputTokens) / 1000000 +
+        (Number(pricing.output) * outputTokens) / 1000000 +
+        (pricing.request || 0);
+
+      await request.server.prisma.userCredit.update({
+        where: { user_id: bot.user_id },
+        data: {
+          balance: {
+            decrement: cost
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Failed to deduct credits in public stream", err);
+    }
 
     reply.sse({
       event: "result",
