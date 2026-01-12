@@ -332,8 +332,8 @@ export const chatRequestStreamHandler = async (
 
       const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
       const cost =
-        (Number(pricing.input) * inputTokens) / 1000000 +
-        (Number(pricing.output) * outputTokens) / 1000000 +
+        (pricing.input * inputTokens) / 1000000 +
+        (pricing.output * outputTokens) / 1000000 +
         (pricing.request || 0);
 
       await request.server.prisma.userCredit.update({
