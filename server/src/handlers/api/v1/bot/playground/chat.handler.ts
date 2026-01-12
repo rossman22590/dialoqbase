@@ -137,14 +137,14 @@ export const chatRequestHandler = async (
     try {
       // Approximate history tokens by concatenating all text
       const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
-      const inputTokens = countTokens(inputTextField);
-      const outputTokens = countTokens(botResponse);
+      const inputTokens = Number(await countTokens(inputTextField));
+      const outputTokens = Number(await countTokens(botResponse));
 
       const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
       const cost =
         (Number(pricing.input) * inputTokens) / 1000000 +
         (Number(pricing.output) * outputTokens) / 1000000 +
-        (pricing.request || 0);
+        Number(pricing.request ?? 0);
 
       await request.server.prisma.userCredit.update({
         where: { user_id: request.user.user_id },
@@ -327,14 +327,14 @@ export const chatRequestStreamHandler = async (
     // Calculate and Deduct Credits
     try {
       const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
-      const inputTokens = await countTokens(inputTextField);
-      const outputTokens = await countTokens(response);
+      const inputTokens = Number(await countTokens(inputTextField));
+      const outputTokens = Number(await countTokens(response));
 
       const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
       const cost =
-        (pricing.input * inputTokens) / 1000000 +
-        (pricing.output * outputTokens) / 1000000 +
-        (pricing.request || 0);
+        (Number(pricing.input) * inputTokens) / 1000000 +
+        (Number(pricing.output) * outputTokens) / 1000000 +
+        Number(pricing.request ?? 0);
 
       await request.server.prisma.userCredit.update({
         where: { user_id: request.user.user_id },

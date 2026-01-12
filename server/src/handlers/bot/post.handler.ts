@@ -318,9 +318,9 @@ export const chatRequestHandler = async (
 
       const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
       const cost =
-        (pricing.input * inputTokens) / 1000000 +
-        (pricing.output * outputTokens) / 1000000 +
-        (pricing.request || 0);
+        (Number(pricing.input) * inputTokens) / 1000000 +
+        (Number(pricing.output) * outputTokens) / 1000000 +
+        Number(pricing.request ?? 0);
 
       await request.server.prisma.userCredit.update({
         where: { user_id: bot.user_id },
@@ -781,9 +781,9 @@ export const chatRequestStreamHandler = async (
 
       const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
       const cost =
-        (pricing.input * inputTokens) / 1000000 +
-        (pricing.output * outputTokens) / 1000000 +
-        (pricing.request || 0);
+        (Number(pricing.input) * inputTokens) / 1000000 +
+        (Number(pricing.output) * outputTokens) / 1000000 +
+        Number(pricing.request ?? 0);
 
       await request.server.prisma.userCredit.update({
         where: { user_id: bot.user_id },
