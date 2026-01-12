@@ -1,12 +1,4 @@
-import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatOpenAI } from "@langchain/openai";
-import { ChatGooglePaLM } from "@langchain/community/chat_models/googlepalm";
-import { HuggingFaceInference } from "@langchain/community/llms/hf";
-import { DialoqbaseFireworksModel } from "../models/fireworks";
-import { OpenAI } from "@langchain/openai";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { ChatOllama } from "@langchain/community/chat_models/ollama";
-import { Replicate } from "@langchain/community/llms/replicate";
 
 export const chatModelProvider = (
   provider: string,
@@ -14,127 +6,92 @@ export const chatModelProvider = (
   temperature: number,
   otherFields?: any
 ) => {
-  modelName = modelName.replace("-dbase", "");
-  modelName = modelName.replace(/_dialoqbase_[0-9]+$/, "");
+  // Clean up model name artifacts if any
+  let cleanModelName = modelName.replace("-dbase", "");
+  cleanModelName = cleanModelName.replace(/_dialoqbase_[0-9]+$/, "");
 
-  switch (provider.toLowerCase()) {
-    case "openai":
-      return new ChatOpenAI({
-        modelName: modelName,
-        temperature: temperature,
-        ...otherFields,
-        configuration: {
-          ...otherFields.configuration,
-          baseURL: process.env.OPENAI_API_URL,
-        },
-      });
-    case "anthropic":
-      return new ChatAnthropic({
-        modelName: modelName,
-        temperature: temperature,
-        ...otherFields,
-      }) as any;
-    case "google-bison":
-      return new ChatGooglePaLM({
-        temperature: temperature,
-        apiKey: process.env.GOOGLE_API_KEY,
-        ...otherFields,
-      });
-    case "huggingface-api":
-      return new HuggingFaceInference({
-        modelName: modelName,
-        temperature: temperature,
-        ...otherFields,
-      });
-    case "fireworks":
-      return new DialoqbaseFireworksModel({
-        model: modelName,
-        temperature: temperature,
-        is_chat: !notChatModels.includes(modelName),
-        ...otherFields,
-      });
-    case "openai-instruct":
-      return new OpenAI({
-        modelName: modelName,
-        temperature: temperature,
-        ...otherFields,
-        configuration: {
-          baseURL: process.env.OPENAI_API_URL,
-        },
-      });
-    case "local":
-      return new ChatOpenAI({
-        modelName: modelName,
-        temperature: temperature,
-        openAIApiKey: otherFields.apiKey || process.env.OPENAI_API_KEY,
-        ...otherFields,
-        configuration: {
-          baseURL: otherFields.baseURL,
-          apiKey: otherFields.apiKey || process.env.OPENAI_API_KEY,
-          defaultHeaders: {
-            "HTTP-Referer":
-              process.env.LOCAL_REFER_URL || "https://dialoqbase.n4ze3m.com/",
-            "X-Title": process.env.LOCAL_TITLE || "Dialoqbase",
-          },
-        },
-      });
-    case "google":
-      return new ChatGoogleGenerativeAI({
-        modelName: modelName,
-        maxOutputTokens: 2048,
-        apiKey: process.env.GOOGLE_API_KEY,
-        ...otherFields,
-      }) as any
-    case "ollama":
-      return new ChatOllama({
-        baseUrl: otherFields.baseURL,
-        model: modelName,
-        ...otherFields,
-      });
-    case "replicate":
-      return new Replicate({
-        model: modelName,
-        temperature: temperature,
-        apiKey: otherFields.apiKey,
-        ...otherFields,
-      });
-    case "groq":
-      return new ChatOpenAI({
-        modelName: modelName,
-        openAIApiKey: process.env.GROQ_API_KEY! || "",
-        ...otherFields,
-        configuration: {
-          baseURL: "https://api.groq.com/openai/v1",
-          apiKey: process.env.GROQ_API_KEY! || "",
-        },
-      });
-    default:
-      console.log("using default");
-      return new ChatOpenAI({
-        modelName: modelName,
-        temperature: temperature,
-        ...otherFields,
-      });
+  // Construct OpenRouter model ID
+  // If the model name already contains a slash, assume it's already an OpenRouter ID (e.g. "openai/gpt-4")
+  // Otherwise, attempt to construct it from the legacy provider + model name
+  let openRouterModel = cleanModelName;
+  if (!cleanModelName.includes("/")) {
+    switch (provider.toLowerCase()) {
+      case "openai":
+        openRouterModel = `openai/${cleanModelName}`;
+        break;
+      case "anthropic":
+        openRouterModel = `anthropic/${cleanModelName}`;
+        break;
+      case "google":
+      case "google-bison":
+        openRouterModel = `google/${cleanModelName}`;
+        break;
+      case "fireworks":
+        // Fireworks models usually lack the vendor prefix in the old list, but OpenRouter has names like 'fireworks/firellava-13b' or 'meta-llama/...'
+        // For safety with legacy fireworks string, we might try to map common ones or just default to the name if unsure.
+        // Many fireworks models are actually meta-llama on OpenRouter.
+        if (cleanModelName.includes("llama")) {
+          openRouterModel = `meta-llama/${cleanModelName}`;
+        } else if (cleanModelName.includes("mistral")) {
+          openRouterModel = `mistralai/${cleanModelName}`;
+        } else {
+          openRouterModel = `fireworks/${cleanModelName}`;
+        }
+        break;
+      case "meta":
+        openRouterModel = `meta-llama/${cleanModelName}`;
+        break;
+      case "mistral":
+        openRouterModel = `mistralai/${cleanModelName}`;
+        break;
+      case "cohere":
+        openRouterModel = `cohere/${cleanModelName}`;
+        break;
+      default:
+        // Fallback: use the model name as is, or prepend provider if sensible
+        openRouterModel = `${provider}/${cleanModelName}`;
+        break;
+    }
   }
+
+  // Common OpenRouter Configuration
+  const openRouterConfig = {
+    modelName: openRouterModel,
+    temperature: temperature,
+    openAIApiKey: process.env.OPENROUTER_API_KEY,
+    ...otherFields,
+    configuration: {
+      baseURL: "https://openrouter.ai/api/v1",
+      apiKey: process.env.OPENROUTER_API_KEY,
+      defaultHeaders: {
+        "HTTP-Referer": process.env.LOCAL_REFER_URL || "https://myapps.ai/", // Optional. Site URL for rankings on openrouter.ai.
+        "X-Title": process.env.LOCAL_TITLE || "Botcraft", // Optional. Site title for rankings on openrouter.ai.
+      },
+      ...otherFields.configuration,
+    },
+  };
+
+  return new ChatOpenAI(openRouterConfig);
 };
 
+
 export const streamingSupportedModels = [
-  "gpt-3.5-turbo",
-  "gpt-3.5-turbo-16k",
-  "gpt-4",
-  "gpt-4-0613",
-  "claude-1",
-  "claude-instant-1",
-  "claude-2",
-  "llama-v2-7b-chat",
-  "llama-v2-13b-chat",
-  "llama-v2-70b-chat",
-  "llama-v2-7b-chat-w8a16",
-  "llama-v2-13b-chat-w8a16",
-  "llama-v2-13b-code-instruct",
-  "llama-v2-34b-code-instruct-w8a16",
-  "gpt-3.5-turbo-instruct",
-  "mistral-7b-instruct-4k",
+  "openai/gpt-3.5-turbo",
+  "openai/gpt-4",
+  "openai/gpt-4-turbo",
+  "openai/gpt-4o",
+  "openai/gpt-4o-mini",
+  "anthropic/claude-3-opus",
+  "anthropic/claude-3.5-sonnet",
+  "anthropic/claude-3-haiku",
+  "google/gemini-pro-1.5",
+  "google/gemini-flash-1.5",
+  "meta-llama/llama-3-8b-instruct",
+  "meta-llama/llama-3-70b-instruct",
+  "meta-llama/llama-3.1-8b-instruct",
+  "meta-llama/llama-3.1-70b-instruct",
+  "mistralai/mistral-large",
+  "mistralai/mixtral-8x22b-instruct"
 ];
 
 export const isStreamingSupported = (model: string) => {
@@ -142,28 +99,26 @@ export const isStreamingSupported = (model: string) => {
 };
 
 export const notChatModels = [
-  "accounts/fireworks/models/llama-v2-13b-code-instruct",
-  "accounts/fireworks/models/llama-v2-34b-code-instruct-w8a16",
-  "accounts/fireworks/models/mistral-7b-instruct-4k",
+  // Deprecated or legacy models can be listed here if needed, but for now we keep it empty or with legacy values if strictly needed.
+  // Keeping legacy entries just in case, but they aren't in our new lists.
 ];
 
 export const supportedModels = [
-  "gpt-3.5-turbo",
-  "gpt-3.5-turbo-16k",
-  "gpt-4-0613",
-  "gpt-4",
-  "claude-1",
-  "claude-2",
-  "claude-instant-1",
-  "google-bison",
-  "falcon-7b-instruct-inference",
-  "llama-v2-7b-chat",
-  "llama-v2-13b-chat",
-  "llama-v2-70b-chat",
-  "llama-v2-7b-chat-w8a16",
-  "llama-v2-13b-chat-w8a16",
-  "llama-v2-13b-code-instruct",
-  "llama-v2-34b-code-instruct-w8a16",
-  "gpt-3.5-turbo-instruct",
-  "mistral-7b-instruct-4k",
+  "openai/gpt-3.5-turbo",
+  "openai/gpt-4",
+  "openai/gpt-4-turbo",
+  "openai/gpt-4o",
+  "openai/gpt-4o-mini",
+  "anthropic/claude-3-opus",
+  "anthropic/claude-3.5-sonnet",
+  "anthropic/claude-3-haiku",
+  "google/gemini-pro-1.5",
+  "google/gemini-flash-1.5",
+  "meta-llama/llama-3-8b-instruct",
+  "meta-llama/llama-3-70b-instruct",
+  "meta-llama/llama-3.1-8b-instruct",
+  "meta-llama/llama-3.1-70b-instruct",
+  "mistralai/mistral-large",
+  "mistralai/mixtral-8x22b-instruct"
 ];
+

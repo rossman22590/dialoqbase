@@ -1,70 +1,29 @@
 export const availableChatModels = [
-  { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo (OpenAI)" },
-  { value: "gpt-3.5-turbo-16k", label: "GPT-3.5 Turbo 16K (OpenAI)" },
-  { value: "gpt-4", label: "GPT-4 (OpenAI)" },
-  { value: "gpt-4-0613", label: "GPT-4 0613 (OpenAI)" },
-  {
-    value: "gpt-3.5-turbo-instruct",
-    label: "GPT-3.5 Turbo Instruct (OpenAI)",
-  },
-  { value: "claude-1", label: "Claude 1 (Anthropic)" },
-  { value: "claude-2", label: "Claude 2 (Anthropic)" },
-  { value: "claude-instant-1", label: "Claude Instant (Anthropic)" },
-  {
-    value: "google-bison",
-    label: "Google chat-bison-001",
-  },
-  {
-    value: "llama-v2-7b-chat",
-    label: "Llama v2 7B (Fireworks)",
-  },
-  {
-    value: "llama-v2-13b-chat",
-    label: "Llama v2 13B (Fireworks)",
-  },
-  {
-    value: "llama-v2-70b-chat",
-    label: "Llama v2 70B (Fireworks)",
-  },
-  {
-    value: "llama-v2-7b-chat-w8a16",
-    label: "Llama v2 7B Chat int8 (Fireworks)",
-  },
-  {
-    value: "llama-v2-13b-chat-w8a16",
-    label: "Llama v2 13B Chat int8 (Fireworks)",
-  },
-  {
-    value: "llama-v2-13b-code-instruct",
-    label: "Llama v2 13B Code Instruct (Fireworks)",
-  },
-  {
-    value: "llama-v2-34b-code-instruct-w8a16",
-    label: "Llama v2 34B Code Instruct int8 (Fireworks)",
-  },
-  {
-    value: "mistral-7b-instruct-4k",
-    label: "Mistral 7B Instruct 4K (Fireworks)",
-  }
+  { value: "openai/gpt-5", label: "GPT-5 (OpenAI)" },
+  { value: "openai/gpt-5.2", label: "GPT-5.2 (OpenAI)" },
+  { value: "anthropic/claude-opus-4.5", label: "Claude Opus 4.5 (Anthropic)" },
+  { value: "anthropic/claude-sonnet-4.5", label: "Claude Sonnet 4.5 (Anthropic)" },
+  { value: "anthropic/claude-haiku-4.5", label: "Claude Haiku 4.5 (Anthropic)" },
+  { value: "google/gemini-2.5-pro", label: "Google Gemini 2.5 Pro" },
+  { value: "google/gemini-2.5-flash", label: "Google Gemini 2.5 Flash" },
+  { value: "x-ai/grok-4.1-fast", label: "Grok 4.1 Fast (xAI)" },
+  { value: "meta-llama/llama-4-maverick", label: "Llama 4 Maverick (Meta)" },
+  { value: "meta-llama/llama-4-scout", label: "Llama 4 Scout (Meta)" },
+  { value: "mistralai/mixtral-8x22b-instruct", label: "Mixtral 8x22B Instruct" }
 ];
 
 export const streamingSupportedModels = [
-  "gpt-3.5-turbo",
-  "gpt-3.5-turbo-16k",
-  "gpt-4",
-  "gpt-4-0613",
-  "claude-1",
-  "claude-instant-1",
-  "claude-2",
-  "llama-v2-7b-chat",
-  "llama-v2-13b-chat",
-  "llama-v2-70b-chat",
-  "llama-v2-7b-chat-w8a16",
-  "llama-v2-13b-chat-w8a16",
-  "llama-v2-13b-code-instruct",
-  "llama-v2-34b-code-instruct-w8a16",
-  "gpt-3.5-turbo-instruct",
-  "mistral-7b-instruct-4k",
+  "openai/gpt-5",
+  "openai/gpt-5.2",
+  "anthropic/claude-opus-4.5",
+  "anthropic/claude-sonnet-4.5",
+  "anthropic/claude-haiku-4.5",
+  "google/gemini-2.5-pro",
+  "google/gemini-2.5-flash",
+  "x-ai/grok-4.1-fast",
+  "meta-llama/llama-4-maverick",
+  "meta-llama/llama-4-scout",
+  "mistralai/mixtral-8x22b-instruct"
 ];
 
 export const isStreamingSupported = (model: string) => {
