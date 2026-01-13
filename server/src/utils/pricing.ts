@@ -1,4 +1,4 @@
-export const COST_MULTIPLIER = 1.25;
+export const COST_MULTIPLIER = 12.5;
 
 export const MODEL_PRICING = {
     // OpenAI
