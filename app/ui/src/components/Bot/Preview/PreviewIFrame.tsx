@@ -17,7 +17,7 @@ export const PreviewIframe = ({ public_id }: Props) => {
           src={`${hostUrl}/bot/${public_id}?mode=iframe&no=button`}
           className="w-full bg-white"
           height={585}
-          title="Dialoqbase"
+          title="Botcraft Pro"
         />
       </div>
     </>

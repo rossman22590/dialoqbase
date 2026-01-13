@@ -6,6 +6,7 @@ import { ApplicationMenu } from "./ApplicationMenu";
 import { useQuery } from "@tanstack/react-query";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { OnboardingModal } from "../components/Common/OnboardingModal";
 
 //@ts-ignore
 function classNames(...classes) {
@@ -37,6 +38,7 @@ export default function DashboardLayout({
 
   return (
     <>
+      <OnboardingModal />
       <div className="min-h-full">
         <Disclosure
           as="nav"
@@ -53,7 +55,7 @@ export default function DashboardLayout({
                     <img
                       className="h-8 w-auto"
                       src="/logo.png"
-                      alt="Dialoqbase"
+                      alt="Botcraft Pro"
                     />
                     <span className="ml-1 text-xl font-bold dark:text-white">
                       Botcraft Pro

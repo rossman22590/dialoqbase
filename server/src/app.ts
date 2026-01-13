@@ -45,7 +45,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   void fastify.register(swaggerUi, {
     routePrefix: "/docs",
     theme: {
-      title: "Dialoqbase API Docs",
+      title: "Botcraft Pro API Docs",
     },
     uiConfig: {
       docExpansion: "none",

@@ -20,6 +20,7 @@ import { Tooltip } from "antd";
 import { ApplicationMenu } from "./ApplicationMenu";
 import { useSettings } from "../hooks/useSettings";
 import api from "../services/api";
+import { OnboardingModal } from "../components/Common/OnboardingModal";
 
 const navigation = [
   {
@@ -114,6 +115,7 @@ export default function BotLayout({
 
   return (
     <>
+      <OnboardingModal />
       <div>
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog

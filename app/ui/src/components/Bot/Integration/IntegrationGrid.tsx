@@ -86,7 +86,7 @@ export const IntegrationGrid: React.FC<Props> = ({ data }) => {
         ))}
 
         <IntegrationCard
-          href={`/bot/${param.id}/embed`}
+          href={`/bot/${param.id}/embed?type=html`}
           logo="/providers/html.svg"
           name="HTML Embed"
           color="#fff"
@@ -95,7 +95,7 @@ export const IntegrationGrid: React.FC<Props> = ({ data }) => {
         />
 
         <IntegrationCard
-          href={`/bot/${param.id}/embed`}
+          href={`/bot/${param.id}/embed?type=nextjs`}
           logo="/providers/web.svg"
           name="Next.js Embed"
           color="#fff"

@@ -66,7 +66,7 @@ export const AuthRegister = () => {
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div>
               <div className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 flex items-center">
-                <img className="h-8 w-auto" src="/logo.png" alt="Dialoqbase" />
+                <img className="h-8 w-auto" src="/logo.png" alt="Botcraft Pro" />
                 <span className="text-lg font-bold dark:text-white">
                   Botcraft Pro
                 </span>
