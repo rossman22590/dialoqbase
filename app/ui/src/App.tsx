@@ -202,6 +202,7 @@ export default function App() {
           mode === "dark" ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
           fontFamily: "Inter",
+          colorPrimary: "#7c3aed",
         },
       }}
     >
