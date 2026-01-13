@@ -64,7 +64,7 @@ export const IntegrationGrid: React.FC<Props> = ({ data }) => {
             Integrations
           </h1>
           <p className="mt-2 text-sm text-gray-700 dark:text-gray-400">
-            Make your bot aviailable on different channels and platforms.
+            Make your bot available on different channels and platforms.
           </p>
         </div>
       </div>
@@ -92,6 +92,15 @@ export const IntegrationGrid: React.FC<Props> = ({ data }) => {
           color="#fff"
           textColor="#000"
           description="Embed your chatbot on your website or blog using HTML snippet."
+        />
+
+        <IntegrationCard
+          href={`/bot/${param.id}/embed`}
+          logo="/providers/web.svg"
+          name="Next.js Embed"
+          color="#fff"
+          textColor="#000"
+          description="Embed your chatbot on your Next.js application using a React component."
         />
 
         <IntegrationCard

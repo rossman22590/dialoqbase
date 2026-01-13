@@ -1,6 +1,7 @@
 import React from "react";
 import { EmbedBoardCard } from "./EmbedBoardCard";
 import { EmbedBoardScript } from "./EmbedBoardScript";
+import { EmbedBoardNextjs } from "./EmbedBoardNextjs";
 
 type Props = {
   public_id: string;
@@ -21,8 +22,13 @@ export const EmbedBoard = ({ public_id }: Props) => {
             /> */}
 
       <EmbedBoardScript
-      hostUrl={hostUrl}
-      public_id={public_id}
+        hostUrl={hostUrl}
+        public_id={public_id}
+      />
+
+      <EmbedBoardNextjs
+        hostUrl={hostUrl}
+        public_id={public_id}
       />
       <EmbedBoardCard
         title="Public URL"
