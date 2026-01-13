@@ -9,6 +9,7 @@ import { DialoqbaseWebLoader } from "../../loader/web";
 import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
 import { PrismaClient } from "@prisma/client";
 import { getModelInfo } from "../../utils/get-model-info";
+import { recordEmbeddingUsage } from "../usage";
 
 export const websiteQueueController = async (
   source: QSource,
@@ -65,6 +66,7 @@ export const websiteQueueController = async (
         sourceId: source.id,
       }
     );
+    await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, chunks);
   } else {
     let docs: any[] = [];
     if (process.env.USE_LEGACY_WEB_LOADER === "true") {
@@ -100,12 +102,13 @@ export const websiteQueueController = async (
       embeddings(
         embeddingInfo.model_provider!.toLowerCase(),
         embeddingInfo.model_id,
-        embeddingInfo?.config
+        { ...((embeddingInfo?.config as any) || {}), apiKey: source.bot_model_api_key }
       ),
       {
         botId: source.botId,
         sourceId: source.id,
       }
     );
+    await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, chunks);
   }
 };

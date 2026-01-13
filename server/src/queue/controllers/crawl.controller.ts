@@ -38,6 +38,9 @@ export const crawlQueueController = async (source: QSource) => {
           chunkSize: source.chunkSize,
           usePuppeteerFetch: source.usePuppeteerFetch,
           doNotClosePuppeteer: true,
+          bot_model_api_key: source.bot_model_api_key,
+          bot_user_id: source.bot_user_id,
+          bot_name: source.bot_name,
         },
         prisma
       );

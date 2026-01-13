@@ -5,6 +5,7 @@ import { embeddings } from "../../utils/embeddings";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { PrismaClient } from "@prisma/client";
 import { getModelInfo } from "../../utils/get-model-info";
+import { recordEmbeddingUsage } from "../usage";
 
 export const txtQueueController = async (
   source: QSource,
@@ -43,4 +44,5 @@ export const txtQueueController = async (
       sourceId: source.id,
     }
   );
+  await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, chunks);
 };

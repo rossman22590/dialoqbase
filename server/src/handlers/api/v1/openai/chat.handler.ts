@@ -6,7 +6,7 @@ import { Document } from "langchain/document";
 import { BaseRetriever } from "@langchain/core/retrievers";
 import { DialoqbaseHybridRetrival } from "../../../../utils/hybrid";
 import { DialoqbaseVectorStore } from "../../../../utils/store";
-import { createChatModel } from "../bot/playground/chat.service";
+import { createChatModel, getBotConfig } from "../bot/playground/chat.service";
 import { createChain } from "../../../../chain";
 import {
     openaiNonStreamResponse,
@@ -78,7 +78,7 @@ export const createChatCompletionHandler = async (
         const embeddingModel = embeddings(
             embeddingInfo.model_provider!.toLowerCase(),
             embeddingInfo.model_id,
-            embeddingInfo?.config
+            { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
         );
 
         const modelinfo = await getModelInfo({
@@ -98,7 +98,7 @@ export const createChatCompletionHandler = async (
             });
         }
 
-        const botConfig = (modelinfo.config as {}) || {};
+        const botConfig = getBotConfig(bot, modelinfo);
         let retriever: BaseRetriever;
         let resolveWithDocuments: (value: Document[]) => void;
 

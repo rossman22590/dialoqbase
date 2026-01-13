@@ -56,11 +56,11 @@ export const chatModelProvider = (
 
   // Common OpenRouter Configuration
   const openRouterConfig = {
-    modelName: openRouterModel,
-    tiktokenModelName: "gpt-4",
     temperature: temperature,
     openAIApiKey: otherFields?.configuration?.apiKey || process.env.OPENROUTER_API_KEY,
     ...otherFields,
+    modelName: openRouterModel,
+    tiktokenModelName: otherFields?.tiktokenModelName || "gpt-4",
     configuration: {
       baseURL: "https://openrouter.ai/api/v1",
       apiKey: otherFields?.configuration?.apiKey || process.env.OPENROUTER_API_KEY,

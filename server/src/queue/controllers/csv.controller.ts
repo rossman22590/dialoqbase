@@ -5,6 +5,7 @@ import { DialoqbaseVectorStore } from "../../utils/store";
 import { embeddings } from "../../utils/embeddings";
 import { PrismaClient } from "@prisma/client";
 import { getModelInfo } from "../../utils/get-model-info";
+import { recordEmbeddingUsage } from "../usage";
 
 export const csvQueueController = async (
   source: QSource,
@@ -44,4 +45,5 @@ export const csvQueueController = async (
       sourceId: source.id,
     }
   );
+  await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, chunks);
 };

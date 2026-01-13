@@ -6,6 +6,7 @@ import { embeddings } from "../../utils/embeddings";
 import { DialoqbaseGithub } from "../../loader/github";
 import { PrismaClient } from "@prisma/client";
 import { getModelInfo } from "../../utils/get-model-info";
+import { recordEmbeddingUsage } from "../usage";
 
 export const githubQueueController = async (
   source: QSource,
@@ -50,4 +51,5 @@ export const githubQueueController = async (
       sourceId: source.id,
     }
   );
+  await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, chunks);
 };

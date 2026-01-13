@@ -40,3 +40,30 @@ export const MODEL_PRICING = {
     // Default
     "default": { input: 1.0, output: 1.0 }
 };
+
+export const EMBEDDING_PRICING = {
+    "text-embedding-ada-002": { input: 0.10 },
+    "text-embedding-3-small": { input: 0.02 },
+    "text-embedding-3-large": { input: 0.13 },
+    "default": { input: 0.10 }
+};
+
+export const normalizeEmbeddingModelId = (modelId: string) => {
+    const cleaned = modelId
+        .replace("dialoqbase_eb_", "")
+        .replace(/_dialoqbase_[0-9]+$/, "");
+    if (cleaned.includes("/")) {
+        return cleaned.split("/").pop() || cleaned;
+    }
+    return cleaned;
+};
+
+export const calculateEmbeddingCost = (modelId: string, tokens: number) => {
+    const normalized = normalizeEmbeddingModelId(modelId);
+    const pricing =
+        EMBEDDING_PRICING[modelId] ||
+        EMBEDDING_PRICING[normalized] ||
+        EMBEDDING_PRICING.default;
+    const baseCost = (Number(pricing.input) * tokens) / 1000000;
+    return baseCost * COST_MULTIPLIER;
+};

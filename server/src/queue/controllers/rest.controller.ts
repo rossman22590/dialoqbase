@@ -4,6 +4,7 @@ import { embeddings } from "../../utils/embeddings";
 import { DialoqbaseRestApi } from "../../loader/rest";
 import { PrismaClient } from "@prisma/client";
 import { getModelInfo } from "../../utils/get-model-info";
+import { recordEmbeddingUsage } from "../usage";
 
 export const restQueueController = async (
   source: QSource,
@@ -41,4 +42,5 @@ export const restQueueController = async (
       sourceId: source.id,
     }
   );
+  await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, docs);
 };

@@ -9,4 +9,6 @@ export interface QSource extends BotSource {
   usePuppeteerFetch?: boolean;
   doNotClosePuppeteer?: boolean;
   bot_model_api_key?: string;
+  bot_user_id?: number;
+  bot_name?: string;
 }

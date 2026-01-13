@@ -7,6 +7,7 @@ import { DialoqbaseYoutube } from "../../loader/youtube";
 import { PrismaClient } from "@prisma/client";
 import { DialoqbaseYoutubeTranscript } from "../../loader/youtube-transcript";
 import { getModelInfo } from "../../utils/get-model-info";
+import { recordEmbeddingUsage } from "../usage";
 
 export const youtubeQueueController = async (
   source: QSource,
@@ -16,76 +17,97 @@ export const youtubeQueueController = async (
     language_code: string;
     youtube_mode: "whisper" | "transcript";
   };
+
   if (youtube_mode === "transcript") {
-    console.log("Using Youtube Transcript Mode");
-    const loader = new DialoqbaseYoutubeTranscript({
-      url: source.content!,
-      language_code,
-    });
-    const docs = await loader.load();
+    try {
+      console.log("Using Youtube Transcript Mode");
+      const loader = new DialoqbaseYoutubeTranscript({
+        url: source.content!,
+        language_code,
+      });
+      const docs = await loader.load();
 
-    const textSplitter = new RecursiveCharacterTextSplitter({
-      chunkSize: source.chunkSize,
-      chunkOverlap: source.chunkOverlap,
-    });
-    const chunks = await textSplitter.splitDocuments(docs);
+      const textSplitter = new RecursiveCharacterTextSplitter({
+        chunkSize: source.chunkSize,
+        chunkOverlap: source.chunkOverlap,
+      });
+      const chunks = await textSplitter.splitDocuments(docs);
 
-    const embeddingInfo = await getModelInfo({
-      model: source.embedding,
-      prisma,
-      type: "embedding",
-    });
+      const embeddingInfo = await getModelInfo({
+        model: source.embedding,
+        prisma,
+        type: "embedding",
+      });
 
-    if (!embeddingInfo) {
-      throw new Error("Embedding not found. Please verify the embedding id");
-    }
-
-    await DialoqbaseVectorStore.fromDocuments(
-      chunks,
-      embeddings(
-        embeddingInfo.model_provider!.toLowerCase(),
-        embeddingInfo.model_id,
-        embeddingInfo?.config
-      ),
-      {
-        botId: source.botId,
-        sourceId: source.id,
+      if (!embeddingInfo) {
+        throw new Error("Embedding not found. Please verify the embedding id");
       }
-    );
+
+      await DialoqbaseVectorStore.fromDocuments(
+        chunks,
+        embeddings(
+          embeddingInfo.model_provider!.toLowerCase(),
+          embeddingInfo.model_id,
+          {
+            ...((embeddingInfo?.config as any) || {}),
+            apiKey: source.bot_model_api_key,
+          }
+        ),
+        {
+          botId: source.botId,
+          sourceId: source.id,
+        }
+      );
+      await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, chunks);
+    } catch (e) {
+      console.error(
+        "Youtube Transcript Mode failed, falling back to Whisper Mode",
+        e
+      );
+      await processWhisperMode(source, prisma);
+    }
   } else {
-    console.log("Using Youtube Whisper Mode");
-    const loader = new DialoqbaseYoutube({
-      url: source.content!,
-    });
-    const docs = await loader.load();
-
-    const textSplitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 200,
-    });
-    const chunks = await textSplitter.splitDocuments(docs);
-
-    const embeddingInfo = await getModelInfo({
-      model: source.embedding,
-      prisma,
-      type: "embedding",
-    });
-
-    if (!embeddingInfo) {
-      throw new Error("Embedding not found. Please verify the embedding id");
-    }
-
-    await DialoqbaseVectorStore.fromDocuments(
-      chunks,
-      embeddings(
-        embeddingInfo.model_provider!.toLowerCase(),
-        embeddingInfo.model_id,
-        embeddingInfo?.config
-      ),
-      {
-        botId: source.botId,
-        sourceId: source.id,
-      }
-    );
+    await processWhisperMode(source, prisma);
   }
+};
+
+const processWhisperMode = async (source: QSource, prisma: PrismaClient) => {
+  console.log("Using Youtube Whisper Mode");
+  const loader = new DialoqbaseYoutube({
+    url: source.content!,
+  });
+  const docs = await loader.load();
+
+  const textSplitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
+  const chunks = await textSplitter.splitDocuments(docs);
+
+  const embeddingInfo = await getModelInfo({
+    model: source.embedding,
+    prisma,
+    type: "embedding",
+  });
+
+  if (!embeddingInfo) {
+    throw new Error("Embedding not found. Please verify the embedding id");
+  }
+
+  await DialoqbaseVectorStore.fromDocuments(
+    chunks,
+    embeddings(
+      embeddingInfo.model_provider!.toLowerCase(),
+      embeddingInfo.model_id,
+      {
+        ...((embeddingInfo?.config as any) || {}),
+        apiKey: source.bot_model_api_key,
+      }
+    ),
+    {
+      botId: source.botId,
+      sourceId: source.id,
+    }
+  );
+  await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, chunks);
 };

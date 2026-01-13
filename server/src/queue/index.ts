@@ -46,6 +46,8 @@ export default async function queueHandler(job: SandboxedJob) {
         source.chunkSize = chunkSize;
         source.usePuppeteerFetch = usePuppeteerFetch;
         source.bot_model_api_key = bot?.bot_model_api_key || undefined;
+        source.bot_user_id = bot?.user_id || undefined;
+        source.bot_name = bot?.name || undefined;
         switch (source.type.toLowerCase()) {
           case "website":
             await websiteQueueController(source, prisma);

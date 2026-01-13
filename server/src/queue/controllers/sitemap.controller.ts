@@ -57,6 +57,9 @@ export const sitemapQueueController = async (source: QSource) => {
           embedding: source.embedding,
           chunkSize: source.chunkSize,
           chunkOverlap: source.chunkOverlap,
+          bot_model_api_key: source.bot_model_api_key,
+          bot_user_id: source.bot_user_id,
+          bot_name: source.bot_name,
         },
         prisma
       );

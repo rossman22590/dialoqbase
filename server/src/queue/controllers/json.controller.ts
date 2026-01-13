@@ -5,6 +5,7 @@ import { embeddings } from "../../utils/embeddings";
 import { PrismaClient } from "@prisma/client";
 import { getModelInfo } from "../../utils/get-model-info";
 import * as fs from "fs/promises"
+import { recordEmbeddingUsage } from "../usage";
 
 export const jsonQueueController = async (
     source: QSource,
@@ -52,4 +53,5 @@ export const jsonQueueController = async (
             sourceId: source.id,
         }
     );
+    await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, chunks);
 };

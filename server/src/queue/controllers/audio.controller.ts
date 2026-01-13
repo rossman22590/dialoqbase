@@ -6,6 +6,7 @@ import { DialoqbaseAudioVideoLoader } from "../../loader/audio-video";
 import { convertMp3ToWave } from "../../utils/ffmpeg";
 import { PrismaClient } from "@prisma/client";
 import { getModelInfo } from "../../utils/get-model-info";
+import { recordEmbeddingUsage } from "../usage";
 
 export const audioQueueController = async (
   source: QSource,
@@ -48,4 +49,5 @@ export const audioQueueController = async (
       sourceId: source.id,
     }
   );
+  await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, chunks);
 };

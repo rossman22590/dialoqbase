@@ -6,6 +6,7 @@ import { embeddings } from "../../utils/embeddings";
 import { DialoqbasePDFLoader } from "../../loader/pdf";
 import { PrismaClient } from "@prisma/client";
 import { getModelInfo } from "../../utils/get-model-info";
+import { recordEmbeddingUsage } from "../usage";
 
 export const pdfQueueController = async (
   source: QSource,
@@ -45,4 +46,5 @@ export const pdfQueueController = async (
       sourceId: source.id,
     }
   );
+  await recordEmbeddingUsage(prisma, source, embeddingInfo.model_id, chunks);
 };
