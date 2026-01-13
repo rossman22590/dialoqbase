@@ -10,7 +10,7 @@ import { createChain, groupMessagesByConversation } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
 import { nextTick } from "../../utils/nextTick";
 import { jwtBotVerify } from "../../utils/jwt";
-import { COST_MULTIPLIER, MODEL_PRICING } from "../../utils/pricing";
+import { COST_MULTIPLIER, MIN_CHAT_COST, MODEL_PRICING } from "../../utils/pricing";
 import { countTokens } from "../../utils/tokenizer";
 
 export const chatRequestHandler = async (
@@ -322,7 +322,7 @@ export const chatRequestHandler = async (
         (Number(pricing.input) * inputTokens) / 1000000 +
         (Number(pricing.output) * outputTokens) / 1000000 +
         Number(pricing.request ?? 0);
-      const cost = baseCost * COST_MULTIPLIER;
+      const cost = Math.max(baseCost * COST_MULTIPLIER, MIN_CHAT_COST);
 
       if (!usesOwnKey) {
         await request.server.prisma.userCredit.update({
@@ -805,7 +805,7 @@ export const chatRequestStreamHandler = async (
         (Number(pricing.input) * inputTokens) / 1000000 +
         (Number(pricing.output) * outputTokens) / 1000000 +
         Number(pricing.request ?? 0);
-      const cost = baseCost * COST_MULTIPLIER;
+      const cost = Math.max(baseCost * COST_MULTIPLIER, MIN_CHAT_COST);
 
       if (!usesOwnKey) {
         await request.server.prisma.userCredit.update({

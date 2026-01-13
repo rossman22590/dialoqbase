@@ -1,4 +1,6 @@
-export const COST_MULTIPLIER = 12.5;
+export const COST_MULTIPLIER = 125;
+export const MIN_CHAT_COST = 0.01;
+export const MIN_EMBEDDING_COST = 0.001;
 
 export const MODEL_PRICING = {
     // OpenAI
@@ -65,5 +67,6 @@ export const calculateEmbeddingCost = (modelId: string, tokens: number) => {
         EMBEDDING_PRICING[normalized] ||
         EMBEDDING_PRICING.default;
     const baseCost = (Number(pricing.input) * tokens) / 1000000;
-    return baseCost * COST_MULTIPLIER;
+    const cost = baseCost * COST_MULTIPLIER;
+    return Math.max(cost, MIN_EMBEDDING_COST);
 };
