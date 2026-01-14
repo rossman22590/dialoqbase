@@ -83,7 +83,15 @@ export function createChatWidget(scriptElement: HTMLScriptElement): void {
   let chatbotUrl: string = scriptElement.getAttribute(
     "data-chat-url"
   ) as string;
+  let chatBgColor = scriptElement.getAttribute("data-widget-msg-bg-color");
+  let chatTextColor = scriptElement.getAttribute("data-widget-msg-text-color");
   let iframeSource: string = `${chatbotUrl}?mode=iframe`;
+  if (chatBgColor) {
+    iframeSource += `&bot_bg_color=${encodeURIComponent(chatBgColor)}`;
+  }
+  if (chatTextColor) {
+    iframeSource += `&bot_text_color=${encodeURIComponent(chatTextColor)}`;
+  }
   iframe.src = iframeSource;
   document.body.appendChild(widgetContainer);
 
@@ -97,7 +105,7 @@ export function createChatWidget(scriptElement: HTMLScriptElement): void {
       iframeStyle.top = "0";
       iframeStyle.width = "100%";
       iframeStyle.height = "100%";
-      
+
     } else {
       widgetContainerStyle.width = "100%";
       widgetContainerStyle.height = "100%";

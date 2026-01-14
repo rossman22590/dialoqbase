@@ -35,7 +35,20 @@ function App() {
     ["getBotStyle"],
     async () => {
       const response = await axios.get(`${getUrl().split("?")[0]}/style`);
-      return response.data as BotStyle;
+      const res = response.data as BotStyle;
+      if (params.bot_bg_color) {
+        res.data.chat_bot_bubble_style = {
+          ...res.data.chat_bot_bubble_style,
+          background_color: params.bot_bg_color,
+        };
+      }
+      if (params.bot_text_color) {
+        res.data.chat_bot_bubble_style = {
+          ...res.data.chat_bot_bubble_style,
+          text_color: params.bot_text_color,
+        };
+      }
+      return res;
     },
     {
       refetchOnWindowFocus: false,

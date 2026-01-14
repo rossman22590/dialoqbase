@@ -14,6 +14,8 @@ export function EmbedBoardScript({
   const [from] = Form.useForm();
 
   const widgetBtnColor = Form.useWatch("data-widget-btn-color", from);
+  const widgetMsgBgColor = Form.useWatch("data-widget-msg-bg-color", from);
+  const widgetMsgTextColor = Form.useWatch("data-widget-msg-text-color", from);
   const widgetPosition = Form.useWatch("data-btn-position", from);
   const widgetIcon = Form.useWatch("data-widget-icon", from);
   //content={`<script src="${hostUrl}/chat.min.js" data-chat-url="${hostUrl}/bot/${public_id}" data-btn-position="bottom-right" defer></script>`}
@@ -31,6 +33,8 @@ export function EmbedBoardScript({
           initialValues={{
             "data-btn-position": "bottom-right",
             "data-widget-btn-color": "#9b59b6",
+            "data-widget-msg-bg-color": "#f3f4f6",
+            "data-widget-msg-text-color": "#000000",
           }}
           layout="vertical"
         >
@@ -69,6 +73,36 @@ export function EmbedBoardScript({
               }
             />
           </Form.Item>
+
+          <Form.Item
+            name="data-widget-msg-bg-color"
+            label="Chat Bubble Background Color"
+            tooltip="This color will be used for the bot chat bubble background color"
+          >
+            <DbColorPicker
+              format="hex"
+              pickedColor={
+                typeof widgetMsgBgColor === "string"
+                  ? widgetMsgBgColor
+                  : `#${widgetMsgBgColor?.toHex()}`
+              }
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="data-widget-msg-text-color"
+            label="Chat Bubble Text Color"
+            tooltip="This color will be used for the bot chat bubble text color"
+          >
+            <DbColorPicker
+              format="hex"
+              pickedColor={
+                typeof widgetMsgTextColor === "string"
+                  ? widgetMsgTextColor
+                  : `#${widgetMsgTextColor?.toHex()}`
+              }
+            />
+          </Form.Item>
         </Form>
 
         <div>
@@ -91,11 +125,18 @@ export function EmbedBoardScript({
     src="${hostUrl}/chat.min.js" 
     data-chat-url="${hostUrl}/bot/${public_id}" 
     data-btn-position="${widgetPosition}"
-    data-widget-btn-color="${
-      typeof widgetBtnColor === "string"
-        ? widgetBtnColor
-        : `#${widgetBtnColor?.toHex()}`
-    }"${widgetIcon ? `\n    data-widget-icon="${widgetIcon}"` : ""}
+    data-widget-btn-color="${typeof widgetBtnColor === "string"
+                  ? widgetBtnColor
+                  : `#${widgetBtnColor?.toHex()}`
+                }"
+    data-widget-msg-bg-color="${typeof widgetMsgBgColor === "string"
+                  ? widgetMsgBgColor
+                  : `#${widgetMsgBgColor?.toHex()}`
+                }"
+    data-widget-msg-text-color="${typeof widgetMsgTextColor === "string"
+                  ? widgetMsgTextColor
+                  : `#${widgetMsgTextColor?.toHex()}`
+                }"${widgetIcon ? `\n    data-widget-icon="${widgetIcon}"` : ""}
     defer>
 </script>`}
             </SyntaxHighlighter>
@@ -108,13 +149,17 @@ export function EmbedBoardScript({
           </div>
           <span className="flex justify-end mt-4">
             <CopyBtn
-              value={`<script src="${hostUrl}/chat.min.js" data-chat-url="${hostUrl}/bot/${public_id}" data-btn-position="${widgetPosition}" data-widget-btn-color="${
-                typeof widgetBtnColor === "string"
+              value={`<script src="${hostUrl}/chat.min.js" data-chat-url="${hostUrl}/bot/${public_id}" data-btn-position="${widgetPosition}" data-widget-btn-color="${typeof widgetBtnColor === "string"
                   ? widgetBtnColor
                   : `#${widgetBtnColor?.toHex()}`
-              } "${
-                widgetIcon ? `data-widget-icon="${widgetIcon}"` : ""
-              } defer> </script>`}
+                }" data-widget-msg-bg-color="${typeof widgetMsgBgColor === "string"
+                  ? widgetMsgBgColor
+                  : `#${widgetMsgBgColor?.toHex()}`
+                }" data-widget-msg-text-color="${typeof widgetMsgTextColor === "string"
+                  ? widgetMsgTextColor
+                  : `#${widgetMsgTextColor?.toHex()}`
+                }" ${widgetIcon ? `data-widget-icon="${widgetIcon}"` : ""
+                } defer> </script>`}
               className="border border-gray-300 dark:border-gray-700 dark:text-white dark:hover:bg-[#333030] dark:focus:ring-gray-900 rounded-md dark:bg-[#171717]"
             />
           </span>
