@@ -31,30 +31,40 @@ function App() {
     }
   });
 
-  const { data: botStyle, status } = useQuery(
+  const { data: botStyleResponse, status } = useQuery(
     ["getBotStyle"],
     async () => {
       const response = await axios.get(`${getUrl().split("?")[0]}/style`);
-      const res = response.data as BotStyle;
-      if (params.bot_bg_color) {
-        res.data.chat_bot_bubble_style = {
-          ...res.data.chat_bot_bubble_style,
-          background_color: params.bot_bg_color,
-        };
-      }
-      if (params.bot_text_color) {
-        res.data.chat_bot_bubble_style = {
-          ...res.data.chat_bot_bubble_style,
-          text_color: params.bot_text_color,
-        };
-      }
-      return res;
+      return response.data as BotStyle;
     },
     {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
     }
   );
+
+  const botStyle = React.useMemo(() => {
+    if (!botStyleResponse || !botStyleResponse.data) return undefined;
+    const res = JSON.parse(JSON.stringify(botStyleResponse)) as BotStyle;
+
+    // Bot Style Overrides
+    if (params.bot_bg_color) {
+      res.data.chat_bot_bubble_style = {
+        ...(res.data.chat_bot_bubble_style || {}),
+        background_color: params.bot_bg_color,
+      };
+    }
+    if (params.bot_text_color) {
+      res.data.chat_bot_bubble_style = {
+        ...(res.data.chat_bot_bubble_style || {}),
+        text_color: params.bot_text_color,
+      };
+    }
+
+    // Human Style Overrides (Apply same colors if desired, or keep separate if we add more params)
+    // For now, let's just make the application more robust
+    return res;
+  }, [botStyleResponse, params.bot_bg_color, params.bot_text_color]);
 
   React.useEffect(() => {
     if (botStyle?.data && messages.length === 0) {
@@ -66,7 +76,6 @@ function App() {
         setMessages(JSON.parse(localMessages));
       } else {
         setMessages([
-          ...messages,
           {
             isBot: true,
             message: botStyle.data.first_message,
@@ -88,6 +97,10 @@ function App() {
         there was an error occured
       </div>
     );
+  }
+
+  if (!botStyle) {
+    return <Loader />;
   }
 
   if (botStyle?.data?.is_protected && !isAuthenticated) {

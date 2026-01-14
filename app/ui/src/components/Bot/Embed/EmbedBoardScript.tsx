@@ -107,6 +107,7 @@ export function EmbedBoardScript({
 
         <div>
           <div className="flex-grow">
+            {/* @ts-ignore */}
             <SyntaxHighlighter
               language="html"
               customStyle={{
@@ -150,8 +151,8 @@ export function EmbedBoardScript({
           <span className="flex justify-end mt-4">
             <CopyBtn
               value={`<script src="${hostUrl}/chat.min.js" data-chat-url="${hostUrl}/bot/${public_id}" data-btn-position="${widgetPosition}" data-widget-btn-color="${typeof widgetBtnColor === "string"
-                  ? widgetBtnColor
-                  : `#${widgetBtnColor?.toHex()}`
+                ? widgetBtnColor
+                : `#${widgetBtnColor?.toHex()}`
                 }" data-widget-msg-bg-color="${typeof widgetMsgBgColor === "string"
                   ? widgetMsgBgColor
                   : `#${widgetMsgBgColor?.toHex()}`
