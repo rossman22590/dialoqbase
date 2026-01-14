@@ -61,10 +61,22 @@ function App() {
       };
     }
 
-    // Human Style Overrides (Apply same colors if desired, or keep separate if we add more params)
-    // For now, let's just make the application more robust
+    // Human Style Overrides
+    if (params.user_bg_color) {
+      res.data.chat_human_bubble_style = {
+        ...(res.data.chat_human_bubble_style || {}),
+        background_color: params.user_bg_color,
+      };
+    }
+    if (params.user_text_color) {
+      res.data.chat_human_bubble_style = {
+        ...(res.data.chat_human_bubble_style || {}),
+        text_color: params.user_text_color,
+      };
+    }
+
     return res;
-  }, [botStyleResponse, params.bot_bg_color, params.bot_text_color]);
+  }, [botStyleResponse, params.bot_bg_color, params.bot_text_color, params.user_bg_color, params.user_text_color]);
 
   React.useEffect(() => {
     if (botStyle?.data && messages.length === 0) {

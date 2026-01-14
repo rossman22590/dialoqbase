@@ -16,6 +16,8 @@ export function EmbedBoardNextjs({
     const widgetBtnColor = Form.useWatch("data-widget-btn-color", from);
     const widgetMsgBgColor = Form.useWatch("data-widget-msg-bg-color", from);
     const widgetMsgTextColor = Form.useWatch("data-widget-msg-text-color", from);
+    const userMsgBgColor = Form.useWatch("data-widget-user-bg-color", from);
+    const userMsgTextColor = Form.useWatch("data-widget-user-text-color", from);
     const widgetPosition = Form.useWatch("data-btn-position", from);
     const widgetIcon = Form.useWatch("data-widget-icon", from);
 
@@ -31,6 +33,14 @@ export function EmbedBoardNextjs({
         ? widgetMsgTextColor
         : `#${widgetMsgTextColor?.toHex()}`;
 
+    const userBgColorHex = typeof userMsgBgColor === "string"
+        ? userMsgBgColor
+        : `#${userMsgBgColor?.toHex()}`;
+
+    const userTextColorHex = typeof userMsgTextColor === "string"
+        ? userMsgTextColor
+        : `#${userMsgTextColor?.toHex()}`;
+
     const nextjsCode = `import Script from 'next/script';
 
 const ChatBot = () => {
@@ -42,7 +52,9 @@ const ChatBot = () => {
         data-btn-position="${widgetPosition}"
         data-widget-btn-color="${btnColorHex}"
         data-widget-msg-bg-color="${msgBgColorHex}"
-        data-widget-msg-text-color="${msgTextColorHex}"${widgetIcon ? `\n        data-widget-icon="${widgetIcon}"` : ""}
+        data-widget-msg-text-color="${msgTextColorHex}"
+        data-widget-user-bg-color="${userBgColorHex}"
+        data-widget-user-text-color="${userTextColorHex}"${widgetIcon ? `\n        data-widget-icon="${widgetIcon}"` : ""}
         defer
       />
     </>
@@ -67,6 +79,8 @@ export default ChatBot;`;
                         "data-widget-btn-color": "#9b59b6",
                         "data-widget-msg-bg-color": "#f3f4f6",
                         "data-widget-msg-text-color": "#000000",
+                        "data-widget-user-bg-color": "#3b82f6",
+                        "data-widget-user-text-color": "#ffffff",
                     }}
                     layout="vertical"
                 >
@@ -115,12 +129,34 @@ export default ChatBot;`;
 
                     <Form.Item
                         name="data-widget-msg-text-color"
-                        label="Chat Bubble Text Color"
+                        label="AI Chat Bubble Text Color"
                         tooltip="This color will be used for the bot chat bubble text color"
                     >
                         <DbColorPicker
                             format="hex"
                             pickedColor={msgTextColorHex}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="data-widget-user-bg-color"
+                        label="User Chat Bubble Background Color"
+                        tooltip="This color will be used for the user chat bubble background color"
+                    >
+                        <DbColorPicker
+                            format="hex"
+                            pickedColor={userBgColorHex}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="data-widget-user-text-color"
+                        label="User Chat Bubble Text Color"
+                        tooltip="This color will be used for the user chat bubble text color"
+                    >
+                        <DbColorPicker
+                            format="hex"
+                            pickedColor={userTextColorHex}
                         />
                     </Form.Item>
                 </Form>

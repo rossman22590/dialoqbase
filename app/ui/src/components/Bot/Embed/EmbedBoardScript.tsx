@@ -16,6 +16,8 @@ export function EmbedBoardScript({
   const widgetBtnColor = Form.useWatch("data-widget-btn-color", from);
   const widgetMsgBgColor = Form.useWatch("data-widget-msg-bg-color", from);
   const widgetMsgTextColor = Form.useWatch("data-widget-msg-text-color", from);
+  const userMsgBgColor = Form.useWatch("data-widget-user-bg-color", from);
+  const userMsgTextColor = Form.useWatch("data-widget-user-text-color", from);
   const widgetPosition = Form.useWatch("data-btn-position", from);
   const widgetIcon = Form.useWatch("data-widget-icon", from);
   //content={`<script src="${hostUrl}/chat.min.js" data-chat-url="${hostUrl}/bot/${public_id}" data-btn-position="bottom-right" defer></script>`}
@@ -35,6 +37,8 @@ export function EmbedBoardScript({
             "data-widget-btn-color": "#9b59b6",
             "data-widget-msg-bg-color": "#f3f4f6",
             "data-widget-msg-text-color": "#000000",
+            "data-widget-user-bg-color": "#3b82f6",
+            "data-widget-user-text-color": "#ffffff",
           }}
           layout="vertical"
         >
@@ -91,7 +95,7 @@ export function EmbedBoardScript({
 
           <Form.Item
             name="data-widget-msg-text-color"
-            label="Chat Bubble Text Color"
+            label="AI Chat Bubble Text Color"
             tooltip="This color will be used for the bot chat bubble text color"
           >
             <DbColorPicker
@@ -100,6 +104,36 @@ export function EmbedBoardScript({
                 typeof widgetMsgTextColor === "string"
                   ? widgetMsgTextColor
                   : `#${widgetMsgTextColor?.toHex()}`
+              }
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="data-widget-user-bg-color"
+            label="User Chat Bubble Background Color"
+            tooltip="This color will be used for the user chat bubble background color"
+          >
+            <DbColorPicker
+              format="hex"
+              pickedColor={
+                typeof userMsgBgColor === "string"
+                  ? userMsgBgColor
+                  : `#${userMsgBgColor?.toHex()}`
+              }
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="data-widget-user-text-color"
+            label="User Chat Bubble Text Color"
+            tooltip="This color will be used for the user chat bubble text color"
+          >
+            <DbColorPicker
+              format="hex"
+              pickedColor={
+                typeof userMsgTextColor === "string"
+                  ? userMsgTextColor
+                  : `#${userMsgTextColor?.toHex()}`
               }
             />
           </Form.Item>
@@ -137,6 +171,14 @@ export function EmbedBoardScript({
     data-widget-msg-text-color="${typeof widgetMsgTextColor === "string"
                   ? widgetMsgTextColor
                   : `#${widgetMsgTextColor?.toHex()}`
+                }"
+    data-widget-user-bg-color="${typeof userMsgBgColor === "string"
+                  ? userMsgBgColor
+                  : `#${userMsgBgColor?.toHex()}`
+                }"
+    data-widget-user-text-color="${typeof userMsgTextColor === "string"
+                  ? userMsgTextColor
+                  : `#${userMsgTextColor?.toHex()}`
                 }"${widgetIcon ? `\n    data-widget-icon="${widgetIcon}"` : ""}
     defer>
 </script>`}
@@ -159,6 +201,12 @@ export function EmbedBoardScript({
                 }" data-widget-msg-text-color="${typeof widgetMsgTextColor === "string"
                   ? widgetMsgTextColor
                   : `#${widgetMsgTextColor?.toHex()}`
+                }" data-widget-user-bg-color="${typeof userMsgBgColor === "string"
+                  ? userMsgBgColor
+                  : `#${userMsgBgColor?.toHex()}`
+                }" data-widget-user-text-color="${typeof userMsgTextColor === "string"
+                  ? userMsgTextColor
+                  : `#${userMsgTextColor?.toHex()}`
                 }" ${widgetIcon ? `data-widget-icon="${widgetIcon}"` : ""
                 } defer> </script>`}
               className="border border-gray-300 dark:border-gray-700 dark:text-white dark:hover:bg-[#333030] dark:focus:ring-gray-900 rounded-md dark:bg-[#171717]"
