@@ -13,7 +13,13 @@ export const getUserCreditsHandler = async (
         },
     });
 
+    const balance = userCredit ? Number(userCredit.balance) : 0;
+
     return {
-        balance: userCredit ? Number(userCredit.balance) : 0,
+        balance: balance,
+        total: balance, // Set budget to whatever they currently have
     };
 };
+
+
+

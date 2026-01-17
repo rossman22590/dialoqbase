@@ -187,26 +187,32 @@ export default function UsageRoot() {
                         <div className="flex flex-col items-center">
                             <div className="relative w-full h-12 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-700 mb-2 border border-gray-300 dark:border-gray-600">
                                 <div
-                                    className="h-full bg-green-500 transition-all duration-500 ease-out flex items-center justify-center text-white font-bold"
+                                    className="h-full bg-blue-500 transition-all duration-500 ease-out flex items-center justify-center text-white font-bold text-xs"
                                     style={{
-                                        width: `${Math.min(
-                                            ((credits?.balance || 0) / 100) * 100,
-                                            100
-                                        )}%`,
-                                        minWidth: "20%",
+                                        width: `${credits?.total > 0
+                                                ? Math.min(
+                                                    ((credits.total - (credits?.balance || 0)) /
+                                                        credits.total) *
+                                                    100,
+                                                    100
+                                                )
+                                                : 0
+                                            }%`,
                                     }}
                                 >
-                                    ${Number(credits?.balance || 0).toFixed(4)}
+                                    {credits?.total > 0
+                                        ? `${(((credits.total - (credits?.balance || 0)) / credits.total) * 100).toFixed(1)}% Used`
+                                        : "0% Used"}
                                 </div>
                             </div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                Available Credits
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium">
+                                ${Number(credits?.balance || 0).toFixed(4)} Remaining
                             </p>
                         </div>
                     )}
                 </div>
 
-            {/* Usage Chart */}
+                {/* Usage Chart */}
                 <div className="bg-white dark:bg-[#171717] overflow-hidden shadow rounded-lg border dark:border-gray-700 p-6 col-span-2">
                     <Bar options={options} data={chartData} />
                 </div>
