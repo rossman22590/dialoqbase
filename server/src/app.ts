@@ -15,6 +15,32 @@ import { Worker } from "bullmq";
 import { parseRedisUrl } from "./utils/redis";
 import { CronJob } from 'cron';
 import { processDatasourceCron } from "./cron/index";
+import Redis from "ioredis";
+
+class RedisSessionStore {
+  constructor(private redis: Redis) { }
+  get(sessionId: string, cb: any) {
+    this.redis.get(`session:${sessionId}`, (err, data) => {
+      if (err) return cb(err);
+      if (!data) return cb(null, null);
+      try {
+        cb(null, JSON.parse(data));
+      } catch (e) {
+        cb(e);
+      }
+    });
+  }
+  set(sessionId: string, session: any, cb: any) {
+    this.redis.set(`session:${sessionId}`, JSON.stringify(session), "EX", 86400, (err) => {
+      cb(err);
+    });
+  }
+  destroy(sessionId: string, cb: any) {
+    this.redis.del(`session:${sessionId}`, (err) => {
+      cb(err);
+    });
+  }
+}
 
 declare module "fastify" {
   interface Session {
@@ -68,12 +94,16 @@ const app: FastifyPluginAsync<AppOptions> = async (
     preCompressed: true,
   });
 
+  const redis_url = process.env.DB_REDIS_URL || process.env.REDIS_URL;
+  const redis = new Redis(redis_url!);
+
   fastify.register(fastifyCookie);
   fastify.register(fastifySession, {
     secret: getSessionSecret(),
     cookie: {
       secure: isCookieSecure(),
     },
+    store: new RedisSessionStore(redis),
   });
 
   await fastify.register(import("fastify-raw-body"), {
@@ -93,7 +123,7 @@ if (!redis_url) {
 const { host, port, password } = parseRedisUrl(redis_url);
 const path = join(__dirname, "./queue/index.js");
 const workerUrl = pathToFileURL(path);
-const concurrency = parseInt(process.env.DB_QUEUE_CONCURRENCY || "1");
+const concurrency = parseInt(process.env.DB_QUEUE_CONCURRENCY || "5");
 const workerThreads = process.env.DB_QUEUE_THREADS || "false";
 const worker = new Worker("vector", workerUrl, {
   connection: {

@@ -95,11 +95,11 @@ export const deleteBotByIdHandler = async (
     },
   });
 
-  botIntegrations.forEach(async (botIntegration) => {
+  for (const botIntegration of botIntegrations) {
     if (botIntegration.provider === "telegram") {
       await TelegramBot.disconnect(botIntegration.identifier);
     }
-  });
+  }
 
   await prisma.$transaction([
     prisma.botIntegration.deleteMany({

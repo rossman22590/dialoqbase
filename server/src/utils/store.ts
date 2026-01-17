@@ -44,13 +44,13 @@ export class DialoqbaseVectorStore extends VectorStore {
     }));
 
     try {
-      rows.forEach(async (row) => {
+      for (const row of rows) {
         if (row?.embedding) {
           const vector = `[${row.embedding.join(",")}]`;
           const content = row?.content.replace(/\x00/g, "").trim();
           await prisma.$executeRaw`INSERT INTO "BotDocument" ("content", "embedding", "metadata", "botId", "sourceId") VALUES (${content}, ${vector}::vector, ${row.metadata}, ${row.botId}, ${row.sourceId})`;
         }
-      });
+      }
     } catch (e) {
       console.log(e);
       throw e;

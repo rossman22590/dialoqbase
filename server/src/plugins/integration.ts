@@ -12,12 +12,12 @@ const integrationPlugin: FastifyPluginAsync = fp(async (server, options) => {
     where: {
       is_pause: false,
     },
-  include: {
-    Bot: true
-  }
+    include: {
+      Bot: true
+    }
   });
 
-  pendingProcess.forEach(async (process) => {
+  for (const process of pendingProcess) {
     // make switch later
     if (process.provider === "telegram") {
       await TelegramBot.connect(
@@ -40,16 +40,7 @@ const integrationPlugin: FastifyPluginAsync = fp(async (server, options) => {
         process.whatsapp_access_token!,
       )
     }
-
-    // else if (process.provider === "slack") {
-    //   await SlackBot.connect(
-    //     process.identifier,
-    //     process.slack_auth_token!,
-    //     process.slack_signing_secret!,
-    //     process.slack_app_token!,
-    //   )
-    // }
-  });
+  }
 });
 
 export default integrationPlugin;

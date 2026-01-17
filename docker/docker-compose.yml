@@ -40,8 +40,8 @@ services:
     volumes:
       - .redis:/data
   
-  searxng:
-    image: searxng/searxng
-    volumes:
-      - ./searxng:/etc/searxng:rw
-    restart: unless-stopped
+  # searxng:
+  #   image: searxng/searxng
+  #   volumes:
+  #     - ./searxng:/etc/searxng:rw
+  #   restart: unless-stopped
