@@ -189,12 +189,9 @@ export default function UsageRoot() {
                         <Skeleton active paragraph={{ rows: 2 }} />
                     ) : (
                         <div className="flex flex-col w-full">
-                            <div className="flex justify-between items-end mb-2">
+                            <div className="mb-2">
                                 <span className="text-2xl font-bold text-gray-900 dark:text-white">
                                     ${Number(credits?.balance || 0).toFixed(4)}
-                                </span>
-                                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                    Remaining
                                 </span>
                             </div>
 
@@ -216,7 +213,11 @@ export default function UsageRoot() {
                             >
                                 Buy Credits
                             </Button>
+                            <p className="text-center text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 mt-3 font-bold">
+                                1 Credit = $1.00 USD • Top up when balance hits 0
+                            </p>
                         </div>
+
 
 
                     )}
