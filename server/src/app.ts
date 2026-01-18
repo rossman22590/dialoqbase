@@ -112,7 +112,7 @@ const runCrons = async () => {
 }
 
 const job = new CronJob(
-  process.env.DB_CRON_TIME || '0 0 0 * * *',
+  process.env.DB_CRON_TIME || '0 0 0 1 * *',
   runCrons,
   null,
   true,
