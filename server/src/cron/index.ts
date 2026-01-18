@@ -74,7 +74,7 @@ async function autoAddMonthlyCredits() {
         startOfMonth.setDate(1);
         startOfMonth.setHours(0, 0, 0, 0);
 
-        console.log("[CRON] Checking for monthly credits");
+        console.log("[CRON] Checking for MONTHLY credits (20 credits per month)");
 
         const users = await prisma.user.findMany({
             where: {
@@ -83,6 +83,7 @@ async function autoAddMonthlyCredits() {
         });
 
         for (const user of users) {
+            // Check if user already received monthly credits this month
             const existing = await prisma.userTransaction.findFirst({
                 where: {
                     user_id: user.user_id,
@@ -93,6 +94,7 @@ async function autoAddMonthlyCredits() {
                 }
             });
 
+            // Only add if no monthly allowance was given this month
             if (!existing) {
                 await prisma.$transaction([
                     prisma.userCredit.upsert({
@@ -118,9 +120,13 @@ async function autoAddMonthlyCredits() {
                         }
                     })
                 ]);
-                console.log(`[CRON] Added 20 credits to user ${user.user_id}`);
+                console.log(`[CRON] Added 20 MONTHLY credits to user ${user.user_id}`);
+            } else {
+                console.log(`[CRON] User ${user.user_id} already received monthly credits this month - skipping`);
             }
         }
+
+        console.log("[CRON] Finished processing monthly credits");
 
     } catch (error) {
         console.error(error);

@@ -111,6 +111,9 @@ const runCrons = async () => {
   await autoAddMonthlyCredits();
 }
 
+// CRITICAL: Run on 1st of each month at midnight (MONTHLY, not daily!)
+// Cron format: second minute hour day-of-month month day-of-week
+// '0 0 0 1 * *' = 00:00:00 on the 1st day of every month
 const job = new CronJob(
   process.env.DB_CRON_TIME || '0 0 0 1 * *',
   runCrons,
