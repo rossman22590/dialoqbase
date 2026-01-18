@@ -1,6 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton, Table, Tag } from "antd";
+import { Skeleton, Table, Tag, Tooltip as AntdTooltip, Progress } from "antd";
 import api from "../../services/api";
 import {
     Chart as ChartJS,
@@ -36,6 +36,15 @@ export default function UsageRoot() {
             return response.data;
         }
     );
+
+    const usedPercentage = useMemo(() => {
+        if (!credits || !credits.total) return 0;
+        return Math.min(
+            ((credits.total - (credits?.balance || 0)) / credits.total) * 100,
+            100
+        );
+    }, [credits]);
+
 
     const { data: transactions, isLoading: isTransactionsLoading } = useQuery(
         ["getTransactions", botId],
@@ -184,31 +193,38 @@ export default function UsageRoot() {
                     {isCreditsLoading ? (
                         <Skeleton active paragraph={{ rows: 2 }} />
                     ) : (
-                        <div className="flex flex-col items-center">
-                            <div className="relative w-full h-12 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-700 mb-2 border border-gray-300 dark:border-gray-600">
-                                <div
-                                    className="h-full bg-blue-500 transition-all duration-500 ease-out flex items-center justify-center text-white font-bold text-xs"
-                                    style={{
-                                        width: `${credits?.total > 0
-                                                ? Math.min(
-                                                    ((credits.total - (credits?.balance || 0)) /
-                                                        credits.total) *
-                                                    100,
-                                                    100
-                                                )
-                                                : 0
-                                            }%`,
-                                    }}
-                                >
-                                    {credits?.total > 0
-                                        ? `${(((credits.total - (credits?.balance || 0)) / credits.total) * 100).toFixed(1)}% Used`
-                                        : "0% Used"}
-                                </div>
+                        <div className="flex flex-col w-full">
+                            <div className="flex justify-between items-end mb-2">
+                                <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                                    ${Number(credits?.balance || 0).toFixed(4)}
+                                </span>
+                                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Remaining
+                                </span>
                             </div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium">
-                                ${Number(credits?.balance || 0).toFixed(4)} Remaining
-                            </p>
+
+                            <AntdTooltip title={`${usedPercentage.toFixed(2)}% of your credit limit used`}>
+                                <div className="cursor-help transition-transform hover:scale-[1.01]">
+                                    <Progress
+                                        percent={usedPercentage}
+                                        showInfo={false}
+                                        strokeColor={
+                                            usedPercentage < 30 ? "#10b981" :
+                                                usedPercentage < 70 ? "#f59e0b" : "#ef4444"
+                                        }
+                                        trailColor="rgba(0,0,0,0.05)"
+                                        strokeWidth={16}
+                                        className="mb-0"
+                                    />
+                                </div>
+                            </AntdTooltip>
+
+                            <div className="flex justify-between mt-3 text-[10px] uppercase tracking-wider font-bold text-gray-400">
+                                <span>Used: {usedPercentage.toFixed(1)}%</span>
+                                <span>Limit: ${Number(credits?.total || 50).toFixed(0)}</span>
+                            </div>
                         </div>
+
                     )}
                 </div>
 
