@@ -7,7 +7,7 @@ import {
   InputNumber,
   Row,
   Select,
-  Switch,
+  // Switch,
   Upload,
   message,
 } from "antd";
@@ -20,7 +20,7 @@ import {
 } from "@heroicons/react/24/outline";
 import React from "react";
 import { SpiderIcon } from "../Icons/SpiderIcon";
-import { GithubIcon } from "../Icons/GithubIcon";
+// import { GithubIcon } from "../Icons/GithubIcon";
 // import { YoutubeIcon } from "../Icons/YoutubeIcon";
 import { ApiIcon } from "../Icons/ApiIcon";
 import { SitemapIcon } from "../Icons/SitemapIcon";
@@ -255,67 +255,67 @@ export const BotForm = ({
         </>
       ),
     },
-    {
-      id: 6,
-      value: "github",
-      title: "GitHub",
-      icon: GithubIcon,
-      formComponent: (
-        <>
-          <Form.Item
-            name="content"
-            rules={[
-              {
-                required: true,
-                message: "Please enter the public github repo URL",
-              },
-              {
-                pattern: new RegExp(
-                  "^(https?://)?(www.)?github.com/([a-zA-Z0-9-]+)/([a-zA-Z0-9_-]+)(.git)?$"
-                ),
-                message: "Please enter a valid public github repo URL",
-              },
-            ]}
-          >
-            <Input type="url" placeholder="Enter the github repo URL" />
-          </Form.Item>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name={["options", "branch"]}
-                label="Branch"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input branch",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter the branch" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Private repo?" name={["options", "is_private"]}>
-                <Switch className="mr-2" />
-              </Form.Item>
-            </Col>
-          </Row>
+    // {
+    //   id: 6,
+    //   value: "github",
+    //   title: "GitHub",
+    //   icon: GithubIcon,
+    //   formComponent: (
+    //     <>
+    //       <Form.Item
+    //         name="content"
+    //         rules={[
+    //           {
+    //             required: true,
+    //             message: "Please enter the public github repo URL",
+    //           },
+    //           {
+    //             pattern: new RegExp(
+    //               "^(https?://)?(www.)?github.com/([a-zA-Z0-9-]+)/([a-zA-Z0-9_-]+)(.git)?$"
+    //             ),
+    //             message: "Please enter a valid public github repo URL",
+    //           },
+    //         ]}
+    //       >
+    //         <Input type="url" placeholder="Enter the github repo URL" />
+    //       </Form.Item>
+    //       <Row gutter={16}>
+    //         <Col span={12}>
+    //           <Form.Item
+    //             name={["options", "branch"]}
+    //             label="Branch"
+    //             rules={[
+    //               {
+    //                 required: true,
+    //                 message: "Please input branch",
+    //               },
+    //             ]}
+    //           >
+    //             <Input placeholder="Enter the branch" />
+    //           </Form.Item>
+    //         </Col>
+    //         <Col span={12}>
+    //           <Form.Item label="Private repo?" name={["options", "is_private"]}>
+    //             <Switch className="mr-2" />
+    //           </Form.Item>
+    //         </Col>
+    //       </Row>
 
-          <p className="text-sm text-gray-500">
-            If you find any issues, please report them on{" "}
-            <a
-              href={`https://myapps.ai`}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Support
-            </a>
-            .
-          </p>
-        </>
-      ),
-    },
+    //       <p className="text-sm text-gray-500">
+    //         If you find any issues, please report them on{" "}
+    //         <a
+    //           href={`https://myapps.ai`}
+    //           target="_blank"
+    //           rel="noreferrer"
+    //           className="font-medium text-indigo-600 hover:text-indigo-500"
+    //         >
+    //           Support
+    //         </a>
+    //         .
+    //       </p>
+    //     </>
+    //   ),
+    // },
     // {
     //   id: 7,
     //   value: "youtube",
