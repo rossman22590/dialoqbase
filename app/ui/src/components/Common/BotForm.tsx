@@ -21,7 +21,7 @@ import {
 import React from "react";
 import { SpiderIcon } from "../Icons/SpiderIcon";
 import { GithubIcon } from "../Icons/GithubIcon";
-import { YoutubeIcon } from "../Icons/YoutubeIcon";
+// import { YoutubeIcon } from "../Icons/YoutubeIcon";
 import { ApiIcon } from "../Icons/ApiIcon";
 import { SitemapIcon } from "../Icons/SitemapIcon";
 import { useQuery } from "@tanstack/react-query";
