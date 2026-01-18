@@ -20,6 +20,3 @@ export const getUserCreditsHandler = async (
         total: balance, // Set budget to whatever they currently have
     };
 };
-
-
-

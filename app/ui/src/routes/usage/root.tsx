@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton, Table, Tag, Tooltip as AntdTooltip, Progress } from "antd";
+import { Skeleton, Table, Tag, Button } from "antd";
+import { CreditCardIcon } from "@heroicons/react/24/outline";
 import api from "../../services/api";
 import {
     Chart as ChartJS,
@@ -37,13 +38,7 @@ export default function UsageRoot() {
         }
     );
 
-    const usedPercentage = useMemo(() => {
-        if (!credits || !credits.total) return 0;
-        return Math.min(
-            ((credits.total - (credits?.balance || 0)) / credits.total) * 100,
-            100
-        );
-    }, [credits]);
+
 
 
     const { data: transactions, isLoading: isTransactionsLoading } = useQuery(
@@ -203,27 +198,26 @@ export default function UsageRoot() {
                                 </span>
                             </div>
 
-                            <AntdTooltip title={`${usedPercentage.toFixed(2)}% of your credit limit used`}>
-                                <div className="cursor-help transition-transform hover:scale-[1.01]">
-                                    <Progress
-                                        percent={usedPercentage}
-                                        showInfo={false}
-                                        strokeColor={
-                                            usedPercentage < 30 ? "#10b981" :
-                                                usedPercentage < 70 ? "#f59e0b" : "#ef4444"
-                                        }
-                                        trailColor="rgba(0,0,0,0.05)"
-                                        strokeWidth={16}
-                                        className="mb-0"
-                                    />
-                                </div>
-                            </AntdTooltip>
 
-                            <div className="flex justify-between mt-3 text-[10px] uppercase tracking-wider font-bold text-gray-400">
-                                <span>Used: {usedPercentage.toFixed(1)}%</span>
-                                <span>Limit: ${Number(credits?.total || 50).toFixed(0)}</span>
-                            </div>
+
+                            <div className="mb-6" />
+
+
+                            <Button
+                                type="primary"
+                                block
+                                size="large"
+                                icon={<CreditCardIcon className="w-5 h-5" />}
+                                className="flex items-center justify-center gap-2 h-12 rounded-xl border-none font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300"
+                                style={{
+                                    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                                }}
+                                onClick={() => window.open("https://buy.stripe.com/aFa00cg8kbx9g8G7YUgjC0t", "_blank")}
+                            >
+                                Buy Credits
+                            </Button>
                         </div>
+
 
                     )}
                 </div>

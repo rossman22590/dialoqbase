@@ -67,4 +67,67 @@ async function processDatasourceCron() {
     }
 }
 
-export { processDatasourceCron }; 
+async function autoAddMonthlyCredits() {
+    try {
+        await prisma.$connect();
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        console.log("[CRON] Checking for monthly credits");
+
+        const users = await prisma.user.findMany({
+            where: {
+                isSuspended: false,
+            }
+        });
+
+        for (const user of users) {
+            const existing = await prisma.userTransaction.findFirst({
+                where: {
+                    user_id: user.user_id,
+                    type: "monthly_allowance",
+                    createdAt: {
+                        gte: startOfMonth
+                    }
+                }
+            });
+
+            if (!existing) {
+                await prisma.$transaction([
+                    prisma.userCredit.upsert({
+                        where: {
+                            user_id: user.user_id,
+                        },
+                        update: {
+                            balance: {
+                                increment: 20,
+                            },
+                        },
+                        create: {
+                            user_id: user.user_id,
+                            balance: 20,
+                        },
+                    }),
+                    prisma.userTransaction.create({
+                        data: {
+                            user_id: user.user_id,
+                            amount: 20.00,
+                            type: "monthly_allowance",
+                            description: "Monthly Credit Allowance"
+                        }
+                    })
+                ]);
+                console.log(`[CRON] Added 20 credits to user ${user.user_id}`);
+            }
+        }
+
+    } catch (error) {
+        console.error(error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+
+export { processDatasourceCron, autoAddMonthlyCredits }; 

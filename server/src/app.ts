@@ -14,7 +14,7 @@ import { pathToFileURL } from "url";
 import { Worker } from "bullmq";
 import { parseRedisUrl } from "./utils/redis";
 import { CronJob } from 'cron';
-import { processDatasourceCron } from "./cron/index";
+import { processDatasourceCron, autoAddMonthlyCredits } from "./cron/index";
 
 declare module "fastify" {
   interface Session {
@@ -106,9 +106,14 @@ const worker = new Worker("vector", workerUrl, {
   useWorkerThreads: workerThreads === "true",
 });
 
+const runCrons = async () => {
+  await processDatasourceCron();
+  await autoAddMonthlyCredits();
+}
+
 const job = new CronJob(
   process.env.DB_CRON_TIME || '0 0 0 * * *',
-  processDatasourceCron,
+  runCrons,
   null,
   true,
   process.env.DB_CRON_TIMEZONE
