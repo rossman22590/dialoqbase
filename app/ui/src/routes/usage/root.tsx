@@ -205,13 +205,13 @@ export default function UsageRoot() {
                                 block
                                 size="large"
                                 icon={<CreditCardIcon className="w-5 h-5" />}
-                                className="flex items-center justify-center gap-2 h-12 rounded-xl border-none font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300"
+                                className="flex items-center justify-center gap-2 h-12 rounded-xl border-none font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 !flex"
                                 style={{
                                     background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                                 }}
                                 onClick={() => window.open("https://buy.stripe.com/aFa00cg8kbx9g8G7YUgjC0t", "_blank")}
                             >
-                                Buy Credits
+                                <span>Buy Credits</span>
                             </Button>
                             <p className="text-center text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 mt-3 font-bold">
                                 1 Credit = $1.00 USD • Top up when balance hits 0
