@@ -1,6 +1,6 @@
-export const COST_MULTIPLIER = 250;
-export const MIN_CHAT_COST = 0.02;
-export const MIN_EMBEDDING_COST = 0.002;
+export const COST_MULTIPLIER = 500;
+export const MIN_CHAT_COST = 0.04;
+export const MIN_EMBEDDING_COST = 0.004;
 
 export const MODEL_PRICING = {
     // OpenAI
