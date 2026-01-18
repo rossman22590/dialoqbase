@@ -316,61 +316,61 @@ export const BotForm = ({
         </>
       ),
     },
-    {
-      id: 7,
-      value: "youtube",
-      title: "Youtube",
-      icon: YoutubeIcon,
-      formComponent: (
-        <>
-          <Form.Item
-            name="content"
-            rules={[
-              {
-                required: true,
-                message: "Please enter a valid youtube URL",
-              },
-              {
-                pattern: new RegExp(
-                  /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/
-                ),
-                message: "Please enter a valid youtube URL",
-              },
-            ]}
-          >
-            <Input
-              type="url"
-              size="large"
-              placeholder="Enter the youtube URL"
-            />
-          </Form.Item>
+    // {
+    //   id: 7,
+    //   value: "youtube",
+    //   title: "Youtube",
+    //   icon: YoutubeIcon,
+    //   formComponent: (
+    //     <>
+    //       <Form.Item
+    //         name="content"
+    //         rules={[
+    //           {
+    //             required: true,
+    //             message: "Please enter a valid youtube URL",
+    //           },
+    //           {
+    //             pattern: new RegExp(
+    //               /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/
+    //             ),
+    //             message: "Please enter a valid youtube URL",
+    //           },
+    //         ]}
+    //       >
+    //         <Input
+    //           type="url"
+    //           size="large"
+    //           placeholder="Enter the youtube URL"
+    //         />
+    //       </Form.Item>
 
-          <Form.Item
-            name={["options", "youtube_mode"]}
-            label="Youtube mode"
-            rules={[
-              {
-                required: true,
-                message: "Please select a youtube mode",
-              },
-            ]}
-          >
-            <Select
-              options={[
-                {
-                  label: "Transcribe using Whisper",
-                  value: "whisper",
-                },
-                {
-                  label: "Youtube Transcript",
-                  value: "transcript",
-                },
-              ]}
-            />
-          </Form.Item>
-        </>
-      ),
-    },
+    //       <Form.Item
+    //         name={["options", "youtube_mode"]}
+    //         label="Youtube mode"
+    //         rules={[
+    //           {
+    //             required: true,
+    //             message: "Please select a youtube mode",
+    //           },
+    //         ]}
+    //       >
+    //         <Select
+    //           options={[
+    //             {
+    //               label: "Transcribe using Whisper",
+    //               value: "whisper",
+    //             },
+    //             {
+    //               label: "Youtube Transcript",
+    //               value: "transcript",
+    //             },
+    //           ]}
+    //         />
+    //       </Form.Item>
+    //     </>
+    //   ),
+    // },
     {
       id: 8,
       value: "rest",
@@ -608,14 +608,14 @@ export const BotForm = ({
 
               <p className="text-sm text-gray-500">
                 If you find any issues, please report them on{" "}
-            <a
-              href={`https://myapps.ai`}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Support
-            </a>
+                <a
+                  href={`https://myapps.ai`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                  Support
+                </a>
                 .
               </p>
             </>

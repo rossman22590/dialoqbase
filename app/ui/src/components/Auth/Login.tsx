@@ -5,6 +5,8 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useSettings } from "../../hooks/useSettings";
+import { motion } from "framer-motion";
+import { CreditCardIcon, CircleStackIcon, SparklesIcon } from "@heroicons/react/24/outline";
 interface User {
   user_id: number;
   username: string;
@@ -110,7 +112,7 @@ export const AuthLogin = () => {
                   ]}
                 >
                   <Input.Password
-                  size="large"
+                    size="large"
                     autoComplete="current-password"
                     placeholder="Password"
                   />
@@ -144,9 +146,75 @@ export const AuthLogin = () => {
           </div>
         </div>
       </div>
-      <div className="relative hidden w-0 flex-1 lg:block">
-        <div className="absolute h-full w-full object-cover rounded-sm bg-gradient-to-r from-sky-400 to-blue-500 dark:from-sky-900 dark:to-gray-900">
+      <div className="relative hidden w-0 flex-1 lg:block overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-blue-700 to-sky-900 dark:from-indigo-950 dark:via-slate-900 dark:to-neutral-900">
+          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
 
+          <div className="relative h-full flex flex-col items-center justify-center px-12 text-white">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="max-w-xl text-center mb-16"
+            >
+              <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
+                The Future of <span className="text-sky-400">Knowledge</span> is Here.
+              </h1>
+              <p className="text-lg text-slate-200">
+                Harness the power of AI to chat with your documents, automate your workflows, and scale your intelligence.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 gap-6 w-full max-w-lg">
+              {[
+                {
+                  title: "Dynamic RAG Engine",
+                  desc: "Connect websites, PDFs, and more. Chat with your data instantly with 99.9% accuracy.",
+                  icon: CircleStackIcon,
+                  delay: 0.2
+                },
+                {
+                  title: "Monthly Credit Boost",
+                  desc: "Every account gets a $20.00 credit infusion every single month. Forever.",
+                  icon: CreditCardIcon,
+                  delay: 0.4
+                },
+                {
+                  title: "Advanced Model Suite",
+                  desc: "Access GPT-4o, Claude 3.5, and Gemini 1.5 Pro all in one unified interface.",
+                  icon: SparklesIcon,
+                  delay: 0.6
+                }
+              ].map((feature, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: feature.delay, duration: 0.6 }}
+                  className="group relative p-6 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-default"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-sky-500/30 text-sky-400 group-hover:scale-110 transition-transform duration-300">
+                      <feature.icon className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold mb-1 tracking-tight">{feature.title}</h3>
+                      <p className="text-sm text-slate-300 leading-relaxed">{feature.desc}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 1 }}
+              className="absolute bottom-12 text-sm font-medium text-slate-400 dark:text-slate-500"
+            >
+              Powered by Dialoqbase • Loved by Professionals
+            </motion.div>
+          </div>
         </div>
       </div>
     </div>
