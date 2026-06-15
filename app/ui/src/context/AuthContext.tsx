@@ -41,8 +41,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         username: localProfile?.username,
         avatar: `https://api.dicebear.com/5.x/fun-emoji/svg?seed=${localProfile?.username}`,
       });
+    } else {
+      setProfile(null);
     }
   }, [localProfile]);
+
+  React.useEffect(() => {
+    if (userToken && !localProfile) {
+      fetch(`${import.meta.env.VITE_API_URL || "/api/v1"}/user/me`, {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.username) {
+            setLocalProfile({
+              username: data.username,
+              email: data.email,
+            });
+          }
+        })
+        .catch((err) => console.error("Failed to fetch user profile:", err));
+    }
+  }, [userToken, localProfile, setLocalProfile]);
 
   const login = async (data: string, profile: any) => {
     setUserToken(data);
