@@ -56,7 +56,8 @@ RUN apt update && apt install -y --no-install-recommends \
 # Copying build artifacts
 COPY --from=server /app/dist/ . 
 COPY --from=server /app/prisma/ ./prisma 
-COPY --from=server /app/package.json . 
+COPY --from=server /app/package.json .
+COPY --from=server /app/yarn.lock .
 COPY --from=build /app/app/ui/dist/ ./public 
 COPY --from=build /app/app/widget/dist/assets/ ./public/assets 
 COPY --from=build /app/app/widget/dist/index.html ./public/bot.html 
