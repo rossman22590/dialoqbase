@@ -13,7 +13,7 @@ RUN yarn config set registry https://registry.npmjs.org/ && \
 
 # Build stage
 FROM base AS build
-RUN npm --no-update-notifier --no-fund --global install pnpm
+RUN npm --no-update-notifier --no-fund --global install pnpm@9
 COPY . .
 RUN pnpm install && pnpm build
 
