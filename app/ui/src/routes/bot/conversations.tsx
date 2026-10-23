@@ -44,8 +44,10 @@ export default function BotConversationsRoot() {
   return (
     <>
       {status === "loading" && (
-        <div className="mx-auto my-3 w-full max-w-7xl">
-          <SkeletonLoading className="mt-6" />
+        <div className="md:ml-14">
+          <div className="ui-page">
+            <SkeletonLoading className="mt-0" />
+          </div>
         </div>
       )}
       {status === "success" && (

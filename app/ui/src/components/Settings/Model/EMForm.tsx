@@ -94,7 +94,8 @@ export const EMForm: React.FC<Props> = ({ setOpenAddEmbeddingModel }) => {
     });
 
   return (
-    <>
+    <div className="pt-2">
+      <label className="ui-label mb-2">Embedding type</label>
       <Select
         size="large"
         disabled={isSaveEmeddingModel}
@@ -120,7 +121,7 @@ export const EMForm: React.FC<Props> = ({ setOpenAddEmbeddingModel }) => {
         }}
       />
 
-      <div className="mt-4">
+      <div className="mt-5 border-t border-line pt-5">
         {embeddingType === "openai" && (
           <Form
             onFinish={(value) => {
@@ -182,7 +183,7 @@ export const EMForm: React.FC<Props> = ({ setOpenAddEmbeddingModel }) => {
             <button
               type="submit"
               disabled={isSaveEmeddingModel}
-              className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="ui-btn-primary mt-2 h-10 w-full"
             >
               {!isSaveEmeddingModel ? "Save Model" : "Saving Model..."}
             </button>
@@ -221,7 +222,7 @@ export const EMForm: React.FC<Props> = ({ setOpenAddEmbeddingModel }) => {
                 <button
                   type="submit"
                   disabled={isSaveEmeddingModel}
-                  className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="ui-btn-primary mt-2 h-10 w-full"
                 >
                   {!isFetchModel ? "Fetch Ollama Models" : "Fetching Models..."}
                 </button>
@@ -286,7 +287,7 @@ export const EMForm: React.FC<Props> = ({ setOpenAddEmbeddingModel }) => {
                 <button
                   type="submit"
                   disabled={isSaveEmeddingModel}
-                  className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="ui-btn-primary mt-2 h-10 w-full"
                 >
                   {!isSaveEmeddingModel ? "Save Model" : "Saving Model..."}
                 </button>
@@ -318,7 +319,7 @@ export const EMForm: React.FC<Props> = ({ setOpenAddEmbeddingModel }) => {
 
             <Form.Item
               help={
-                <p className="text-sm mb-6 text-gray-500">
+                <p className="mb-6 mt-1 font-mono text-xs text-fg-subtle">
                   {"WhereIsAI/UAE-Large-V1"}
                 </p>
               }
@@ -337,13 +338,13 @@ export const EMForm: React.FC<Props> = ({ setOpenAddEmbeddingModel }) => {
             <button
               type="submit"
               disabled={isSaveEmeddingModel}
-              className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="ui-btn-primary mt-2 h-10 w-full"
             >
               {!isSaveEmeddingModel ? "Save Model" : "Saving Model..."}
             </button>
           </Form>
         )}
       </div>
-    </>
+    </div>
   );
 };

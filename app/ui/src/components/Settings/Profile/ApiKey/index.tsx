@@ -1,10 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../../../services/api";
 import { Form, Input, Modal, Table, Tooltip, notification } from "antd";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import {
+  CodeBracketIcon,
+  ExclamationTriangleIcon,
+  KeyIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import axios from "axios";
 import React from "react";
 import { CopyBtn } from "../../../Common/CopyBtn";
+import { Card, CardHeader, EmptyState } from "../../../ui";
 
 export const UserApiKey = () => {
   const queryClient = useQueryClient();
@@ -100,46 +107,58 @@ export const UserApiKey = () => {
   );
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-base font-semibold leading-7 text-gray-900 dark:text-white">
-          API Key
-        </h2>
-
-        <p className="mt-1 text-sm leading-6 text-gray-500 dark:text-gray-200">
-          Manage your Botcraft Pro API key
-        </p>
-      </div>
-
-      <div className="flex justify-end">
-        <button
-        onClick={() => setOpenModal(true)}
-        className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Generate New API Key
-        </button>
-      </div>
-      <div>
+    <Card
+      className="animate-fade-up overflow-hidden"
+      style={{ animationDelay: "120ms" }}
+    >
+      <CardHeader
+        icon={<CodeBracketIcon />}
+        title="API Key"
+        description="Manage your Botcraft Pro API key"
+        actions={
+          <button onClick={() => setOpenModal(true)} className="ui-btn-primary">
+            <PlusIcon />
+            <span className="hidden sm:inline">Generate New API Key</span>
+            <span className="sm:hidden">New key</span>
+          </button>
+        }
+      />
+      <div className="overflow-x-auto">
         <Table
           columns={[
             {
               title: "Name",
               dataIndex: "name",
               key: "name",
+              render: (text) => (
+                <span className="font-medium text-fg">{text}</span>
+              ),
             },
             {
               title: "API Key",
               dataIndex: "api_key",
               key: "api_key",
+              render: (text) => (
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface-2 px-2 py-1 font-mono text-xs text-fg-muted">
+                  <KeyIcon className="h-3.5 w-3.5 text-fg-subtle" />
+                  {text}
+                </span>
+              ),
             },
             {
               title: "Created At",
               dataIndex: "createdAt",
               key: "createdAt",
-              render: (text) => new Date(text).toLocaleString(),
+              render: (text) => (
+                <span className="whitespace-nowrap text-sm tabular-nums text-fg-muted">
+                  {new Date(text).toLocaleString()}
+                </span>
+              ),
             },
             {
               title: "Action",
               key: "action",
+              align: "right",
               render: (_, record) => (
                 <Tooltip title="Delete API Key">
                   <button
@@ -154,9 +173,10 @@ export const UserApiKey = () => {
                         deleteApiKey(record.id);
                       }
                     }}
-                    className="text-red-400 hover:text-red-500"
+                    aria-label="Delete API Key"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-subtle transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 dark:hover:bg-red-500/10 dark:hover:text-red-400"
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <TrashIcon className="h-4 w-4" />
                   </button>
                 </Tooltip>
               ),
@@ -164,6 +184,16 @@ export const UserApiKey = () => {
           ]}
           loading={isLoading}
           dataSource={data || []}
+          locale={{
+            emptyText: (
+              <EmptyState
+                icon={<KeyIcon />}
+                title="No API keys yet"
+                description="Generate a key to call the Botcraft Pro API from your own apps."
+                className="py-10"
+              />
+            ),
+          }}
         />
       </div>
 
@@ -178,6 +208,7 @@ export const UserApiKey = () => {
           onFinish={(values) => {
             createApiKey(values);
           }}
+          className="mt-4"
         >
           <Form.Item
             label="Name"
@@ -191,11 +222,8 @@ export const UserApiKey = () => {
           >
             <Input size="large" type="text" placeholder="Name" />
           </Form.Item>
-          <div className="text-right">
-            <button
-              type="submit"
-              className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
+          <div className="flex justify-end">
+            <button type="submit" className="ui-btn-primary">
               {isCreating ? "Generating..." : "Generate"}
             </button>
           </div>
@@ -208,24 +236,32 @@ export const UserApiKey = () => {
         onCancel={() => setOpenApiKey(false)}
         footer={null}
       >
-        <p className="text-xs text-gray-500 dark:text-gray-200">
-          Your API Key has been generated successfully. Please copy the API Key
-          and save it in a safe place. You will not be able to see this API Key
-          again.
-        </p>
+        <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
+          <ExclamationTriangleIcon className="mt-0.5 h-4 w-4 shrink-0" />
+          <p className="text-xs leading-relaxed">
+            Your API Key has been generated successfully. Please copy the API
+            Key and save it in a safe place. You will not be able to see this
+            API Key again.
+          </p>
+        </div>
 
-        <div className="flex mt-5">
+        <div className="mt-4 flex items-center gap-2 rounded-xl border border-line bg-surface-2 p-1.5 pl-3">
           <Input
             size="large"
             type="text"
             value={apiKey}
             readOnly
-            className="w-full"
+            variant="borderless"
+            className="w-full min-w-0 px-0 font-mono text-sm"
           />
 
-          <CopyBtn value={apiKey} />
+          <CopyBtn
+            value={apiKey}
+            iconSize="h-4 w-4"
+            className="shrink-0 rounded-lg border border-line bg-surface px-3 text-sm shadow-soft hover:bg-surface-3"
+          />
         </div>
       </Modal>
-    </div>
+    </Card>
   );
 };

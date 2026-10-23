@@ -1,7 +1,12 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton, Table, Tag, Button } from "antd";
-import { CreditCardIcon } from "@heroicons/react/24/outline";
+import { Skeleton, Table, Button } from "antd";
+import {
+    ChartBarIcon,
+    CreditCardIcon,
+    ReceiptPercentIcon,
+    WalletIcon,
+} from "@heroicons/react/24/outline";
 import api from "../../services/api";
 import {
     Chart as ChartJS,
@@ -16,6 +21,14 @@ import { Bar } from "react-chartjs-2";
 import { useMemo } from "react";
 import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
+import {
+    Card,
+    CardBody,
+    CardHeader,
+    PageHeader,
+    Skeleton as UiSkeleton,
+    StatTile,
+} from "../../components/ui";
 
 ChartJS.register(
     CategoryScale,
@@ -97,7 +110,8 @@ export default function UsageRoot() {
                 position: "top" as const,
             },
             title: {
-                display: true,
+                // Shown as the card title instead of inside the canvas.
+                display: false,
                 text: isBotUsage
                     ? "Daily Bot Usage (Last 7 Days)"
                     : "Daily Usage (Last 7 Days)",
@@ -134,7 +148,10 @@ export default function UsageRoot() {
             {
                 label: "Credits Used",
                 data: usagePerDay,
-                backgroundColor: "rgba(53, 162, 235, 0.5)",
+                backgroundColor: "rgba(124, 58, 237, 0.75)",
+                hoverBackgroundColor: "rgba(124, 58, 237, 0.95)",
+                borderRadius: 6,
+                maxBarThickness: 40,
             },
         ],
     };
@@ -153,14 +170,28 @@ export default function UsageRoot() {
             title: "Type",
             dataIndex: "type",
             key: "type",
-            render: (type: string) => <Tag color="blue">{type}</Tag>,
+            render: (type: string) => (
+                <span
+                    className={`ui-badge ${
+                        type === "usage" ? "ui-badge-brand" : "ui-badge-neutral"
+                    }`}
+                >
+                    {type}
+                </span>
+            ),
         },
         {
             title: "Amount",
             dataIndex: "amount",
             key: "amount",
             render: (amount: number) => (
-                <span className={amount < 0 ? "text-red-500" : "text-green-500"}>
+                <span
+                    className={`font-medium tabular-nums ${
+                        amount < 0
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-emerald-600 dark:text-emerald-400"
+                    }`}
+                >
                     {amount > 0 ? "+" : ""}
                     {amount.toFixed(4)}
                 </span>
@@ -173,70 +204,122 @@ export default function UsageRoot() {
         },
     ];
 
+    // Presentation-only totals derived from the data already loaded above.
+    const weekTotal = usagePerDay.reduce((sum, v) => sum + v, 0);
+
     return (
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                {isBotUsage ? "Bot Usage" : "Usage & Billing"}
-            </h1>
+        <div className="ui-page">
+            <PageHeader
+                title={isBotUsage ? "Bot Usage" : "Usage & Billing"}
+                description={
+                    isBotUsage
+                        ? "Credits this bot has used, day by day, with every charge it made."
+                        : "Your credit balance, recent usage and every transaction on your account."
+                }
+            />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+                <StatTile
+                    label={isBotUsage ? "Account Balance" : "Balance"}
+                    icon={<WalletIcon />}
+                    value={
+                        isCreditsLoading ? (
+                            <UiSkeleton className="mt-1 h-7 w-28" />
+                        ) : (
+                            `$${Number(credits?.balance || 0).toFixed(4)}`
+                        )
+                    }
+                    hint="1 Credit = $1.00 USD"
+                />
+                <StatTile
+                    label="Credits used (7 days)"
+                    icon={<ChartBarIcon />}
+                    value={
+                        isTransactionsLoading ? (
+                            <UiSkeleton className="mt-1 h-7 w-24" />
+                        ) : (
+                            weekTotal.toFixed(4)
+                        )
+                    }
+                    hint={isBotUsage ? "For this bot" : "Across all bots"}
+                />
+                <StatTile
+                    label="Transactions"
+                    icon={<ReceiptPercentIcon />}
+                    value={
+                        isTransactionsLoading ? (
+                            <UiSkeleton className="mt-1 h-7 w-12" />
+                        ) : (
+                            filteredTransactions.length
+                        )
+                    }
+                    hint={isBotUsage ? "Charges by this bot" : "On your account"}
+                />
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Battery / Credit Status Card */}
-                <div className="bg-white dark:bg-surface overflow-hidden shadow rounded-lg border dark:border-line-strong p-6 col-span-1">
-                    <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                        {isBotUsage ? "Account Balance" : "Balance"}
-                    </h3>
-                    {isCreditsLoading ? (
-                        <Skeleton active paragraph={{ rows: 2 }} />
-                    ) : (
-                        <div className="flex flex-col w-full">
-                            <div className="mb-2">
-                                <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                                    ${Number(credits?.balance || 0).toFixed(4)}
-                                </span>
+                <Card className="flex flex-col lg:col-span-1">
+                    <CardHeader
+                        icon={<CreditCardIcon />}
+                        title={isBotUsage ? "Account Balance" : "Balance"}
+                        description="Top up any time to keep your bots answering."
+                    />
+                    <CardBody className="flex flex-1 flex-col">
+                        {isCreditsLoading ? (
+                            <Skeleton active paragraph={{ rows: 2 }} />
+                        ) : (
+                            <div className="flex w-full flex-1 flex-col">
+                                <div className="mb-2">
+                                    <span className="text-3xl font-semibold tabular-nums tracking-tight text-fg">
+                                        ${Number(credits?.balance || 0).toFixed(4)}
+                                    </span>
+                                    <p className="mt-1 text-xs text-fg-subtle">
+                                        Available credits
+                                    </p>
+                                </div>
+
+                                <div className="mb-6 flex-1" />
+
+                                <Button
+                                    type="primary"
+                                    block
+                                    size="large"
+                                    icon={<CreditCardIcon className="h-5 w-5" />}
+                                    className="flex items-center justify-center gap-2 font-semibold"
+                                    onClick={() => window.open("https://buy.stripe.com/aFa00cg8kbx9g8G7YUgjC0t", "_blank")}
+                                >
+                                    <span>Buy Credits</span>
+                                </Button>
+                                <p className="mt-3 text-center text-[11px] text-fg-subtle">
+                                    1 Credit = $1.00 USD • Top up when balance hits 0
+                                </p>
                             </div>
-
-
-
-                            <div className="mb-6" />
-
-
-                            <Button
-                                type="primary"
-                                block
-                                size="large"
-                                icon={<CreditCardIcon className="w-5 h-5" />}
-                                className="flex items-center justify-center gap-2 h-12 rounded-xl border-none font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 !flex"
-                                style={{
-                                    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                                }}
-                                onClick={() => window.open("https://buy.stripe.com/aFa00cg8kbx9g8G7YUgjC0t", "_blank")}
-                            >
-                                <span>Buy Credits</span>
-                            </Button>
-                            <p className="text-center text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 mt-3 font-bold">
-                                1 Credit = $1.00 USD • Top up when balance hits 0
-                            </p>
-                        </div>
-
-
-
-                    )}
-                </div>
+                        )}
+                    </CardBody>
+                </Card>
 
                 {/* Usage Chart */}
-                <div className="bg-white dark:bg-surface overflow-hidden shadow rounded-lg border dark:border-line-strong p-6 col-span-2">
-                    <Bar options={options} data={chartData} />
-                </div>
+                <Card className="min-w-0 lg:col-span-2">
+                    <CardHeader
+                        icon={<ChartBarIcon />}
+                        title={options.plugins.title.text}
+                        description="Credits used per day."
+                    />
+                    <CardBody>
+                        <Bar options={options} data={chartData} />
+                    </CardBody>
+                </Card>
             </div>
 
             {/* Transactions Table */}
-            <div className="bg-white dark:bg-surface overflow-hidden shadow rounded-lg border dark:border-line-strong">
-                <div className="px-4 py-5 sm:px-6 border-b border-line dark:border-line-strong">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                        Transaction History
-                    </h3>
-                </div>
-                <div className="p-4">
+            <Card className="mt-6 overflow-hidden">
+                <CardHeader
+                    icon={<ReceiptPercentIcon />}
+                    title="Transaction History"
+                    description="Every charge and top-up on record."
+                />
+                <div className="[&_.ant-table-pagination]:px-4">
                     <Table
                         dataSource={filteredTransactions}
                         columns={columns}
@@ -246,7 +329,7 @@ export default function UsageRoot() {
                         scroll={{ x: true }}
                     />
                 </div>
-            </div>
+            </Card>
         </div>
     );
 }

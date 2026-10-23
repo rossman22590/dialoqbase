@@ -8,13 +8,22 @@ import {
   Modal,
   Select,
   Table,
-  Tag,
   notification,
 } from "antd";
+import { EllipsisHorizontalIcon, UsersIcon } from "@heroicons/react/24/outline";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import { errorMessage, formatAgo, formatCredits, formatDate, formatNumber } from "./shared";
+import {
+  SectionHeader,
+  TableCard,
+  errorMessage,
+  formatAgo,
+  formatCredits,
+  formatDate,
+  formatNumber,
+} from "./shared";
+import { Badge, EmptyState } from "../ui";
 
 type AdminUser = {
   user_id: number;
@@ -86,12 +95,19 @@ export const AdminUsers = () => {
       title: "User",
       key: "user",
       render: (_: any, u: AdminUser) => (
-        <div>
-          <div className="font-medium">{u.username}</div>
-          <div className="text-xs text-gray-500">{u.email || "no email"}</div>
-          <div className="mt-1 flex gap-1">
-            {u.is_admin && <Tag color="purple">Admin</Tag>}
-            {u.is_suspended && <Tag color="red">Suspended</Tag>}
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-semibold uppercase text-indigo-700 ring-1 ring-inset ring-indigo-600/15 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20">
+            {u.username?.charAt(0)}
+          </span>
+          <div className="min-w-0">
+            <div className="font-medium text-fg">{u.username}</div>
+            <div className="text-xs text-fg-subtle">{u.email || "no email"}</div>
+            {(u.is_admin || u.is_suspended) && (
+              <div className="mt-1 flex gap-1">
+                {u.is_admin && <Badge tone="brand">Admin</Badge>}
+                {u.is_suspended && <Badge tone="danger">Suspended</Badge>}
+              </div>
+            )}
           </div>
         </div>
       ),
@@ -101,7 +117,11 @@ export const AdminUsers = () => {
       dataIndex: "balance",
       key: "balance",
       render: (v: number) => (
-        <span className={v < 0 ? "text-red-600" : ""}>{formatCredits(v)}</span>
+        <span
+          className={`tabular-nums ${v < 0 ? "font-medium text-red-600 dark:text-red-400" : "text-fg"}`}
+        >
+          {formatCredits(v)}
+        </span>
       ),
     },
     { title: "Bots", dataIndex: "bots", key: "bots" },
@@ -121,7 +141,11 @@ export const AdminUsers = () => {
       title: "Last active",
       dataIndex: "last_active",
       key: "last_active",
-      render: (v: string | null) => <span title={formatDate(v)}>{formatAgo(v)}</span>,
+      render: (v: string | null) => (
+        <span title={formatDate(v)} className="whitespace-nowrap text-fg-muted">
+          {formatAgo(v)}
+        </span>
+      ),
     },
     { title: "Joined", dataIndex: "createdAt", key: "createdAt", render: formatDate },
     {
@@ -191,58 +215,81 @@ export const AdminUsers = () => {
             },
           }}
         >
-          <Button size="small">Manage</Button>
+          <Button size="small" icon={<EllipsisHorizontalIcon className="h-4 w-4" />}>
+            Manage
+          </Button>
         </Dropdown>
       ),
     },
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <Input.Search
-          allowClear
-          placeholder="Search username or email"
-          onSearch={(v) => {
-            setPage(1);
-            setSearch(v.trim());
-          }}
-          style={{ maxWidth: 320 }}
-        />
-        <Select
-          allowClear
-          placeholder="All users"
-          value={status}
-          onChange={(v) => {
-            setPage(1);
-            setStatus(v);
-          }}
-          style={{ width: 160 }}
-          options={[
-            { label: "Admins", value: "admin" },
-            { label: "Suspended", value: "suspended" },
-          ]}
-        />
-      </div>
-
-      <Table
-        rowKey="user_id"
-        size="small"
-        loading={isFetching}
-        dataSource={data?.data || []}
-        columns={columns as any}
-        scroll={{ x: true }}
-        pagination={{
-          current: page,
-          pageSize,
-          total: data?.total || 0,
-          showSizeChanger: true,
-          onChange: (p, s) => {
-            setPage(p);
-            setPageSize(s);
-          },
-        }}
+    <div className="space-y-4 pt-2">
+      <SectionHeader
+        title="Users"
+        description="Balances, activity and access for every account."
       />
+      <TableCard
+        toolbar={
+          <>
+            <Input.Search
+              allowClear
+              placeholder="Search username or email"
+              onSearch={(v) => {
+                setPage(1);
+                setSearch(v.trim());
+              }}
+              style={{ maxWidth: 320 }}
+            />
+            <Select
+              allowClear
+              placeholder="All users"
+              value={status}
+              onChange={(v) => {
+                setPage(1);
+                setStatus(v);
+              }}
+              style={{ width: 160 }}
+              options={[
+                { label: "Admins", value: "admin" },
+                { label: "Suspended", value: "suspended" },
+              ]}
+            />
+            <span className="ml-auto text-xs tabular-nums text-fg-subtle">
+              {formatNumber(data?.total || 0)} users
+            </span>
+          </>
+        }
+      >
+        <Table
+          rowKey="user_id"
+          size="small"
+          loading={isFetching}
+          dataSource={data?.data || []}
+          columns={columns as any}
+          scroll={{ x: true }}
+          pagination={{
+            current: page,
+            pageSize,
+            total: data?.total || 0,
+            showSizeChanger: true,
+            onChange: (p, s) => {
+              setPage(p);
+              setPageSize(s);
+            },
+          }}
+          locale={{
+            emptyText: (
+              <EmptyState
+                icon={<UsersIcon />}
+                title="No users found"
+                description="Try a different search or filter."
+                className="py-10"
+              />
+            ),
+          }}
+        />
+      </TableCard>
 
       <Modal
         title={`Adjust credits for ${creditUser?.username}`}
@@ -251,7 +298,7 @@ export const AdminUsers = () => {
         onOk={() => creditForm.submit()}
         confirmLoading={action.isLoading}
       >
-        <p className="mb-4 text-sm text-gray-500">
+        <p className="mb-4 mt-2 text-sm leading-relaxed text-fg-muted">
           Current balance: {formatCredits(creditUser?.balance)}. The change is logged as an
           admin adjustment.
         </p>

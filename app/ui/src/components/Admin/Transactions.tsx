@@ -3,7 +3,16 @@ import { Input, Select, Table, Tag } from "antd";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../../services/api";
-import { formatCredits, formatDate, formatNumber, formatUsd } from "./shared";
+import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
+import {
+  SectionHeader,
+  TableCard,
+  formatCredits,
+  formatDate,
+  formatNumber,
+  formatUsd,
+} from "./shared";
+import { Badge, EmptyState } from "../ui";
 
 type AdminTransaction = {
   id: string;
@@ -69,14 +78,21 @@ export const AdminTransactions = () => {
   };
 
   const columns = [
-    { title: "Date", dataIndex: "createdAt", key: "createdAt", render: formatDate },
+    {
+      title: "Date",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (v: string) => (
+        <span className="whitespace-nowrap tabular-nums text-fg-muted">{formatDate(v)}</span>
+      ),
+    },
     {
       title: "User",
       key: "user",
       render: (_: any, t: AdminTransaction) => (
-        <div>
-          <div>{t.username}</div>
-          <div className="text-xs text-gray-500">{t.email}</div>
+        <div className="min-w-0">
+          <div className="font-medium text-fg">{t.username}</div>
+          <div className="text-xs text-fg-subtle">{t.email}</div>
         </div>
       ),
     },
@@ -84,14 +100,26 @@ export const AdminTransactions = () => {
       title: "Type",
       dataIndex: "type",
       key: "type",
-      render: (v: string) => <Tag color={TYPE_COLORS[v]}>{v}</Tag>,
+      render: (v: string) => (
+        <Tag color={TYPE_COLORS[v]} bordered={false} className="m-0">
+          {v}
+        </Tag>
+      ),
     },
     {
       title: "Credits",
       dataIndex: "amount",
       key: "amount",
       render: (v: number) => (
-        <span className={v < 0 ? "text-red-600" : v > 0 ? "text-green-600" : ""}>
+        <span
+          className={`whitespace-nowrap font-medium tabular-nums ${
+            v < 0
+              ? "text-red-600 dark:text-red-400"
+              : v > 0
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-fg-muted"
+          }`}
+        >
           {v > 0 ? "+" : ""}
           {formatCredits(v)}
         </span>
@@ -104,10 +132,14 @@ export const AdminTransactions = () => {
       render: (_: any, t: AdminTransaction) => {
         const m = parseMetadata(t.metadata);
         return (
-          <div className="text-xs">
-            <div>{m.model || "—"}</div>
-            {m.source && <Tag>{m.source}</Tag>}
-            {m.used_own_key && <Tag color="blue">own key</Tag>}
+          <div className="space-y-1 text-xs">
+            <div className="font-mono text-fg-muted">{m.model || "—"}</div>
+            {(m.source || m.used_own_key) && (
+              <div className="flex flex-wrap gap-1">
+                {m.source && <Badge tone="neutral">{m.source}</Badge>}
+                {m.used_own_key && <Badge tone="brand">own key</Badge>}
+              </div>
+            )}
           </div>
         );
       },
@@ -133,64 +165,86 @@ export const AdminTransactions = () => {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <Input.Search
-          allowClear
-          placeholder="Search description or username"
-          onSearch={(v) => {
-            setPage(1);
-            setSearch(v.trim());
-          }}
-          style={{ maxWidth: 320 }}
-        />
-        <Select
-          allowClear
-          placeholder="All types"
-          value={type}
-          onChange={(v) => {
-            setPage(1);
-            setType(v);
-          }}
-          style={{ width: 200 }}
-          options={(data?.types || []).map((t) => ({ label: t, value: t }))}
-        />
-        {userId && (
-          <Tag closable onClose={() => clearFilter("user_id")}>
-            User: {params.get("user") || userId}
-          </Tag>
-        )}
-        {botId && (
-          <Tag closable onClose={() => clearFilter("bot_id")}>
-            Bot: {params.get("bot") || botId}
-          </Tag>
-        )}
-      </div>
-      <Table
-        rowKey="id"
-        size="small"
-        loading={isFetching}
-        dataSource={data?.data || []}
-        columns={columns as any}
-        scroll={{ x: true }}
-        expandable={{
-          expandedRowRender: (t: AdminTransaction) => (
-            <pre className="m-0 whitespace-pre-wrap text-xs">
-              {JSON.stringify(parseMetadata(t.metadata), null, 2)}
-            </pre>
-          ),
-        }}
-        pagination={{
-          current: page,
-          pageSize,
-          total: data?.total || 0,
-          showSizeChanger: true,
-          onChange: (p, s) => {
-            setPage(p);
-            setPageSize(s);
-          },
-        }}
+    <div className="space-y-4 pt-2">
+      <SectionHeader
+        title="Transactions"
+        description="Every credit movement: usage, allowances and admin adjustments."
       />
+      <TableCard
+        toolbar={
+          <>
+            <Input.Search
+              allowClear
+              placeholder="Search description or username"
+              onSearch={(v) => {
+                setPage(1);
+                setSearch(v.trim());
+              }}
+              style={{ maxWidth: 320 }}
+            />
+            <Select
+              allowClear
+              placeholder="All types"
+              value={type}
+              onChange={(v) => {
+                setPage(1);
+                setType(v);
+              }}
+              style={{ width: 200 }}
+              options={(data?.types || []).map((t) => ({ label: t, value: t }))}
+            />
+            {userId && (
+              <Tag closable onClose={() => clearFilter("user_id")}>
+                User: {params.get("user") || userId}
+              </Tag>
+            )}
+            {botId && (
+              <Tag closable onClose={() => clearFilter("bot_id")}>
+                Bot: {params.get("bot") || botId}
+              </Tag>
+            )}
+            <span className="ml-auto text-xs tabular-nums text-fg-subtle">
+              {formatNumber(data?.total || 0)} transactions
+            </span>
+          </>
+        }
+      >
+        <Table
+          rowKey="id"
+          size="small"
+          loading={isFetching}
+          dataSource={data?.data || []}
+          columns={columns as any}
+          scroll={{ x: true }}
+          expandable={{
+            expandedRowRender: (t: AdminTransaction) => (
+              <pre className="m-0 whitespace-pre-wrap rounded-xl border border-line bg-canvas p-3 font-mono text-xs text-fg-muted">
+                {JSON.stringify(parseMetadata(t.metadata), null, 2)}
+              </pre>
+            ),
+          }}
+          pagination={{
+            current: page,
+            pageSize,
+            total: data?.total || 0,
+            showSizeChanger: true,
+            onChange: (p, s) => {
+              setPage(p);
+              setPageSize(s);
+            },
+          }}
+          locale={{
+            emptyText: (
+              <EmptyState
+                icon={<ArrowsRightLeftIcon />}
+                title="No transactions found"
+                description="Try a different search, type or filter."
+                className="py-10"
+              />
+            ),
+          }}
+        />
+      </TableCard>
     </div>
   );
 };

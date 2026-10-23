@@ -1,4 +1,4 @@
-import { Card, Segmented, Statistic } from "antd";
+import { Segmented } from "antd";
 import dayjs from "dayjs";
 
 export const formatCredits = (value: number | null | undefined) =>
@@ -55,13 +55,86 @@ export const StatCard = ({
   title,
   value,
   hint,
+  icon,
 }: {
   title: string;
   value: React.ReactNode;
   hint?: React.ReactNode;
+  icon?: React.ReactNode;
 }) => (
-  <Card size="small" className="h-full">
-    <Statistic title={title} valueRender={() => value} />
-    {hint && <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{hint}</div>}
-  </Card>
+  <div className="ui-card flex h-full flex-col p-4 sm:p-5">
+    <div className="flex items-start justify-between gap-2">
+      <p className="text-[13px] font-medium leading-snug text-fg-muted">
+        {title}
+      </p>
+      {icon && <div className="ui-icon-tile">{icon}</div>}
+    </div>
+    <div className="mt-2 truncate text-xl font-semibold tabular-nums tracking-tight text-fg sm:text-2xl">
+      {value}
+    </div>
+    {hint && (
+      <div className="mt-1.5 text-xs leading-relaxed text-fg-subtle">
+        {hint}
+      </div>
+    )}
+  </div>
+);
+
+/* Presentation helpers shared by the admin tabs. */
+
+export const SectionHeader = ({
+  title,
+  description,
+  actions,
+}: {
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  actions?: React.ReactNode;
+}) => (
+  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="min-w-0">
+      <h2 className="flex flex-wrap items-center gap-2 text-[15px] font-semibold tracking-tight text-fg">
+        {title}
+      </h2>
+      {description && (
+        <p className="mt-0.5 text-sm leading-relaxed text-fg-muted">
+          {description}
+        </p>
+      )}
+    </div>
+    {actions && (
+      <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
+    )}
+  </div>
+);
+
+export const TableCard = ({
+  title,
+  description,
+  toolbar,
+  children,
+}: {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  toolbar?: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <div className="ui-card overflow-hidden">
+    {title && (
+      <div className="border-b border-line px-4 py-3.5 sm:px-5">
+        <h3 className="text-sm font-semibold tracking-tight text-fg">{title}</h3>
+        {description && (
+          <p className="mt-0.5 text-xs leading-relaxed text-fg-subtle">
+            {description}
+          </p>
+        )}
+      </div>
+    )}
+    {toolbar && (
+      <div className="flex flex-wrap items-center gap-2 border-b border-line bg-surface-2/40 px-4 py-3 sm:px-5">
+        {toolbar}
+      </div>
+    )}
+    <div className="[&_.ant-table-pagination]:px-4">{children}</div>
+  </div>
 );

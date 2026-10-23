@@ -1,5 +1,4 @@
 import {
-  Divider,
   Form,
   FormInstance,
   Input,
@@ -13,7 +12,23 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import api from "../../../services/api";
 import axios from "axios";
+import { CardBody, CardFooter } from "../../ui";
 type Props = AppearanceType;
+
+const SectionTitle = ({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) => (
+  <div className="mb-4 border-t border-line pt-6 first:border-t-0 first:pt-0">
+    <h3 className="text-sm font-semibold tracking-tight text-fg">{title}</h3>
+    <p className="mt-0.5 text-xs leading-relaxed text-fg-subtle">
+      {description}
+    </p>
+  </div>
+);
 
 export const AppearanceForm = ({
   initialData,
@@ -97,6 +112,12 @@ export const AppearanceForm = ({
       form={form}
       onFinish={updateAppearance}
     >
+      <CardBody>
+      <SectionTitle
+        title="Identity"
+        description="What your bot is called and how it says hello."
+      />
+      <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
       <Form.Item
         rules={[
           {
@@ -122,8 +143,12 @@ export const AppearanceForm = ({
       >
         <Input size="large" />
       </Form.Item>
+      </div>
 
-      <Divider orientation="left">Style</Divider>
+      <SectionTitle
+        title="Style"
+        description="Background and text colours for each chat bubble."
+      />
 
       {/* <Form.Item
         rules={[
@@ -142,11 +167,12 @@ export const AppearanceForm = ({
         />
       </Form.Item> */}
 
+      <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
       <Form.Item label="Bot bubble style" name="chat_bot_bubble_style">
-        <div className="flex flex-row justify-normal space-x-6">
+        <div className="flex flex-row flex-wrap justify-normal gap-x-6 rounded-xl border border-line bg-surface-2/60 px-4 pt-3 [&_.ant-form-item]:mb-3">
           <Form.Item
             name={["chat_bot_bubble_style", "background_color"]}
-            label={<span className="text-xs">bg color</span>}
+            label={<span className="text-xs text-fg-muted">Background</span>}
             rules={[
               {
                 required: true,
@@ -166,7 +192,7 @@ export const AppearanceForm = ({
 
           <Form.Item
             name={["chat_bot_bubble_style", "text_color"]}
-            label={<span className="text-xs">text color</span>}
+            label={<span className="text-xs text-fg-muted">Text</span>}
             rules={[
               {
                 required: true,
@@ -186,10 +212,10 @@ export const AppearanceForm = ({
       </Form.Item>
 
       <Form.Item label="Human bubble style" name="chat_human_bubble_style">
-        <div className="flex flex-row justify-normal space-x-6">
+        <div className="flex flex-row flex-wrap justify-normal gap-x-6 rounded-xl border border-line bg-surface-2/60 px-4 pt-3 [&_.ant-form-item]:mb-3">
           <Form.Item
             name={["chat_human_bubble_style", "background_color"]}
-            label={<span className="text-xs">bg color</span>}
+            label={<span className="text-xs text-fg-muted">Background</span>}
             rules={[
               {
                 required: true,
@@ -208,7 +234,7 @@ export const AppearanceForm = ({
 
           <Form.Item
             name={["chat_human_bubble_style", "text_color"]}
-            label={<span className="text-xs">text color</span>}
+            label={<span className="text-xs text-fg-muted">Text</span>}
             rules={[
               {
                 required: true,
@@ -227,7 +253,12 @@ export const AppearanceForm = ({
         </div>
       </Form.Item>
 
-      <Divider orientation="left">Text to Speech (TTS) Settings</Divider>
+      </div>
+
+      <SectionTitle
+        title="Text to Speech (TTS) Settings"
+        description="Let visitors listen to your bot's replies."
+      />
 
       <Form.Item label="Enable TTS" name="tts" valuePropName="checked">
         <Switch />
@@ -290,15 +321,16 @@ export const AppearanceForm = ({
         </>
       )}
 
-      <div className="mt-3 text-right">
+      </CardBody>
+      <CardFooter>
         <button
           type="submit"
           disabled={isUpdatingAppearance}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+          className="ui-btn-primary"
         >
           {isUpdatingAppearance ? "Saving..." : "Save Changes"}
         </button>
-      </div>
+      </CardFooter>
     </Form>
   );
 };

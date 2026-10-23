@@ -76,18 +76,26 @@ export const NewDsForm = ({ onClose }: { onClose: () => void }) => {
 
   if (botConfigStatus === "loading") {
     return (
-      <div className="flex justify-center items-center">
+      <div className="flex items-center justify-center py-4">
         <Skeleton active paragraph={{ rows: 5 }} />
       </div>
     );
   }
 
   if (botConfigStatus === "error") {
-    return <div>Something went wrong while fetching config</div>;
+    return (
+      <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+        Something went wrong while fetching config
+      </div>
+    );
   }
 
   return (
     <>
+      <p className="-mt-1 mb-5 text-sm leading-relaxed text-fg-muted">
+        Pick a source type and point your bot at the content it should learn
+        from.
+      </p>
       <BotForm
         botConfig={botConfig}
         showEmbeddingAndModels={false}

@@ -1,5 +1,13 @@
 import { Result, Tabs } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  ArrowsRightLeftIcon,
+  ChartBarIcon,
+  CpuChipIcon,
+  QueueListIcon,
+  Squares2X2Icon,
+  UsersIcon,
+} from "@heroicons/react/24/outline";
 import { useIsAdmin } from "../../hooks/useIsAdmin";
 import { AdminOverview } from "../../components/Admin/Overview";
 import { AdminUsers } from "../../components/Admin/Users";
@@ -7,14 +15,52 @@ import { AdminBots } from "../../components/Admin/Bots";
 import { AdminTransactions } from "../../components/Admin/Transactions";
 import { AdminUsage } from "../../components/Admin/Usage";
 import { AdminQueue } from "../../components/Admin/Queue";
+import { PageHeader } from "../../components/ui";
+
+const TabLabel = ({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  children: React.ReactNode;
+}) => (
+  <span className="inline-flex items-center gap-1.5">
+    <Icon className="h-4 w-4" aria-hidden="true" />
+    {children}
+  </span>
+);
 
 const TABS = [
-  { key: "overview", label: "Overview", children: <AdminOverview /> },
-  { key: "users", label: "Users", children: <AdminUsers /> },
-  { key: "bots", label: "Bots", children: <AdminBots /> },
-  { key: "transactions", label: "Transactions", children: <AdminTransactions /> },
-  { key: "usage", label: "Usage", children: <AdminUsage /> },
-  { key: "queue", label: "Queue", children: <AdminQueue /> },
+  {
+    key: "overview",
+    label: <TabLabel icon={Squares2X2Icon}>Overview</TabLabel>,
+    children: <AdminOverview />,
+  },
+  {
+    key: "users",
+    label: <TabLabel icon={UsersIcon}>Users</TabLabel>,
+    children: <AdminUsers />,
+  },
+  {
+    key: "bots",
+    label: <TabLabel icon={CpuChipIcon}>Bots</TabLabel>,
+    children: <AdminBots />,
+  },
+  {
+    key: "transactions",
+    label: <TabLabel icon={ArrowsRightLeftIcon}>Transactions</TabLabel>,
+    children: <AdminTransactions />,
+  },
+  {
+    key: "usage",
+    label: <TabLabel icon={ChartBarIcon}>Usage</TabLabel>,
+    children: <AdminUsage />,
+  },
+  {
+    key: "queue",
+    label: <TabLabel icon={QueueListIcon}>Queue</TabLabel>,
+    children: <AdminQueue />,
+  },
 ];
 
 export default function AdminRoot() {
@@ -33,19 +79,20 @@ export default function AdminRoot() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Every user, bot, credit and background job on this server.
-        </p>
-      </div>
-      <Tabs
-        activeKey={TABS.some((t) => t.key === tab) ? tab : "overview"}
-        onChange={(key) => navigate(`/admin/${key}`)}
-        items={TABS}
-        destroyInactiveTabPane
+    <div className="ui-page">
+      <PageHeader
+        eyebrow="Administration"
+        title="Admin"
+        description="Every user, bot, credit and background job on this server."
       />
+      <div className="mt-6">
+        <Tabs
+          activeKey={TABS.some((t) => t.key === tab) ? tab : "overview"}
+          onChange={(key) => navigate(`/admin/${key}`)}
+          items={TABS}
+          destroyInactiveTabPane
+        />
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Divider, Form, Input, notification } from "antd";
+import { Form, Input, notification } from "antd";
 import { Switch } from "@headlessui/react";
 import React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -144,15 +144,15 @@ export const IntegrationForm: React.FC<Props> = ({ onClose, data }) => {
           }, {}),
         }}
         layout="vertical"
-        className="space-y-6"
+        className="mt-5"
         onFinish={updateIntegration}
       >
         {data.fields.map((field, index) => {
           if (field.type === "webhook") {
             return (
               <Form.Item key={index} label={field.title} name={field.name}>
-                <div className="flex">
-                  <div className="relative flex-grow focus-within:z-10">
+                <div className="flex gap-2">
+                  <div className="relative min-w-0 flex-grow focus-within:z-10">
                     <Input
                       size="large"
                       readOnly
@@ -161,9 +161,10 @@ export const IntegrationForm: React.FC<Props> = ({ onClose, data }) => {
                       placeholder={field.help}
                     />
                   </div>
-                  <div className="flex-shrink-0 ml-3">
+                  <div className="flex-shrink-0">
                     <button
                       type="button"
+                      aria-label="Copy webhook URL"
                       onClick={async () => {
                         await clipbardCopy(
                           `${hostUrl}/api/v1/bot/integration/${params.id}/whatsapp`
@@ -173,9 +174,9 @@ export const IntegrationForm: React.FC<Props> = ({ onClose, data }) => {
                           placement: "bottomRight",
                         });
                       }}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+                      className="ui-btn-secondary h-10 w-10 px-0"
                     >
-                      <ClipboardIcon className="w-5 h-5" />
+                      <ClipboardIcon />
                     </button>
                   </div>
                 </div>
@@ -210,29 +211,33 @@ export const IntegrationForm: React.FC<Props> = ({ onClose, data }) => {
           );
         })}
 
-        <Form.Item>
+        <Form.Item className="mb-0">
           <button
             type="submit"
             disabled={isUpdating || isToggling}
-            className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="ui-btn-primary h-10 w-full"
           >
             {isUpdating ? "Saving..." : "Save"}
           </button>
         </Form.Item>
       </Form>
-      <Divider />
       <div
         className={
-          data?.connectBtn ? "flex items-center justify-between space-x-3" : ""
+          data?.connectBtn
+            ? "mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface-2/60 px-4 py-3"
+            : "mt-5 rounded-xl border border-line bg-surface-2/60 px-4 py-3"
         }
       >
         <Switch.Group
           as="div"
-          className="flex items-center justify-between space-x-3"
+          className="flex items-center justify-between gap-4"
         >
-          <Switch.Label as="span" className="ml-3">
-            <span className="text-sm font-medium text-gray-600">
+          <Switch.Label as="span" className="min-w-0">
+            <span className="block text-sm font-medium text-fg">
               Enable integration
+            </span>
+            <span className="block text-xs text-fg-subtle">
+              Pause or resume this channel without losing its settings.
             </span>
           </Switch.Label>
           <Switch
@@ -247,8 +252,8 @@ export const IntegrationForm: React.FC<Props> = ({ onClose, data }) => {
               toggleIntegration();
             }}
             className={classNames(
-              enabled ? "bg-indigo-600" : "bg-gray-200",
-              "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+              enabled ? "bg-indigo-600" : "bg-surface-3 ring-1 ring-inset ring-line-strong",
+              "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50"
             )}
           >
             <span
@@ -262,10 +267,7 @@ export const IntegrationForm: React.FC<Props> = ({ onClose, data }) => {
         </Switch.Group>
         {data.connectBtn && (
           <Link to={data.connectBtn.link} target="_blank">
-            <button
-              type="button"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
-            >
+            <button type="button" className="ui-btn-secondary">
               {data.connectBtn.text}
             </button>
           </Link>

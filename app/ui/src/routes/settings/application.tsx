@@ -8,6 +8,12 @@ import { SkeletonLoading } from "../../components/Common/SkeletonLoading";
 import { useNavigate } from "react-router-dom";
 import { ApplicationCard } from "../../components/Settings/Application/ApplicationCard";
 import { useCreateConfig } from "../../hooks/useCreateConfig";
+import {
+  AdjustmentsHorizontalIcon,
+  CpuChipIcon,
+  Square3Stack3DIcon,
+} from "@heroicons/react/24/outline";
+import { CardBody, CardFooter, PageHeader } from "../../components/ui";
 
 export default function SettingsApplicationRoot() {
   const [form] = Form.useForm();
@@ -103,11 +109,18 @@ export default function SettingsApplicationRoot() {
 
   return (
     <SettingsLayout>
+      <PageHeader
+        eyebrow="Settings"
+        title="Application"
+        description="Instance-wide defaults for users, models and retrieval."
+      />
       {status === "success" && (
-        <div className="flex flex-col gap-6">
+        <div className="space-y-6">
           <ApplicationCard
             title="Application Settings"
             description="Configure your application settings"
+            icon={<AdjustmentsHorizontalIcon />}
+            className="animate-fade-up"
           >
             <Form
               form={form}
@@ -117,8 +130,8 @@ export default function SettingsApplicationRoot() {
               layout="vertical"
               onFinish={updateApplicationSettings}
             >
-              <div className="sm:overflow-hidden ">
-                <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-surface dark:border-line-strong">
+              <div>
+                <CardBody className="pb-1">
                   <Form.Item
                     label="No of bots per user"
                     name="noOfBotsPerUser"
@@ -194,16 +207,16 @@ export default function SettingsApplicationRoot() {
                   >
                     <Switch />
                   </Form.Item>
-                </div>
-                <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-surface-2 dark:border-line-strong">
+                </CardBody>
+                <CardFooter>
                   <button
                     disabled={isLoading}
                     type="submit"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="ui-btn-primary"
                   >
                     {isLoading ? "Saving..." : "Save"}
                   </button>
-                </div>
+                </CardFooter>
               </div>
             </Form>
           </ApplicationCard>
@@ -211,6 +224,9 @@ export default function SettingsApplicationRoot() {
           <ApplicationCard
             title="Models Settings"
             description="Configure your models settings"
+            icon={<CpuChipIcon />}
+            className="animate-fade-up"
+            style={{ animationDelay: "60ms" }}
           >
             <Form
               initialValues={{
@@ -219,8 +235,8 @@ export default function SettingsApplicationRoot() {
               layout="vertical"
               onFinish={updateModelSettings}
             >
-              <div className="sm:overflow-hidden ">
-                <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-surface dark:border-line-strong">
+              <div>
+                <CardBody className="pb-1">
                   <Form.Item
                     label="Default Chat Model"
                     name="defaultChatModel"
@@ -310,16 +326,16 @@ export default function SettingsApplicationRoot() {
                   >
                     <Switch />
                   </Form.Item>
-                </div>
-                <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-surface-2 dark:border-line-strong">
+                </CardBody>
+                <CardFooter>
                   <button
                     disabled={isModelLoading}
                     type="submit"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="ui-btn-primary"
                   >
                     {isModelLoading ? "Saving..." : "Save"}
                   </button>
-                </div>
+                </CardFooter>
               </div>
             </Form>
           </ApplicationCard>
@@ -327,8 +343,11 @@ export default function SettingsApplicationRoot() {
           <ApplicationCard
             title="RAG Settings"
             description="Configure your RAG settings"
+            icon={<Square3Stack3DIcon />}
+            className="animate-fade-up"
+            style={{ animationDelay: "120ms" }}
           >
-            <div className="sm:overflow-hidden ">
+            <div>
               <Form
                 initialValues={{
                   defaultChunkSize: data.defaultChunkSize,
@@ -337,7 +356,7 @@ export default function SettingsApplicationRoot() {
                 layout="vertical"
                 onFinish={updateRagSettings}
               >
-                <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-surface dark:border-line-strong">
+                <CardBody className="pb-1">
                   <Form.Item
                     label="Default Chunk Size"
                     name="defaultChunkSize"
@@ -363,16 +382,16 @@ export default function SettingsApplicationRoot() {
                   >
                     <InputNumber size="large" style={{ width: "100%" }} />
                   </Form.Item>
-                </div>
-                <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-surface-2 dark:border-line-strong">
+                </CardBody>
+                <CardFooter>
                   <button
                     disabled={isRagLoading}
                     type="submit"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="ui-btn-primary"
                   >
                     {isRagLoading ? "Saving..." : "Save"}
                   </button>
-                </div>
+                </CardFooter>
               </Form>
             </div>
           </ApplicationCard>
@@ -381,7 +400,9 @@ export default function SettingsApplicationRoot() {
       {status === "loading" && <SkeletonLoading />}
 
       {status === "error" && (
-        <div className="text-center">Something went wrong</div>
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+          Something went wrong
+        </div>
       )}
     </SettingsLayout>
   );

@@ -1,4 +1,4 @@
-import { Form, Input, Modal, Table, Tag, Tooltip, notification, Select, InputNumber } from "antd";
+import { Form, Input, Modal, Table, Tooltip, notification, Select, InputNumber } from "antd";
 import React from "react";
 import api from "../../services/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -6,8 +6,24 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SettingsLayout } from "../../Layout/SettingsLayout";
 import { SkeletonLoading } from "../../components/Common/SkeletonLoading";
 import { useNavigate } from "react-router-dom";
-import { KeyIcon, TrashIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import {
+  KeyIcon,
+  TrashIcon,
+  CurrencyDollarIcon,
+  UsersIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 import axios from "axios";
+import {
+  Badge,
+  Card,
+  CardHeader,
+  EmptyState,
+  PageHeader,
+} from "../../components/ui";
+
+const iconBtn =
+  "inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-subtle transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500";
 
 export default function SettingsTeamsRoot() {
   const [newUser] = Form.useForm();
@@ -187,103 +203,134 @@ export default function SettingsTeamsRoot() {
 
   return (
     <SettingsLayout>
+      <PageHeader
+        eyebrow="Settings"
+        title="Teams"
+        description="Invite people, manage roles, credits and access."
+      />
       {status === "success" && (
         <>
-          <div>
-            <div className="flex justify-between">
-              <h2 className="text-base font-semibold leading-7 text-gray-900 dark:text-white">
-                All Users
-              </h2>
-              <button
-                type="button"
-                onClick={() => setNewUserModal(true)}
-                className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Add New User
-              </button>
-            </div>
-            <p className="mt-1 text-sm leading-6 text-gray-500 dark:text-gray-200">
-              Manage all users in your Dialoqbase Application
-            </p>
+          <Card className="animate-fade-up overflow-hidden">
+            <CardHeader
+              icon={<UsersIcon />}
+              title="All Users"
+              description="Manage all users in your Dialoqbase Application"
+              actions={
+                <button
+                  type="button"
+                  onClick={() => setNewUserModal(true)}
+                  className="ui-btn-primary"
+                >
+                  <UserPlusIcon />
+                  <span className="hidden sm:inline">Add New User</span>
+                  <span className="sm:hidden">Add</span>
+                </button>
+              }
+            />
 
-            <dl className="mt-6 space-y-6 divide-y divide-line sm:overflow-x-none overflow-x-auto  text-sm leading-6 ">
-              <div className="mt-5 md:col-span-2 md:mt-0">
-                <Table
-                  bordered
-                  columns={[
-                    {
-                      title: "Username",
-                      dataIndex: "username",
-                      key: "username",
-                    },
-                    {
-                      title: "Email",
-                      dataIndex: "email",
-                    },
-                    {
-                      title: "Total Bots",
-                      dataIndex: "bots",
-                    },
-                    {
-                      title: "Role",
-                      dataIndex: "is_admin",
-                      render: (value) => (
-                        <Tag color={value ? "green" : "blue"}>
-                          {value ? "Admin" : "User"}
-                        </Tag>
-                      ),
-                    },
-                    {
-                      title: "Actions",
-                      render: (_, user) => (
-                        <div className="flex space-x-2">
-                          <Tooltip title="Reset Password">
+            <div className="overflow-x-auto">
+              <Table
+                columns={[
+                  {
+                    title: "Username",
+                    dataIndex: "username",
+                    key: "username",
+                    render: (value) => (
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-semibold uppercase text-indigo-700 ring-1 ring-inset ring-indigo-600/15 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20">
+                          {String(value ?? "").charAt(0)}
+                        </span>
+                        <span className="font-medium text-fg">{value}</span>
+                      </div>
+                    ),
+                  },
+                  {
+                    title: "Email",
+                    dataIndex: "email",
+                    render: (value) => (
+                      <span className="text-fg-muted">{value}</span>
+                    ),
+                  },
+                  {
+                    title: "Total Bots",
+                    dataIndex: "bots",
+                    render: (value) => (
+                      <span className="tabular-nums text-fg">{value}</span>
+                    ),
+                  },
+                  {
+                    title: "Role",
+                    dataIndex: "is_admin",
+                    render: (value) => (
+                      <Badge tone={value ? "brand" : "neutral"}>
+                        {value ? "Admin" : "User"}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    title: "Actions",
+                    align: "right",
+                    render: (_, user) => (
+                      <div className="flex justify-end gap-1">
+                        <Tooltip title="Reset Password">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setResetPasswordUserId(user.user_id);
+                              setResetPasswordModal(true);
+                            }}
+                            aria-label="Reset Password"
+                            className={`${iconBtn} hover:bg-surface-2 hover:text-fg`}
+                          >
+                            <KeyIcon className="h-4 w-4" />
+                          </button>
+                        </Tooltip>
+                        <Tooltip title="Manage Credits">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCreditUserId(user.user_id);
+                              setCreditModal(true);
+                            }}
+                            aria-label="Manage Credits"
+                            className={`${iconBtn} hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400`}
+                          >
+                            <CurrencyDollarIcon className="h-4 w-4" />
+                          </button>
+                        </Tooltip>
+                        {!user.is_admin && (
+                          <Tooltip title="Delete User">
                             <button
                               type="button"
                               onClick={() => {
-                                setResetPasswordUserId(user.user_id);
-                                setResetPasswordModal(true);
+                                setDeleteUserId(user.user_id);
+                                setDeleteUserModal(true);
                               }}
-                              className="text-red-400 hover:text-red-500"
+                              aria-label="Delete User"
+                              className={`${iconBtn} hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400`}
                             >
-                              <KeyIcon className="h-5 w-5" />
+                              <TrashIcon className="h-4 w-4" />
                             </button>
                           </Tooltip>
-                          <Tooltip title="Manage Credits">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setCreditUserId(user.user_id);
-                                setCreditModal(true);
-                              }}
-                              className="text-green-400 hover:text-green-500"
-                            >
-                              <CurrencyDollarIcon className="h-5 w-5" />
-                            </button>
-                          </Tooltip>
-                          {!user.is_admin && (
-                            <Tooltip title="Delete User">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setDeleteUserId(user.user_id);
-                                  setDeleteUserModal(true);
-                                }}
-                                className="text-red-400 hover:text-red-500"
-                              >
-                                <TrashIcon className="h-5 w-5" />
-                              </button>
-                            </Tooltip>
-                          )}
-                        </div>
-                      ),
-                    },
-                  ]}
-                  dataSource={data}
-                />
-              </div>
-            </dl>
-          </div>
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+                dataSource={data}
+                locale={{
+                  emptyText: (
+                    <EmptyState
+                      icon={<UsersIcon />}
+                      title="No users yet"
+                      description="Add a user to give them access to this workspace."
+                      className="py-10"
+                    />
+                  ),
+                }}
+              />
+            </div>
+          </Card>
 
           <Modal
             title="Reset Password"
@@ -313,7 +360,7 @@ export default function SettingsTeamsRoot() {
                 <button
                   disabled={resetPasswordLoading}
                   type="submit"
-                  className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="ui-btn-primary"
                 >
                   {resetPasswordLoading ? "Saving..." : "Save"}
                 </button>
@@ -373,7 +420,7 @@ export default function SettingsTeamsRoot() {
                 <button
                   disabled={createUserLoading}
                   type="submit"
-                  className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="ui-btn-primary"
                 >
                   {createUserLoading ? "Saving..." : "Save"}
                 </button>
@@ -387,18 +434,20 @@ export default function SettingsTeamsRoot() {
             onCancel={() => setDeleteUserModal(false)}
             footer={null}
           >
-            <p>Are you sure you want to delete this user?</p>
-            <div className="flex justify-end mt-4">
+            <p className="text-sm leading-relaxed text-fg-muted">
+              Are you sure you want to delete this user?
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setDeleteUserModal(false)}
-                className="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-line-strong rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="ui-btn-secondary"
               >
                 Cancel
               </button>
               <button
                 onClick={() => deleteUser({ user_id: deleteUserId })}
                 disabled={deleteUserLoading}
-                className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="ui-btn-danger"
               >
                 {deleteUserLoading ? "Deleting..." : "Delete"}
               </button>
@@ -440,7 +489,7 @@ export default function SettingsTeamsRoot() {
                 <button
                   disabled={updateCreditsLoading}
                   type="submit"
-                  className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="ui-btn-primary"
                 >
                   {updateCreditsLoading ? "Updating..." : "Update Credits"}
                 </button>
@@ -452,7 +501,9 @@ export default function SettingsTeamsRoot() {
       {status === "loading" && <SkeletonLoading />}
 
       {status === "error" && (
-        <div className="text-center">Something went wrong</div>
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+          Something went wrong
+        </div>
       )}
     </SettingsLayout>
   );

@@ -6,6 +6,8 @@ import { SkeletonLoading } from "../../components/Common/SkeletonLoading";
 import { Cooking } from "../../components/Common/Cooking";
 import { EmbedBoard } from "../../components/Bot/Embed/EmbedBoard";
 import { PreviewIframe } from "../../components/Bot/Preview/PreviewIFrame";
+import { Card, CardHeader, PageHeader } from "../../components/ui";
+import { EyeIcon } from "@heroicons/react/24/outline";
 
 export default function BotEmbedRoot() {
   const param = useParams<{ id: string }>();
@@ -32,39 +34,32 @@ export default function BotEmbedRoot() {
   }, [status]);
 
   return (
-    <div className="mx-auto mt-3 w-full max-w-7xl">
+    <div className="ui-page">
       {status === "loading" && <SkeletonLoading />}
       {status === "success" && data.inProgress && <Cooking />}
       {status === "success" && !data.inProgress && (
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="sm:flex sm:items-center">
-            <div className="sm:flex-auto">
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Embedding</h1>
-              <p className="mt-2 text-sm text-gray-700 dark:text-gray-400">
-                Embed your bot on your website or blog.
-              </p>
-            </div>
-          </div>
-          <div className="mx-auto mt-6 max-w-3xl lg:max-w-7xl">
-            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-8">
-              <div className="grid grid-cols-1 gap-4 lg:col-span-2">
-                <section aria-labelledby="section-1-title">
-                  <div className="overflow-hidden">
-                      <EmbedBoard public_id={data.public_id} />
-                    </div>
-                </section>
-              </div>
-              <div className="grid grid-cols-1 gap-4">
-                <section aria-labelledby="section-2-title">
-                  <div className="overflow-hidden rounded-lg bg-white border dark:bg-canvas dark:border-line-strong">
-                    <div>
-                      <PreviewIframe public_id={data.public_id} />
-                    </div>
-                  </div>
-                </section>
-              </div>
-            </div>
+        <div>
+          <PageHeader
+            title="Embed"
+            description="Put your bot on any website or app. Tweak the widget, copy the snippet, and paste it into your page."
+          />
+          <div className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+            <section aria-label="Embed snippets" className="min-w-0 lg:col-span-2">
+              <EmbedBoard public_id={data.public_id} />
+            </section>
+            <section
+              aria-label="Live preview"
+              className="min-w-0 lg:sticky lg:top-20"
+            >
+              <Card className="overflow-hidden">
+                <CardHeader
+                  icon={<EyeIcon />}
+                  title="Live preview"
+                  description="How visitors will see your bot."
+                />
+                <PreviewIframe public_id={data.public_id} />
+              </Card>
+            </section>
           </div>
         </div>
       )}

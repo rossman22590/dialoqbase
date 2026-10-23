@@ -12,10 +12,10 @@ export const PreviewIframe = ({ public_id }: Props) => {
   );
   return (
     <>
-      <div>
+      <div className="bg-surface-2">
         <iframe
           src={`${hostUrl}/bot/${public_id}?mode=iframe&no=button`}
-          className="w-full bg-white"
+          className="block w-full border-0 bg-white"
           height={585}
           title="Botcraft Pro"
         />

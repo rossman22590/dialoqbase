@@ -1,9 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, Skeleton, Table } from "antd";
+import { Table } from "antd";
 import React from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
-import { DaysPicker, formatCredits, formatNumber, formatUsd } from "./shared";
+import {
+  DaysPicker,
+  SectionHeader,
+  TableCard,
+  formatCredits,
+  formatNumber,
+  formatUsd,
+} from "./shared";
+import { Skeleton } from "../ui";
 
 type UsageRow = {
   messages: number;
@@ -58,7 +66,7 @@ const UsageTable = ({
   rowKey: string;
   first: any;
 }) => (
-  <Card size="small" title={title}>
+  <TableCard title={title}>
     <Table
       rowKey={rowKey}
       size="small"
@@ -67,7 +75,7 @@ const UsageTable = ({
       pagination={{ pageSize: 10, hideOnSinglePage: true }}
       scroll={{ x: true }}
     />
-  </Card>
+  </TableCard>
 );
 
 export const AdminUsage = () => {
@@ -78,19 +86,21 @@ export const AdminUsage = () => {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold dark:text-white">Usage breakdown</h2>
-          <p className="text-xs text-gray-500">
-            OpenRouter cost is only recorded for messages billed after this update.
-          </p>
+    <div className="space-y-6 pt-2">
+      <SectionHeader
+        title="Usage breakdown"
+        description="OpenRouter cost is only recorded for messages billed after this update."
+        actions={<DaysPicker value={days} onChange={setDays} />}
+      />
+      {status === "loading" && (
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-64 rounded-2xl" />
+          ))}
         </div>
-        <DaysPicker value={days} onChange={setDays} />
-      </div>
-      {status === "loading" && <Skeleton active />}
+      )}
       {data && (
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-2">
           <UsageTable
             title="By user"
             rows={data.by_user}
@@ -101,7 +111,7 @@ export const AdminUsage = () => {
               render: (_: any, r: UsageRow) => (
                 <Link
                   to={`/admin/transactions?user_id=${r.user_id}&user=${encodeURIComponent(r.username)}`}
-                  className="text-indigo-600"
+                  className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
                 >
                   {r.username}
                 </Link>
@@ -118,13 +128,16 @@ export const AdminUsage = () => {
               render: (_: any, r: UsageRow) =>
                 r.bot_name ? (
                   <div>
-                    <Link to={`/bot/${r.bot_id}`} className="text-indigo-600">
+                    <Link
+                      to={`/bot/${r.bot_id}`}
+                      className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                    >
                       {r.bot_name}
                     </Link>
-                    <div className="text-xs text-gray-500">{r.owner}</div>
+                    <div className="text-xs text-fg-subtle">{r.owner}</div>
                   </div>
                 ) : (
-                  <span className="text-gray-400">{r.bot_id || "unknown"} (deleted)</span>
+                  <span className="text-fg-subtle">{r.bot_id || "unknown"} (deleted)</span>
                 ),
             }}
           />

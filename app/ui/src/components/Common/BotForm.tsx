@@ -18,6 +18,7 @@ import {
   GlobeAltIcon,
   InboxIcon,
 } from "@heroicons/react/24/outline";
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import React from "react";
 import { SpiderIcon } from "../Icons/SpiderIcon";
 // import { GithubIcon } from "../Icons/GithubIcon";
@@ -86,10 +87,7 @@ export const BotForm = ({
             },
           ]}
         >
-          <Input.TextArea
-            placeholder="Enter the text"
-            className=" block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-line-strong rounded-md"
-          />
+          <Input.TextArea placeholder="Enter the text" rows={5} />
         </Form.Item>
       ),
     },
@@ -159,9 +157,11 @@ export const BotForm = ({
                 return false;
               }}
             >
-              <div className="p-3">
-                <p className="ant-upload-drag-icon justify-center flex">
-                  <InboxIcon className="h-10 w-10 text-gray-400" />
+              <div className="px-3 py-4">
+                <p className="ant-upload-drag-icon flex justify-center">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20">
+                    <InboxIcon className="h-5 w-5" aria-hidden="true" />
+                  </span>
                 </p>
                 <p className="ant-upload-text">
                   Click or drag PDF, Docx, CSV, TXT, MP3, MP4, Zip, or JSON
@@ -175,13 +175,13 @@ export const BotForm = ({
               </div>
             </Upload.Dragger>
           </Form.Item>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs leading-relaxed text-fg-subtle">
             If you find any issues, please report them on{" "}
             <a
               href={`https://myapps.ai`}
               target="_blank"
               rel="noreferrer"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               Support
             </a>
@@ -240,13 +240,13 @@ export const BotForm = ({
             />
           </Form.Item>
 
-          <p className="text-sm text-gray-500">
+          <p className="text-xs leading-relaxed text-fg-subtle">
             If you find any issues, please report them on{" "}
             <a
               href={`https://myapps.ai`}
               target="_blank"
               rel="noreferrer"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               Support
             </a>
@@ -301,13 +301,13 @@ export const BotForm = ({
     //         </Col>
     //       </Row>
 
-    //       <p className="text-sm text-gray-500">
+    //       <p className="text-xs leading-relaxed text-fg-subtle">
     //         If you find any issues, please report them on{" "}
     //         <a
     //           href={`https://myapps.ai`}
     //           target="_blank"
     //           rel="noreferrer"
-    //           className="font-medium text-indigo-600 hover:text-indigo-500"
+    //           className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
     //         >
     //           Support
     //         </a>
@@ -505,11 +505,14 @@ export const BotForm = ({
             setSelectedSource(e);
           }}
         >
-          <RadioGroup.Label className="text-base font-medium text-gray-800 dark:text-gray-200">
+          <RadioGroup.Label className="block text-sm font-semibold tracking-tight text-fg">
             Select a data source
           </RadioGroup.Label>
+          <p className="mt-0.5 text-sm leading-relaxed text-fg-muted">
+            Where should your bot learn from?
+          </p>
 
-          <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
+          <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
             {availableSources.map((source) => (
               <RadioGroup.Option
                 key={source.id}
@@ -517,35 +520,41 @@ export const BotForm = ({
                 className={({ checked, active }) =>
                   classNames(
                     checked
-                      ? "border-transparent"
-                      : "border-line-strong dark:border-line-strong",
-                    active
-                      ? "border-indigo-500 ring-0 ring-indigo-500 dark:border-line-strong dark:ring-gray-900"
-                      : "",
-                    "relative  items-center justify-center flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none dark:bg-surface-2"
+                      ? "border-indigo-500 bg-indigo-50/60 shadow-soft ring-1 ring-indigo-500 dark:border-indigo-400 dark:bg-indigo-500/10 dark:ring-indigo-400"
+                      : "border-line bg-surface shadow-soft hover:-translate-y-0.5 hover:border-line-strong hover:shadow-raised",
+                    active && !checked ? "ring-2 ring-indigo-500/30" : "",
+                    "group relative flex cursor-pointer flex-col items-start gap-3 rounded-xl border p-3.5 transition-all duration-200 ease-out focus:outline-none"
                   )
                 }
               >
-                {({ checked, active }) => (
+                {({ checked }) => (
                   <>
-                    <span className="flex-shrink-0 flex items-center justify-centerrounded-lg">
-                      <RadioGroup.Label
-                        as="span"
-                        className="block text-sm font-medium text-gray-900 dark:text-gray-200"
-                      >
-                        <source.icon
-                          className="h-6 w-6 mr-3"
-                          aria-hidden="true"
-                        />
-                      </RadioGroup.Label>
-                      {source.title}
-                    </span>
-
                     <span
                       className={classNames(
-                        active ? "border" : "border-2",
-                        checked ? "border-indigo-500" : "border-transparent",
-                        "pointer-events-none absolute -inset-px rounded-lg"
+                        checked
+                          ? "bg-indigo-600 text-white ring-indigo-600 dark:bg-indigo-500 dark:ring-indigo-500"
+                          : "bg-surface-2 text-fg-muted ring-line group-hover:text-indigo-600 dark:group-hover:text-indigo-300",
+                        "flex h-8 w-8 items-center justify-center rounded-lg ring-1 ring-inset transition-colors"
+                      )}
+                    >
+                      <source.icon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <RadioGroup.Label
+                      as="span"
+                      className={classNames(
+                        checked
+                          ? "text-indigo-700 dark:text-indigo-200"
+                          : "text-fg",
+                        "block text-sm font-medium"
+                      )}
+                    >
+                      {source.title}
+                    </RadioGroup.Label>
+
+                    <CheckCircleIcon
+                      className={classNames(
+                        checked ? "scale-100 opacity-100" : "scale-75 opacity-0",
+                        "pointer-events-none absolute right-2.5 top-2.5 h-4 w-4 text-indigo-600 transition-all duration-200 ease-out dark:text-indigo-400"
                       )}
                       aria-hidden="true"
                     />
@@ -606,13 +615,13 @@ export const BotForm = ({
                 />
               </Form.Item>
 
-              <p className="text-sm text-gray-500">
+              <p className="text-xs leading-relaxed text-fg-subtle">
                 If you find any issues, please report them on{" "}
                 <a
                   href={`https://myapps.ai`}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                  className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                 >
                   Support
                 </a>
@@ -628,7 +637,7 @@ export const BotForm = ({
         <Form.Item
           hidden={!showEmbeddingAndModels}
           label={
-            <span className="font-medium text-gray-800 text-sm dark:text-gray-200">
+            <span className="text-sm font-medium text-fg">
               Chat Model
             </span>
           }
@@ -656,7 +665,7 @@ export const BotForm = ({
         <Form.Item
           hidden={!showEmbeddingAndModels}
           label={
-            <span className="font-medium text-gray-800 text-sm dark:text-gray-200">
+            <span className="text-sm font-medium text-fg">
               Embedding model
             </span>
           }
@@ -686,8 +695,14 @@ export const BotForm = ({
           <button
             type="submit"
             disabled={isLoading}
-            className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="ui-btn-primary h-10 w-full"
           >
+            {isLoading && (
+              <span
+                aria-hidden="true"
+                className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+              />
+            )}
             {isLoading ? "Creating..." : "Create"}
           </button>
         </Form.Item>

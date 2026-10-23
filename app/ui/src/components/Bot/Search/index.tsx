@@ -10,6 +10,7 @@ import { notification } from "antd";
 import axios from "axios";
 import { useSettings } from "../../../hooks/useSettings";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { Card, EmptyState, PageHeader } from "../../ui";
 
 export const BotSearchFeature = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,28 +41,28 @@ export const BotSearchFeature = () => {
   });
   if (status === "success" && !settings.internalSearchEnabled) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <ExclamationTriangleIcon className="h-12 w-12 text-yellow-500 mb-4" />
-        <p className="text-center text-gray-900 dark:text-white">
-          Internal search needs to be enabled by an admin in order to use this
-          feature.
-        </p>
+      <div className="ui-page max-w-5xl">
+        <Card className="mt-8">
+          <EmptyState
+            icon={<ExclamationTriangleIcon />}
+            title="Search is turned off"
+            description="Internal search needs to be enabled by an admin in order to use this feature."
+          />
+        </Card>
       </div>
     );
   }
   return (
-    <div className="mx-auto my-3 w-full max-w-7xl">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+    <div className="ui-page max-w-5xl">
+      <PageHeader
+        title={
+          <span className="inline-flex items-center gap-2.5">
             Search
-          </h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-400">
-            Search documents using semantic search. This feature is
-            experimental.
-          </p>
-        </div>
-      </div>
+            <span className="ui-badge ui-badge-brand align-middle">Beta</span>
+          </span>
+        }
+        description="Search documents using semantic search. This feature is experimental."
+      />
 
       <AnimatePresence mode="wait">
         {defaultSearchBox ? (

@@ -51,26 +51,26 @@ export default function BotDSRoot() {
   }, [status]);
 
   return (
-    <div className="mx-auto my-3 w-full max-w-7xl">
+    <div className="ui-page">
       {status === "loading" && <SkeletonLoading />}
       {status === "success" && (
-        <div className="px-4 sm:px-6 lg:px-8">
+        <div>
           <DsTable
             data={botData.data}
             searchNode={
-              <div className="flex mb-6 justify-end sm:justify-center md:justify-end">
+              <div className="w-full sm:w-72">
                 <Input.Search
                   value={search}
                   onSearch={(value) => setSearchValue(value)}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search"
-                  style={{ width: 300 }}
+                  placeholder="Search sources"
+                  className="w-full"
                 />
               </div>
             }
           />
           {botData.total >= 10 && (
-            <div className="my-3 flex items-center justify-end">
+            <div className="mt-4 flex items-center justify-end">
               <Pagination
                 onShowSizeChange={(current, size) => {
                   setPage(current);

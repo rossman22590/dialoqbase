@@ -22,7 +22,7 @@ export const EmbedBoard = ({ public_id }: Props) => {
   const showNextjs = !type || type === "nextjs";
 
   return (
-    <div className="lg:col-span-9">
+    <div className="space-y-6">
       {showHtml && (
         <EmbedBoardScript
           hostUrl={hostUrl}
@@ -41,13 +41,13 @@ export const EmbedBoard = ({ public_id }: Props) => {
         <>
           <EmbedBoardCard
             title="Public URL"
-            description="This is the public URL of your bot. You can use this URL to embed"
+            description="The public URL of your bot. Share it directly or use it to embed."
             content={`${hostUrl}/bot/${public_id}`}
           />
 
           <EmbedBoardCard
             title="Iframe"
-            description="You can use this iframe to embed your bot"
+            description="Drop this iframe anywhere to embed your bot inline."
             content={`<iframe src="${hostUrl}/bot/${public_id}?mode=iframe" width="400" height="500" />`}
           />
         </>

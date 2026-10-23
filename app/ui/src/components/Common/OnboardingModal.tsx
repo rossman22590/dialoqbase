@@ -143,10 +143,10 @@ export const OnboardingModal: React.FC = () => {
             centered
             maskClosable={false}
             className="premium-onboarding"
-            bodyStyle={{ padding: 0 }}
+            styles={{ body: { padding: 0 } }}
             closeIcon={null} // Cleaner look
         >
-            <div className="flex flex-col lg:flex-row min-h-[580px] bg-white dark:bg-canvas overflow-hidden rounded-[32px] font-sans selection:bg-purple-100 dark:selection:bg-purple-900/40">
+            <div className="flex flex-col lg:flex-row min-h-[580px] bg-surface overflow-hidden rounded-[28px] border border-line shadow-float">
 
                 {/* Left Side: Visual / Mood */}
                 <div className={`relative w-full lg:w-[400px] bg-gradient-to-br ${current.color} overflow-hidden flex flex-col items-center justify-center p-12 transition-all duration-700 ease-in-out`}>
@@ -188,7 +188,7 @@ export const OnboardingModal: React.FC = () => {
                 </div>
 
                 {/* Right Side: Content */}
-                <div className="flex-1 flex flex-col p-10 lg:p-16 relative bg-white dark:bg-canvas">
+                <div className="flex-1 flex flex-col p-8 sm:p-10 lg:p-14 relative bg-surface">
 
                     {/* Header / Subtitle */}
                     <AnimatePresence mode="wait">
@@ -199,15 +199,15 @@ export const OnboardingModal: React.FC = () => {
                             exit={{ y: -20, opacity: 0 }}
                             transition={{ delay: 0.1 }}
                         >
-                            <span className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 mb-3 block">
+                            <span className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
                                 {current.subtitle}
                             </span>
-                            <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-8">
+                            <h2 className="mb-5 text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
                                 {current.title}
                             </h2>
 
                             <div className="max-w-md">
-                                <p className="text-lg text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                                <p className="text-base leading-relaxed text-fg-muted sm:text-[17px]">
                                     {current.description}
                                 </p>
                             </div>
@@ -215,13 +215,13 @@ export const OnboardingModal: React.FC = () => {
                     </AnimatePresence>
 
                     {/* Interactive Preview Concept (Static but looks dynamic) */}
-                    <div className={`mt-auto mb-12 p-6 rounded-3xl border border-line dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center gap-4 transition-all duration-700 ${current.glow}`}>
+                    <div className={`mt-auto mb-12 p-6 rounded-3xl border border-line bg-surface-2/60 flex items-center gap-4 transition-all duration-700 ${current.glow}`}>
                         <div className={`p-2 rounded-xl bg-gradient-to-br ${current.color} shadow-lg`}>
                             <SparklesIcon className="h-5 w-5 text-white" />
                         </div>
                         <div className="flex-1">
-                            <div className="h-2 w-1/3 bg-gray-200 dark:bg-gray-800 rounded-full mb-2" />
-                            <div className="h-2 w-2/3 bg-gray-100 dark:bg-gray-800/50 rounded-full" />
+                            <div className="skeleton mb-2 h-2 w-1/3 rounded-full" />
+                            <div className="skeleton h-2 w-2/3 rounded-full" />
                         </div>
                     </div>
 
@@ -230,7 +230,7 @@ export const OnboardingModal: React.FC = () => {
                         <Button
                             type="text"
                             onClick={handleFinish}
-                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 font-bold text-xs p-0 uppercase tracking-widest"
+                            className="p-0 text-xs font-medium uppercase tracking-widest text-fg-subtle hover:!text-fg"
                         >
                             Skip to App
                         </Button>
@@ -239,7 +239,7 @@ export const OnboardingModal: React.FC = () => {
                             {currentStep > 0 && (
                                 <button
                                     onClick={handleBack}
-                                    className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-line dark:border-white/5 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-200 dark:hover:border-white/20 transition-all font-bold"
+                                    className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-fg-subtle shadow-soft transition-all hover:border-line-strong hover:text-fg active:scale-95"
                                 >
                                     <ChevronLeftIcon className="h-5 w-5" />
                                 </button>
@@ -247,7 +247,7 @@ export const OnboardingModal: React.FC = () => {
 
                             <button
                                 onClick={handleNext}
-                                className={`group relative overflow-hidden flex items-center gap-3 px-10 py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-full font-bold transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/10 dark:shadow-white/5`}
+                                className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-indigo-500 to-indigo-600 px-7 py-3 font-medium text-white shadow-brand ring-1 ring-inset ring-white/10 transition-all hover:brightness-110 active:scale-95"
                             >
                                 <span className="relative z-10">
                                     {currentStep === steps.length - 1 ? "Get Started" : "Continue"}

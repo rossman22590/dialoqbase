@@ -3,6 +3,8 @@ import { notification } from "antd";
 import React from "react";
 import api from "../../../../services/api";
 import { useParams } from "react-router-dom";
+import { KeyIcon } from "@heroicons/react/24/outline";
+import { Card, EmptyState } from "../../../ui";
 
 const NoApiKeyComponent: React.FC = () => {
   const client = useQueryClient();
@@ -31,21 +33,24 @@ const NoApiKeyComponent: React.FC = () => {
   );
 
   return (
-    <div className="m-0 p-0 h-screen flex flex-col justify-start items-center">
-      <div className="mt-20 p-8 border bg-gray-50 border-line-strong rounded-lg dark:bg-canvas dark:border-line-strong">
-        <h1 className="text-2xl font-semibold mb-4 dark:text-white">No API Key Found</h1>
-        <p className="mb-4 dark:text-gray-500">You need to generate an API key to get started.</p>
-        <button
-          disabled={isGeneratingAPIKey}
-          onClick={() => {
-            generateAPIKey();
-          }}
-          className="bg-indigo-600 w-full text-center text-white px-4 py-2 rounded hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {!isGeneratingAPIKey ? "Generate API Key" : "Generating API Key..."}
-        </button>
-      </div>
-    </div>
+    <Card className="mx-auto max-w-2xl">
+      <EmptyState
+        icon={<KeyIcon />}
+        title="No API key found"
+        description="You need to generate an API key to get started. You can regenerate it at any time."
+        action={
+          <button
+            disabled={isGeneratingAPIKey}
+            onClick={() => {
+              generateAPIKey();
+            }}
+            className="ui-btn-primary"
+          >
+            {!isGeneratingAPIKey ? "Generate API Key" : "Generating API Key..."}
+          </button>
+        }
+      />
+    </Card>
   );
 };
 

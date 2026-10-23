@@ -2,6 +2,7 @@ import React from "react";
 import { DashboardGrid } from "../components/Dashboard/DashboardGrid";
 import { DashboardNewBtn } from "../components/Dashboard/DashboardNewBtn";
 import { useMessage } from "../hooks/useMessage";
+import { PageHeader } from "../components/ui";
 
 export default function Root() {
   const { setMessages, setHistory, setIsFirstMessage , setHistoryId} = useMessage();
@@ -14,10 +15,14 @@ export default function Root() {
   }, []);
 
   return (
-    <div className="mx-auto py-10 max-w-7xl px-3 sm:px-6 lg:px-8">
-
-      {/* Create Bot Button */}
-      <DashboardNewBtn />
+    <div className="ui-page">
+      <PageHeader
+        className="animate-fade-up"
+        eyebrow="Workspace"
+        title="Your bots"
+        description="Every bot you've built, trained on your own data. Open one to chat with it, tune its settings or embed it anywhere."
+        actions={<DashboardNewBtn />}
+      />
       <DashboardGrid />
     </div>
   );

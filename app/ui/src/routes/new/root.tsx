@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useMutation } from "@tanstack/react-query";
 import { BotForm } from "../../components/Common/BotForm";
-import { Form, notification, Skeleton } from "antd";
+import { Form, notification } from "antd";
 import axios from "axios";
 import { useCreateConfig } from "../../hooks/useCreateConfig";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { Card, PageHeader, Skeleton } from "../../components/ui";
 
 export default function NewRoot() {
   const { data: botConfig, status: botConfigStatus } = useCreateConfig();
@@ -66,34 +68,58 @@ export default function NewRoot() {
 
   return (
     <>
-      <div className="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Create a new bot
-          </h2>
-        </div>
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
-          <div className="bg-white py-8 px-4 border sm:rounded-lg sm:px-10 dark:bg-surface dark:border-line-strong">
-            {botConfigStatus === "success" && (
-              <BotForm
-                botConfig={botConfig}
-                showEmbeddingAndModels={true}
-                createBot={createBot}
-                isLoading={isLoading}
-                setSelectedSource={setSelectedSource}
-                form={form}
+      <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+        <PageHeader
+          className="animate-fade-up"
+          eyebrow="New bot"
+          title="Create a new bot"
+          description="Choose where your bot should learn from, then pick the models it uses. You can add more sources and change settings later."
+        />
+        <Card
+          className="animate-fade-up mt-8 px-5 py-6 sm:px-8 sm:py-8"
+          style={{ animationDelay: "80ms" }}
+        >
+          {botConfigStatus === "success" && (
+            <BotForm
+              botConfig={botConfig}
+              showEmbeddingAndModels={true}
+              createBot={createBot}
+              isLoading={isLoading}
+              setSelectedSource={setSelectedSource}
+              form={form}
+            />
+          )}
+          {botConfigStatus === "error" && (
+            <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+              <ExclamationTriangleIcon
+                className="mt-0.5 h-5 w-5 shrink-0"
+                aria-hidden="true"
               />
-            )}
-            {botConfigStatus === "error" && (
               <div>Something went wrong while fetching config</div>
-            )}
-            {botConfigStatus === "loading" && (
-              <div className="flex justify-center items-center">
-                <Skeleton active paragraph={{ rows: 5 }} />
+            </div>
+          )}
+          {botConfigStatus === "loading" && (
+            <div aria-busy="true" className="space-y-6">
+              <span className="sr-only">Loading</span>
+              <Skeleton className="h-4 w-40" />
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {[1, 2, 3, 4, 5, 6].map((item) => (
+                  <Skeleton key={item} className="h-[84px] rounded-xl" />
+                ))}
               </div>
-            )}
-          </div>
-        </div>
+              <Skeleton className="h-10 w-full rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-10 w-full rounded-xl" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3.5 w-28" />
+                <Skeleton className="h-10 w-full rounded-xl" />
+              </div>
+              <Skeleton className="h-10 w-full rounded-xl" />
+            </div>
+          )}
+        </Card>
       </div>
     </>
   );

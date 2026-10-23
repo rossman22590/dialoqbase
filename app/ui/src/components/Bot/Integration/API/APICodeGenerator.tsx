@@ -9,9 +9,16 @@ export const CodePreview: React.FC<{ code: string; lang: string }> = ({
   lang,
 }) => {
   return (
-    <div className="code relative text-base bg-gray-800 rounded-md overflow-hidden">
-      <div className="flex items-center justify-end py-1.5 px-4">
-        <CopyBtn showText={false} iconSize="h-4 w-4" value={code} />
+    <div className="code relative overflow-hidden rounded-xl border border-zinc-900/10 bg-zinc-950 text-base shadow-raised ring-1 ring-inset ring-white/[0.06] dark:border-white/10">
+      <div className="flex items-center justify-between border-b border-white/[0.08] bg-white/[0.03] py-1.5 pl-4 pr-1.5">
+        <span className="font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-400">
+          {lang}
+        </span>
+        <CopyBtn
+          iconSize="h-4 w-4"
+          value={code}
+          className="h-8 rounded-lg px-2.5 py-1 text-xs font-medium hover:bg-white/10"
+        />
       </div>
       <SyntaxHighlighter
         children={String(code).replace(/\n$/, "")}
@@ -20,6 +27,8 @@ export const CodePreview: React.FC<{ code: string; lang: string }> = ({
         showLineNumbers
         customStyle={{
           margin: 0,
+          padding: "1rem 1.25rem",
+          background: "transparent",
           fontSize: "1rem",
           lineHeight: "1.5rem",
         }}

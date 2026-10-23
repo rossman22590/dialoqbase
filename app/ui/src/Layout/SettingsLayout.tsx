@@ -107,7 +107,7 @@ export const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
             "px-4 py-10 sm:px-6 lg:flex-auto lg:px-0 lg:py-12 lg:mx-auto lg:max-w-3xl"
           }
         >
-          <div className="mx-auto max-w-3xl space-y-10 lg:mx-0 lg:max-w-none">
+          <div className="mx-auto max-w-3xl space-y-8 lg:mx-0 lg:max-w-none">
             {children}
           </div>
         </main>

@@ -116,7 +116,7 @@ export const LLMForm: React.FC<Props> = ({ setOpenAddModel }) => {
   );
 
   return (
-    <>
+    <div className="pt-2">
       {type === "url" && (
         <Form
           form={fetchUrlForm}
@@ -281,7 +281,7 @@ export const LLMForm: React.FC<Props> = ({ setOpenAddModel }) => {
           <button
             type="submit"
             disabled={isSaveModel}
-            className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="ui-btn-primary mt-2 h-10 w-full"
           >
             {noFetchProviders.includes(apiType)
               ? !isSaveLocalModel
@@ -364,12 +364,12 @@ export const LLMForm: React.FC<Props> = ({ setOpenAddModel }) => {
           <button
             disabled={isSaveLocalModel}
             type="submit"
-            className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="ui-btn-primary mt-2 h-10 w-full"
           >
             {!isSaveLocalModel ? "Save Model" : "Saving Model..."}
           </button>
         </Form>
       )}
-    </>
+    </div>
   );
 };

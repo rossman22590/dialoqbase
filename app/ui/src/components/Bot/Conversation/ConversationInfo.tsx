@@ -1,59 +1,59 @@
-import { UserIcon } from "@heroicons/react/24/outline";
+import {
+  ComputerDesktopIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
+import dayjs from "dayjs";
 import { ConversationsByType } from "../../../@types/conversation";
 import { getOSAndBrowser } from "../../../utils/useragent";
-import { PlaygroundMessage } from "../Playground/Message";
+import { BotAvatar, PlaygroundMessage } from "../Playground/Message";
 
 export const ConversationInfo = ({ data }: { data: ConversationsByType }) => {
   return (
     <div className="grow  flex flex-col md:translate-x-0 transition-transform duration-300 ease-in-out">
-      <nav className="flex flex-col flex-1 p-3 overflow-y-auto bg-white border-b dark:bg-surface dark:border-line-strong">
-        <span className="text-md font-thin text-gray-500 dark:text-gray-200">
-          {data?.metdata?.user_agent
-            ? getOSAndBrowser(data?.metdata?.user_agent)
-            : 
-            data?.metdata?.info || 'Anonymous'
-            }
-        </span>
-      </nav>
+      <div className="sticky top-14 z-10 flex items-center gap-3 border-b border-line bg-app/85 px-4 py-3 backdrop-blur-xl sm:px-6">
+        <div className="ui-icon-tile">
+          <ComputerDesktopIcon />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold tracking-tight text-fg">
+            {data?.metdata?.user_agent
+              ? getOSAndBrowser(data?.metdata?.user_agent)
+              : data?.metdata?.info || "Anonymous"}
+          </p>
+          <p className="text-xs tabular-nums text-fg-subtle">
+            {data.all_messages.length}{" "}
+            {data.all_messages.length === 1 ? "message" : "messages"}
+            {data?.created_at &&
+              ` · ${dayjs(data.created_at).format("MMM D, YYYY h:mm A")}`}
+          </p>
+        </div>
+      </div>
       <div className="chat-scroll flex-grow overflow-y-auto">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-7 px-4 py-6 sm:px-6">
-        {data.all_messages.map((sender, index) => {
-          return (
-            <PlaygroundMessage
-              isBot={sender.isBot}
-              message={sender.message || ""}
-              onSourceClick={() => {}}
-              textToSpeech={false}
-              textToSpeechType="web_api"
-              sources={sender.sources}
-              key={index}
-              hideCopy={true}
-              userAvatar={<div>
-                <UserIcon className="w-10 h-10 text-gray-500" />
-              </div>}
-              botAvatar={
-                <div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="w-10 h-10 text-blue-500"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 8V4H8"></path>
-                    <rect width="16" height="12" x="4" y="8" rx="2"></rect>
-                    <path d="M2 14h2M20 14h2M15 13v2M9 13v2"></path>
-                  </svg>
-                </div>
-              }
-            />
-          );
-        })}
+          {data.all_messages.map((sender, index) => {
+            return (
+              <PlaygroundMessage
+                isBot={sender.isBot}
+                message={sender.message || ""}
+                onSourceClick={() => {}}
+                textToSpeech={false}
+                textToSpeechType="web_api"
+                sources={sender.sources}
+                key={index}
+                hideCopy={true}
+                userAvatar={
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-3 text-fg-muted ring-1 ring-inset ring-line">
+                    <UserIcon className="!h-4 !w-4" />
+                  </div>
+                }
+                botAvatar={
+                  <div className="[&_svg]:!h-4 [&_svg]:!w-4">
+                    <BotAvatar />
+                  </div>
+                }
+              />
+            );
+          })}
         </div>
       </div>
     </div>

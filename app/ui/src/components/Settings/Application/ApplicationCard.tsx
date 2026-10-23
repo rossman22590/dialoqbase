@@ -1,24 +1,24 @@
+import { Card, CardHeader } from "../../ui";
+
 export const ApplicationCard = ({
   children,
   description,
   title,
+  icon,
+  className,
+  style,
 }: {
   children: React.ReactNode;
   title: string;
   description: string;
+  icon?: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
 }) => {
   return (
-    <div>
-      <h2 className="text-base font-semibold leading-7 text-gray-900 dark:text-white">
-        {title}
-      </h2>
-      <p className="mt-1 text-sm leading-6 text-gray-500 dark:text-gray-200">
-        {description}
-      </p>
-
-      <dl className="mt-6 space-y-6 divide-y divide-line  border-line text-sm leading-6 dark:text-gray-200">
-        <div className="mt-5 md:col-span-2 md:mt-0">{children}</div>
-      </dl>
-    </div>
+    <Card className={className} style={style}>
+      <CardHeader icon={icon} title={title} description={description} />
+      {children}
+    </Card>
   );
 };

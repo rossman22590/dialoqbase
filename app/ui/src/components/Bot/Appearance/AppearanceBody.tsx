@@ -3,6 +3,8 @@ import { AppearanceType } from "./types";
 import React from "react";
 import { AppearanceForm } from "./AppearanceForm";
 import { AppearancePreview } from "./AppearancePreview";
+import { Card, CardHeader, PageHeader } from "../../ui";
+import { EyeIcon, SwatchIcon } from "@heroicons/react/24/outline";
 
 type Props = AppearanceType;
 
@@ -16,35 +18,39 @@ export const AppearanceBody = (props: Props) => {
   }, [props.data]);
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Appearance</h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-400">
-            Customize the appearance of your bot.
-          </p>
-        </div>
-      </div>
-      <div className="mx-auto max-w-3xl mt-6 lg:max-w-7xl">
-        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-8">
-          <div className="grid grid-cols-1 gap-4 lg:col-span-2">
-            <section aria-labelledby="section-1-title">
-              <div className="overflow-hidden rounded-lg bg-white border dark:bg-surface dark:border-line-strong">
-                <div className="p-6">
-                  <AppearanceForm initialData={props} form={form} />
-                </div>
-              </div>
-            </section>
-          </div>
-          <div className="grid grid-cols-1 gap-4">
-            <section aria-labelledby="section-2-title">
-              <div className="overflow-hidden rounded-lg bg-white border">
+    <div>
+      <PageHeader
+        title="Appearance"
+        description="Customize how your bot looks and sounds. Changes show up in the live preview as you type."
+      />
+      <div className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-5">
+        <section aria-label="Appearance settings" className="min-w-0 lg:col-span-3">
+          <Card>
+            <CardHeader
+              icon={<SwatchIcon />}
+              title="Bot appearance"
+              description="Name, greeting, chat bubble colours and voice."
+            />
+            <AppearanceForm initialData={props} form={form} />
+          </Card>
+        </section>
+        <section
+          aria-label="Live preview"
+          className="min-w-0 lg:sticky lg:top-20 lg:col-span-2"
+        >
+          <Card className="overflow-hidden">
+            <CardHeader
+              icon={<EyeIcon />}
+              title="Live preview"
+              description="A mock of the chat widget."
+            />
+            <div className="bg-surface-2 p-3 sm:p-4">
+              <div className="overflow-hidden rounded-xl border border-line shadow-soft">
                 <AppearancePreview form={form} />
               </div>
-            </section>
-          </div>
-        </div>
+            </div>
+          </Card>
+        </section>
       </div>
     </div>
   );

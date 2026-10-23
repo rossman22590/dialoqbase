@@ -1,6 +1,8 @@
 import { Form, Input, Radio } from "antd";
-import { CopyBtn } from "../../Common/CopyBtn";
+import { CodeBracketIcon } from "@heroicons/react/24/outline";
 import { DbColorPicker } from "../../Common/DbColorPicker";
+import { Card, CardBody, CardHeader } from "../../ui";
+import { EmbedCodePanel } from "./EmbedBoardCard";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { nightOwl } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
@@ -64,15 +66,15 @@ const ChatBot = () => {
 export default ChatBot;`;
 
     return (
-        <div className="px-4 py-6 sm:p-6 lg:pb-8 mb-3 bg-white border border-line rounded-lg shadow-sm dark:bg-surface-2 dark:border-line-strong font-sans">
-            <h2 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
-                Next.js (React)
-            </h2>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                You can use this component to embed your bot into your Next.js application.
-            </p>
-            <div className="mt-6 flex flex-col ">
+        <Card className="font-sans">
+            <CardHeader
+                icon={<CodeBracketIcon />}
+                title="Next.js (React)"
+                description="Drop this component into your Next.js app to embed your bot."
+            />
+            <CardBody className="flex flex-col gap-6">
                 <Form
+                    className="grid grid-cols-1 gap-x-6 sm:grid-cols-2 [&_.ant-form-item]:mb-5"
                     form={from}
                     initialValues={{
                         "data-btn-position": "bottom-right",
@@ -85,6 +87,7 @@ export default ChatBot;`;
                     layout="vertical"
                 >
                     <Form.Item
+                        className="sm:col-span-2 max-w-full overflow-x-auto"
                         name="data-btn-position"
                         label="Widget Position"
                         tooltip="This position will be used for the widget button position"
@@ -98,6 +101,7 @@ export default ChatBot;`;
                     </Form.Item>
 
                     <Form.Item
+                        className="sm:col-span-2"
                         name="data-widget-icon"
                         label="Widget Icon"
                         tooltip="This icon will be used for the widget button icon default is the bot icon"
@@ -161,34 +165,29 @@ export default ChatBot;`;
                     </Form.Item>
                 </Form>
 
-                <div>
-                    <div className="flex-grow">
-                        {/* @ts-ignore */}
-                        <SyntaxHighlighter
-                            language="tsx"
-                            customStyle={{
-                                borderRadius: "0.7rem",
-                                lineHeight: "1.25rem",
-                                overflow: "auto",
-                                fontFamily: "Menlo, Monaco, Consolas, 'Courier New', monospace",
-                                color: "#d6deeb",
-                            }}
-                            style={nightOwl}
-                            codeTagProps={{
-                                className: "text-sm",
-                            }}
-                        >
-                            {nextjsCode}
-                        </SyntaxHighlighter>
-                    </div>
-                    <span className="flex justify-end mt-4">
-                        <CopyBtn
-                            value={nextjsCode}
-                            className="border border-line-strong dark:border-line-strong dark:text-white dark:hover:bg-surface-3 dark:focus:ring-gray-900 rounded-md dark:bg-surface"
-                        />
-                    </span>
-                </div>
-            </div>
-        </div>
+                <EmbedCodePanel label="ChatBot.tsx" copyValue={nextjsCode}>
+                    {/* @ts-ignore */}
+                    <SyntaxHighlighter
+                        language="tsx"
+                        PreTag="div"
+                        customStyle={{
+                            margin: 0,
+                            padding: "1rem 1.25rem",
+                            background: "transparent",
+                            lineHeight: "1.4rem",
+                            overflow: "auto",
+                            fontFamily: "Menlo, Monaco, Consolas, 'Courier New', monospace",
+                            color: "#d6deeb",
+                        }}
+                        style={nightOwl}
+                        codeTagProps={{
+                            className: "text-[13px]",
+                        }}
+                    >
+                        {nextjsCode}
+                    </SyntaxHighlighter>
+                </EmbedCodePanel>
+            </CardBody>
+        </Card>
     );
 }

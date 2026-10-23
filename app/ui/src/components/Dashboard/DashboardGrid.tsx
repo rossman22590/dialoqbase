@@ -1,10 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
-import { ChevronRightIcon, XCircleIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Empty } from "antd";
+import {
+  ChevronRightIcon,
+  ExclamationTriangleIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
 import { sources } from "../../utils/sources";
 import { useMemo, useState } from "react";
+import { EmptyState, Skeleton } from "../ui";
 
 export const DashboardGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,10 +29,16 @@ export const DashboardGrid = () => {
   return (
     <div className="mt-8">
       {status === "success" && data.length > 0 && (
-        <div className="mb-8 max-w-md">
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" aria-hidden="true" />
+        <div
+          className="animate-fade-up mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+          style={{ animationDelay: "60ms" }}
+        >
+          <div className="group relative w-full sm:max-w-sm">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+              <MagnifyingGlassIcon
+                className="h-4 w-4 text-fg-subtle transition-colors group-focus-within:text-indigo-500"
+                aria-hidden="true"
+              />
             </div>
             <input
               type="text"
@@ -34,76 +46,117 @@ export const DashboardGrid = () => {
               autoComplete="off"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full pl-11 pr-4 py-3 bg-white dark:bg-surface border border-line dark:border-line-strong rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm hover:border-line-strong dark:hover:border-line-strong dark:text-white"
+              aria-label="Search your bots"
+              className="ui-input h-10 pl-10"
             />
           </div>
+          <p className="text-xs tabular-nums text-fg-subtle">
+            {searchQuery
+              ? `${filteredData.length} of ${data.length} bots`
+              : `${data.length} ${data.length === 1 ? "bot" : "bots"}`}
+          </p>
         </div>
       )}
 
       {status === "loading" && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((item) => (
             <div
-              className="flex animate-pulse h-28 px-3 py-4 bg-gray-200 dark:bg-surface rounded-xl shadow-sm border border-line dark:border-line"
+              className="ui-card animate-fade-in overflow-hidden"
+              style={{ animationDelay: `${item * 50}ms` }}
               key={item}
-            ></div>
+            >
+              <div className="flex items-center gap-3.5 p-5">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-3.5 w-24 rounded-full" />
+                </div>
+              </div>
+              <div className="flex gap-2 border-t border-line px-5 py-3.5">
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-5 w-12 rounded-full" />
+              </div>
+            </div>
           ))}
         </div>
       )}
 
       {status === "success" && data.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <Empty description="No bots created yet" />
+        <div className="rounded-2xl border border-dashed border-line-strong bg-surface/60">
+          <EmptyState
+            className="py-16"
+            icon={<SparklesIcon />}
+            title="Create your first bot"
+            description="Point a bot at a website, documents or an API and it will answer questions using that knowledge."
+            action={
+              <Link to="/new" className="ui-btn-primary">
+                <PlusIcon aria-hidden="true" />
+                Create new bot
+              </Link>
+            }
+          />
         </div>
       )}
 
       {status === "success" && data.length > 0 && (
         <>
           {filteredData.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <Empty description="No bots match your search" />
+            <div className="ui-card">
+              <EmptyState
+                icon={<MagnifyingGlassIcon />}
+                title="No bots match your search"
+                description={`Nothing is named like "${searchQuery}". Try a different search term.`}
+              />
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {filteredData.map((bot: any) => (
+            <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {filteredData.map((bot: any, index: number) => (
                 <Link
                   to={`/bot/${bot.id}`}
-                  className="group flex rounded-2xl hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 ease-in-out cursor-pointer border border-line bg-white dark:bg-surface dark:border-line dark:hover:bg-surface-2 dark:hover:border-line-strong hover:bg-gray-50 hover:border-indigo-200 dark:hover:border-indigo-500/30 overflow-hidden"
+                  className="ui-card ui-card-hover animate-fade-up group flex min-w-0 flex-col overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-app"
+                  style={{ animationDelay: `${100 + Math.min(index, 12) * 40}ms` }}
                   key={bot.id}
                 >
-                  <div className="w-full truncate ">
-                    <div className="flex flex-1 items-center justify-between ">
-                      <div className="flex-1 truncate px-6 py-5">
-                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 dark:text-gray-100 dark:group-hover:text-white transition-colors truncate mb-1">
-                          {bot.name}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
+                  <div className="flex items-center gap-3.5 p-5">
+                    <div
+                      aria-hidden="true"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-[15px] font-semibold text-white shadow-brand ring-1 ring-inset ring-white/15"
+                    >
+                      {String(bot.name || "?").trim().charAt(0).toUpperCase() ||
+                        "?"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-[15px] font-semibold tracking-tight text-fg transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-300">
+                        {bot.name}
+                      </h3>
+                      <div className="mt-1 flex min-w-0">
+                        <span className="ui-badge ui-badge-neutral max-w-full">
+                          <span className="truncate">
                             {bot.model
                               .replace("-dbase", "")
                               .replace(/_dialoqbase_[0-9]+$/, "")}
                           </span>
-                        </div>
-                      </div>
-                      <div className="flex-shrink-0 pr-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="h-8 w-8 flex items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                          <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="px-6 pb-5 flex flex-wrap gap-2 text-gray-500 text-xs dark:text-gray-400 border-t border-line dark:border-line/50 pt-3">
-                      {bot.source.map((source: any, idx: number) => (
-                        <span
-                          title={`${source.type} source`}
-                          key={idx}
-                          className="flex items-center gap-1.5 opacity-70 group-hover:opacity-100 transition-opacity"
-                        >
-                          {sources[source.type as keyof typeof sources]}
-                          <span className="text-[10px] capitalize">{source.type}</span>
                         </span>
-                      ))}
+                      </div>
                     </div>
+                    <ChevronRightIcon
+                      className="h-4 w-4 shrink-0 text-fg-subtle transition-all duration-200 ease-out group-hover:translate-x-0.5 group-hover:text-indigo-500"
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div className="mt-auto flex flex-wrap gap-1.5 border-t border-line bg-surface-2/40 px-5 py-3">
+                    {bot.source.map((source: any, idx: number) => (
+                      <span
+                        title={`${source.type} source`}
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2 py-0.5 text-[11px] font-medium capitalize text-fg-muted [&_svg]:h-3 [&_svg]:w-3 [&_svg]:text-fg-subtle"
+                      >
+                        {sources[source.type as keyof typeof sources]}
+                        {source.type}
+                      </span>
+                    ))}
                   </div>
                 </Link>
               ))}
@@ -113,16 +166,18 @@ export const DashboardGrid = () => {
       )}
 
       {status === "error" && (
-        <div className="rounded-2xl bg-red-50 dark:bg-red-900/10 p-4 border border-red-100 dark:border-red-900/20">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800 dark:text-red-400">
-                Something went wrong while loading your bots
-              </h3>
-            </div>
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+          <ExclamationTriangleIcon
+            className="mt-0.5 h-5 w-5 shrink-0"
+            aria-hidden="true"
+          />
+          <div>
+            <h3 className="text-sm font-medium">
+              Something went wrong while loading your bots
+            </h3>
+            <p className="mt-0.5 text-sm opacity-80">
+              Please refresh the page or try again in a moment.
+            </p>
           </div>
         </div>
       )}

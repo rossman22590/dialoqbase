@@ -27,11 +27,9 @@ export default function BotSettingsRoot() {
     }
   }, [status]);
   return (
-    <div className="flex-1 py-8 md:py-12 px-4 md:px-6">
-      <div className="max-w-6xl mx-auto grid gap-8">
-        {status === "loading" && <SkeletonLoading />}
-        {status === "success" && <SettingsBody {...data} />}
-      </div>
+    <div className="ui-page max-w-4xl">
+      {status === "loading" && <SkeletonLoading className="mt-0" />}
+      {status === "success" && <SettingsBody {...data} />}
     </div>
   );
 }

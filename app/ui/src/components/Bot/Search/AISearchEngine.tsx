@@ -19,30 +19,42 @@ export default function AISearchEngine({
   data,
 }: Props) {
   return (
-    <div className="max-w-5xl mt-12 mx-auto p-4 min-h-screen">
+    <div className="mt-8 min-h-screen">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit(searchQuery);
         }}
-        className="flex mb-8"
+        className="mb-8 flex items-center gap-2 rounded-2xl border border-line-strong bg-surface p-1.5 shadow-soft transition focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 dark:bg-canvas"
       >
+        <MagnifyingGlassIcon
+          aria-hidden="true"
+          className="ml-2.5 h-5 w-5 shrink-0 text-fg-subtle"
+        />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Enter your search query..."
-          className="flex-grow px-4 py-2 border border-line-strong dark:border-line-strong rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-surface text-gray-900 dark:text-gray-100"
+          className="min-w-0 flex-grow border-0 bg-transparent px-1 py-2 text-[15px] text-fg outline-none ring-0 placeholder:text-fg-subtle focus:ring-0"
         />
         <button
           type="submit"
-          className="px-6 py-2 bg-indigo-600 dark:bg-white text-white dark:text-indigo-600 rounded-r-lg hover:bg-indigo-700 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+          aria-label="Search"
+          className="ui-btn-primary shrink-0"
         >
-          <MagnifyingGlassIcon className="w-5 h-5" />
+          <MagnifyingGlassIcon className="h-4 w-4 sm:hidden" />
+          <span className="hidden sm:inline">Search</span>
         </button>
       </form>
 
-      <motion.div className="space-y-6">
+      {!isLoading && data.length > 0 && (
+        <p className="mb-3 text-xs font-medium text-fg-subtle">
+          {data.length} {data.length === 1 ? "result" : "results"}
+        </p>
+      )}
+
+      <motion.div className="space-y-4">
         {isLoading && (
           <>
             <SkeletonSearchResult />

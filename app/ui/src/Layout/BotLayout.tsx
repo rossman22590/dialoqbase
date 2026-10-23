@@ -289,7 +289,7 @@ export default function BotLayout({
                 </div>
               </div>
             </aside>
-            <main className={`flex-1 ${asideSpace}`}>{children}</main>
+            <main className={`min-w-0 flex-1 ${asideSpace}`}>{children}</main>
           </div>
         </div>
       </div>

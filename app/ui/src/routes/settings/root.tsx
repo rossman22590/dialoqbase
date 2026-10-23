@@ -3,11 +3,19 @@ import React from "react";
 import api from "../../services/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { KeyIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 
 import { SettingsLayout } from "../../Layout/SettingsLayout";
 import { SkeletonLoading } from "../../components/Common/SkeletonLoading";
 import { useNavigate } from "react-router-dom";
 import { UserApiKey } from "../../components/Settings/Profile/ApiKey";
+import {
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  PageHeader,
+} from "../../components/ui";
 
 export default function SettingsRoot() {
   const [form] = Form.useForm();
@@ -91,132 +99,119 @@ export default function SettingsRoot() {
 
   return (
     <SettingsLayout>
+      <PageHeader
+        eyebrow="Settings"
+        title="General"
+        description="Manage your profile, password and personal API keys."
+      />
       {status === "success" && (
-        <>
-          <div>
-            <h2 className="text-base font-semibold leading-7 text-gray-900 dark:text-white">
-              Profile
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-gray-500 dark:text-gray-200">
-              Update your profile details.
-            </p>
-
-            <dl className="mt-6 space-y-6 divide-y divide-line  border-line text-sm leading-6 dark:text-gray-200">
-              <div className="mt-5 md:col-span-2 md:mt-0">
-                <Form
-                  form={form}
-                  initialValues={{
-                    ...data,
-                  }}
-                  layout="vertical"
-                  onFinish={updateProfile}
+        <div className="space-y-6">
+          <Card className="animate-fade-up">
+            <CardHeader
+              icon={<UserCircleIcon />}
+              title="Profile"
+              description="Update your profile details."
+            />
+            <Form
+              form={form}
+              initialValues={{
+                ...data,
+              }}
+              layout="vertical"
+              onFinish={updateProfile}
+            >
+              <CardBody className="pb-1">
+                <Form.Item
+                  label="Username"
+                  name="username"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your username!",
+                    },
+                  ]}
                 >
-                  <div className="sm:overflow-hidden ">
-                    <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-surface-2 dark:border-line-strong">
-                      <Form.Item
-                        label="Username"
-                        name="username"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please input your username!",
-                          },
-                        ]}
-                      >
-                        <Input size="large" type="text" />
-                      </Form.Item>
-                      <Form.Item
-                        label="Email"
-                        name="email"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please input your email!",
-                          },
-                        ]}
-                      >
-                        <Input
-                          size="large"
-                          type="email"
-                          className="mt-1 block w-full border-line-strong rounded-md  focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        />
-                      </Form.Item>
-                    </div>
-                    <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-surface-2 dark:border-line-strong">
-                      <button
-                        disabled={isLoading}
-                        type="submit"
-                        className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                      >
-                        {isLoading ? "Saving..." : "Save"}
-                      </button>
-                    </div>
-                  </div>
-                </Form>
-              </div>
-            </dl>
-          </div>
+                  <Input size="large" type="text" />
+                </Form.Item>
+                <Form.Item
+                  label="Email"
+                  name="email"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your email!",
+                    },
+                  ]}
+                >
+                  <Input size="large" type="email" className="w-full" />
+                </Form.Item>
+              </CardBody>
+              <CardFooter>
+                <button
+                  disabled={isLoading}
+                  type="submit"
+                  className="ui-btn-primary"
+                >
+                  {isLoading ? "Saving..." : "Save"}
+                </button>
+              </CardFooter>
+            </Form>
+          </Card>
 
-          <div>
-            <h2 className="text-base font-semibold leading-7 text-gray-900 dark:text-white">
-              Password
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-gray-500 dark:text-gray-200">
-              Update your password.
-            </p>
-
-            <dl className="mt-6 space-y-6 divide-y divide-line  border-line text-sm leading-6 dark:text-gray-200">
-              <div className="mt-5 md:col-span-2 md:mt-0">
-                <Form layout="vertical" onFinish={updatePassowrd}>
-                  <div className="overflow-hidden sm:rounded-md">
-                    <div className="bg-white border-t border rounded-t-md  px-4 py-5 sm:p-6 dark:bg-surface-2 dark:border-line-strong">
-                      <Form.Item
-                        label="Current Password"
-                        name="oldPassword"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please input your current password!",
-                          },
-                        ]}
-                      >
-                        <Input.Password size="large" type="password" />
-                      </Form.Item>
-                      <Form.Item
-                        label="New Password"
-                        name="newPassword"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please input your new password!",
-                          },
-                        ]}
-                      >
-                        <Input.Password size="large" />
-                      </Form.Item>
-                    </div>
-                    <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md  px-4 py-3 text-right sm:px-6 dark:bg-surface-2 dark:border-line-strong">
-                      <button
-                        disabled={isPasswordLoading}
-                        type="submit"
-                        className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                      >
-                        {isPasswordLoading ? "Saving..." : "Save"}
-                      </button>
-                    </div>
-                  </div>
-                </Form>
-              </div>
-            </dl>
-          </div>
+          <Card className="animate-fade-up" style={{ animationDelay: "60ms" }}>
+            <CardHeader
+              icon={<KeyIcon />}
+              title="Password"
+              description="Update your password."
+            />
+            <Form layout="vertical" onFinish={updatePassowrd}>
+              <CardBody className="pb-1">
+                <Form.Item
+                  label="Current Password"
+                  name="oldPassword"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your current password!",
+                    },
+                  ]}
+                >
+                  <Input.Password size="large" type="password" />
+                </Form.Item>
+                <Form.Item
+                  label="New Password"
+                  name="newPassword"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your new password!",
+                    },
+                  ]}
+                >
+                  <Input.Password size="large" />
+                </Form.Item>
+              </CardBody>
+              <CardFooter>
+                <button
+                  disabled={isPasswordLoading}
+                  type="submit"
+                  className="ui-btn-primary"
+                >
+                  {isPasswordLoading ? "Saving..." : "Save"}
+                </button>
+              </CardFooter>
+            </Form>
+          </Card>
 
           <UserApiKey />
-        </>
+        </div>
       )}
       {status === "loading" && <SkeletonLoading />}
 
       {status === "error" && (
-        <div className="text-center">Something went wrong</div>
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+          Something went wrong
+        </div>
       )}
     </SettingsLayout>
   );
