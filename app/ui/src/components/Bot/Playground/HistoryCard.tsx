@@ -76,83 +76,84 @@ export const PlaygroundHistoryCard = ({
     }
   );
 
+  const isActive = historyId === item.id;
+  const isProcessing = (isDeleting || isEditing) && processingId === item.id;
+
   return (
     <div
-      className={`flex py-2 px-2 items-center gap-3 relative rounded-md truncate hover:pr-4 group transition-opacity duration-300 ease-in-out ${
-        historyId === item.id
-          ? item.id === params.history_id
-            ? "bg-gray-300 dark:bg-[#393939] dark:text-white"
-            : "bg-gray-300 dark:bg-[#393939] dark:text-white"
-          : "bg-gray-100 dark:bg-[#201f1f] dark:text-gray-200"
+      className={`group relative flex items-center rounded-lg text-sm transition-colors ${
+        isActive
+          ? "bg-indigo-50 font-medium text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-100"
+          : "text-gray-700 hover:bg-gray-200/60 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white"
       }`}
     >
       <Link
         to={`/bot/${params.id}/playground/${item.id}`}
-        className="flex-1 overflow-hidden break-all"
+        title={item.title}
+        aria-current={isActive ? "page" : undefined}
+        className="block min-w-0 flex-1 truncate rounded-lg py-2 pl-3 pr-9 text-inherit hover:text-inherit focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
       >
-        <span
-          className="text-gray-500 dark:text-gray-400 text-sm font-semibold truncate"
-          title={item.title}
-        >
-          {item.title}
-        </span>
+        {item.title}
       </Link>
-      <Dropdown
-        disabled={(isDeleting || isEditing) && processingId === item.id}
-        menu={{
-          items: [
-            {
-              key: "1",
-              label: (
-                <button
-                  className="flex items-center gap-2 w-full "
-                  onClick={() => {
-                    const newTitle = prompt("Enter new title", item.title);
-                    if (newTitle) {
-                      editHistory(newTitle);
-                      setProcessingId(item.id);
-                    }
-                  }}
-                >
-                  <PencilIcon className="w-3 h-3 text-gray-500 dark:text-gray-400" />
-                  <span>Edit</span>
-                </button>
-              ),
-            },
-            {
-              key: "2",
-              label: (
-                <button
-                  onClick={() => {
-                    deleteHistory();
-                    setProcessingId(item.id);
-                  }}
-                  className="flex items-center gap-2 w-full text-red-500"
-                >
-                  <TrashIcon className="w-3 h-3 text-red-500 dark:text-red-400" />
-                  <span>Delete</span>
-                </button>
-              ),
-            },
-          ],
-        }}
-      >
-        {(isDeleting || isEditing) && processingId === item.id ? (
-          <Spin />
+      <div className="absolute right-1 top-1/2 -translate-y-1/2">
+        {isProcessing ? (
+          <div className="flex h-7 w-7 items-center justify-center">
+            <Spin size="small" />
+          </div>
         ) : (
-          <EllipsisHorizontalIcon
-            className={`text-gray-500 dark:text-gray-400 w-5 h-5 
-    ${
-      historyId === item.id
-        ? item.id === params.history_id
-          ? "opacity-100"
-          : "opacity-100"
-        : "opacity-0 hover:opacity-100 group-hover:opacity-100"
-    }
-    `}
-          />
+          <Dropdown
+            trigger={["click"]}
+            placement="bottomRight"
+            menu={{
+              items: [
+                {
+                  key: "1",
+                  label: (
+                    <button
+                      className="flex items-center gap-2 w-full "
+                      onClick={() => {
+                        const newTitle = prompt("Enter new title", item.title);
+                        if (newTitle) {
+                          editHistory(newTitle);
+                          setProcessingId(item.id);
+                        }
+                      }}
+                    >
+                      <PencilIcon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+                      <span>Rename</span>
+                    </button>
+                  ),
+                },
+                {
+                  key: "2",
+                  label: (
+                    <button
+                      onClick={() => {
+                        deleteHistory();
+                        setProcessingId(item.id);
+                      }}
+                      className="flex items-center gap-2 w-full text-red-500"
+                    >
+                      <TrashIcon className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />
+                      <span>Delete</span>
+                    </button>
+                  ),
+                },
+              ],
+            }}
+          >
+            <button
+              type="button"
+              aria-label={`Options for ${item.title}`}
+              className={`flex h-7 w-7 items-center justify-center rounded-md text-gray-500 transition hover:bg-gray-300/50 hover:text-gray-800 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white [@media(hover:none)]:opacity-100 ${
+                isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              }`}
+            >
+              <EllipsisHorizontalIcon className="h-5 w-5" />
+            </button>
+          </Dropdown>
         )}
-      </Dropdown>
+      </div>
     </div>
   );
 };

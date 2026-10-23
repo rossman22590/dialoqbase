@@ -15,7 +15,8 @@ export const ConversationInfo = ({ data }: { data: ConversationsByType }) => {
             }
         </span>
       </nav>
-      <div className="flex-grow overflow-y-auto ">
+      <div className="chat-scroll flex-grow overflow-y-auto">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-7 px-4 py-6 sm:px-6">
         {data.all_messages.map((sender, index) => {
           return (
             <PlaygroundMessage
@@ -53,6 +54,7 @@ export const ConversationInfo = ({ data }: { data: ConversationsByType }) => {
             />
           );
         })}
+        </div>
       </div>
     </div>
   );

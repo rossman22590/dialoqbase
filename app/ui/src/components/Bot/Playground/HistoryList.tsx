@@ -5,7 +5,7 @@ import api from "../../../services/api";
 import { BotPlaygroundHistory } from "./types";
 import React from "react";
 import { useMessage } from "../../../hooks/useMessage";
-import { Empty, Skeleton } from "antd";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import { useStoreMessage } from "../../../store";
 import { motion } from "framer-motion";
 
@@ -63,40 +63,51 @@ export const PlaygroundHistoryList = () => {
   }, [status, data]);
 
   return (
-    <div className={`flex-col flex-1 overflow-y-auto`}>
-      <div>
-        {status === "success" && (
-          <div>
-            {data.history.length === 0 && (
-              <div className="flex justify-center items-center mt-20 overflow-hidden">
-                <Empty description="No history yet" />
-              </div>
-            )}
-            <div className="flex flex-col gap-2 overflow-hidden text-gray-100 text-sm dark:text-gray-400">
-              {data.history.map((item, index) => (
-                <motion.div
-                  key={item.id || index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                >
-                  <PlaygroundHistoryCard item={item} />
-                </motion.div>
-              ))}
+    <div>
+      {status === "success" && (
+        <div>
+          {data.history.length === 0 && (
+            <div className="flex flex-col items-center px-4 pt-12 text-center">
+              <ChatBubbleLeftRightIcon className="h-8 w-8 text-gray-300 dark:text-gray-600" />
+              <p className="mt-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+                No chats yet
+              </p>
+              <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
+                Your playground conversations will show up here.
+              </p>
             </div>
+          )}
+          <div className="flex flex-col gap-0.5">
+            {data.history.map((item, index) => (
+              <motion.div
+                key={item.id || index}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: Math.min(index, 12) * 0.02 }}
+              >
+                <PlaygroundHistoryCard item={item} />
+              </motion.div>
+            ))}
           </div>
-        )}
-        {status === "loading" && (
-          <div className="flex justify-center items-center mt-5">
-            <Skeleton active paragraph={{ rows: 8 }} />
-          </div>
-        )}
-        {status === "error" && (
-          <div className="flex justify-center items-center">
-            <span className="text-red-500">Error loading history</span>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+      {status === "loading" && (
+        <div className="flex flex-col gap-1.5 px-1 pt-1" aria-hidden="true">
+          {[72, 56, 84, 64, 48, 76].map((width, index) => (
+            <div key={index} className="flex h-9 items-center px-2">
+              <div
+                className="h-3 animate-pulse rounded bg-gray-200 dark:bg-white/10"
+                style={{ width: `${width}%` }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+      {status === "error" && (
+        <div className="px-3 pt-6 text-center text-sm text-red-500">
+          Couldn't load chats
+        </div>
+      )}
     </div>
   );
 };

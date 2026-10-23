@@ -12,7 +12,16 @@ import Mermaid from "./Mermaid";
 import { useMessage } from "../../hooks/useMessage";
 import { clipbardCopy } from "../../utils/clipboard";
 
-export default function Markdown({ message }: { message: string }) {
+const DEFAULT_CLASS_NAME =
+  "prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 dark:prose-dark";
+
+export default function Markdown({
+  message,
+  className = DEFAULT_CLASS_NAME,
+}: {
+  message: string;
+  className?: string;
+}) {
   const [isBtnPressed, setIsBtnPressed] = React.useState(false);
   const [isOpenHTML, setIsOpenHTML] = React.useState(false);
   const [html, setHtml] = React.useState("");
@@ -31,7 +40,7 @@ export default function Markdown({ message }: { message: string }) {
   return (
     <React.Fragment>
       <ReactMarkdown
-        className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 dark:prose-dark"
+        className={className}
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeMathjax]}
         components={{

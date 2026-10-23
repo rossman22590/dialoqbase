@@ -113,6 +113,16 @@ export default function BotLayout({
     }
   }, [isLogged]);
 
+  const isActive = (href: string) => {
+    const path = href.replace(":id", params.id!);
+    if (location.pathname === path) return true;
+    // Saved playground chats live under /bot/:id/playground/:history_id.
+    return (
+      href === "/bot/:id" &&
+      location.pathname.startsWith(`/bot/${params.id}/playground/`)
+    );
+  };
+
   return (
     <>
       <OnboardingModal />
@@ -200,18 +210,16 @@ export default function BotLayout({
                               pathname: item.href.replace(":id", params.id!),
                             }}
                             className={classNames(
-                              location.pathname ===
-                                item.href.replace(":id", params.id!)
-                                ? "bg-gray-100 text-gray-900 dark:bg-[#262626] dark:text-white"
+                              isActive(item.href)
+                                ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-100"
                                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white dark:hover:bg-[#262626]",
                               "group flex items-center px-2 py-2 text-base font-medium rounded-md"
                             )}
                           >
                             <item.icon
                               className={classNames(
-                                location.pathname ===
-                                  item.href.replace(":id", params.id!)
-                                  ? "text-gray-500"
+                                isActive(item.href)
+                                  ? "text-indigo-600 dark:text-indigo-300"
                                   : "text-gray-400 group-hover:text-gray-500",
                                 "mr-4 flex-shrink-0 h-6 w-6"
                               )}
@@ -244,19 +252,25 @@ export default function BotLayout({
             </button>
             <Link
               to="/"
-              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 flex items-center px-3 dark:text-white"
+              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 flex shrink-0 items-center px-3 dark:text-white"
             >
               <img className="h-8 w-auto" src="/logo.png" alt="Botcraft Pro" />
-              <span className="ml-1 text-xl font-bold">Botcraft Pro</span>
-              <span className="inline-block flex-shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 ml-2">
+              <span className="ml-1 whitespace-nowrap text-lg font-bold sm:text-xl">
+                Botcraft Pro
+              </span>
+              <span className="ml-2 hidden flex-shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 sm:inline-block">
                 {/* @ts-ignore */}
                 {`v${__APP_VERSION__}`}
               </span>
             </Link>
-            <div className="flex flex-1 justify-end px-4">
-              <div className="ml-4 flex items-center md:ml-6">
-                <div className="mr-4 text-sm font-medium text-gray-700 dark:text-gray-200 border px-3 py-1 rounded-full border-gray-300 dark:border-gray-600">
-                  Credits: ${Number(creditData?.balance || 0).toFixed(4)}
+            <div className="flex min-w-0 flex-1 justify-end px-3 sm:px-4">
+              <div className="ml-2 flex items-center md:ml-6">
+                <div
+                  title="Credits"
+                  className="mr-2 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-200 border px-3 py-1 rounded-full border-gray-300 dark:border-gray-600 sm:mr-4"
+                >
+                  <span className="hidden sm:inline">Credits: </span>$
+                  {Number(creditData?.balance || 0).toFixed(4)}
                 </div>
                 <ApplicationMenu />
               </div>
@@ -280,27 +294,25 @@ export default function BotLayout({
                           placement="right"
                           key={item.name}
                           title={item.name}
+                          mouseEnterDelay={0.05}
                         >
                           <Link
                             to={{
                               pathname: item.href.replace(":id", params.id!),
                             }}
+                            aria-label={item.name}
+                            aria-current={
+                              isActive(item.href) ? "page" : undefined
+                            }
                             className={classNames(
-                              location.pathname ===
-                                item.href.replace(":id", params.id!)
-                                ? "bg-gray-100 text-gray-900 dark:bg-[#262626] dark:text-white"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white dark:hover:bg-[#262626]",
-                              "group flex items-center justify-center px-2 py-2 text-sm font-medium rounded-md"
+                              isActive(item.href)
+                                ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300"
+                                : "text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-[#262626]",
+                              "group flex h-10 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                             )}
                           >
                             <item.icon
-                              className={classNames(
-                                location.pathname ===
-                                  item.href.replace(":id", params.id!)
-                                  ? "text-gray-500 dark:text-white"
-                                  : "text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-white",
-                                "flex-shrink-0 h-6 w-6"
-                              )}
+                              className="flex-shrink-0 h-5 w-5"
                               aria-hidden="true"
                             />
                           </Link>
