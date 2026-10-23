@@ -6,9 +6,8 @@ import { BaseRetriever } from "@langchain/core/retrievers";
 import { DialoqbaseHybridRetrival } from "../../utils/hybrid";
 import { createChain } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
-import { ChatUsage } from "../../utils/usage-tracker";
 import {
-  chargeChatUsage,
+  answerWithBilling,
   checkCanAnswer,
 } from "../../utils/billing";
 import { differenceInSeconds } from "date-fns";
@@ -145,11 +144,17 @@ export const whatsappBotHandler = async (
       retriever,
     });
 
-    const usage = new ChatUsage();
-    const response = await usage.track(() => chain.invoke({
-      question: sanitizedQuestion,
-      chat_history: history,
-    }));
+    const response = await answerWithBilling(
+      prisma,
+      bot,
+      `WhatsApp usage for bot: ${bot.name}`,
+      "whatsapp",
+      () =>
+        chain.invoke({
+          question: sanitizedQuestion,
+          chat_history: history,
+        })
+    );
 
     await prisma.botWhatsappHistory.create({
       data: {
@@ -161,14 +166,6 @@ export const whatsappBotHandler = async (
         bot_id: bot_id,
       },
     });
-
-    await chargeChatUsage(
-      prisma,
-      bot,
-      usage,
-      `WhatsApp usage for bot: ${bot.name}`,
-      "whatsapp"
-    );
 
     await prisma.$disconnect();
 

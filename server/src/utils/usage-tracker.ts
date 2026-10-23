@@ -27,6 +27,10 @@ export class ChatUsage {
     this.calls.push(call);
   }
 
+  get callCount() {
+    return this.calls.length;
+  }
+
   async totals(modelId: string) {
     const calls = await Promise.all(this.calls);
     return {

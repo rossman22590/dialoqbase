@@ -7,9 +7,8 @@ import { Document } from "langchain/document";
 import { BaseRetriever } from "@langchain/core/retrievers";
 import { createChain } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
-import { ChatUsage } from "../../utils/usage-tracker";
 import {
-  chargeChatUsage,
+  answerWithBilling,
   checkCanAnswer,
 } from "../../utils/billing";
 import { differenceInSeconds } from "date-fns";
@@ -160,11 +159,17 @@ export const discordBotHandler = async (
       retriever,
     });
 
-    const usage = new ChatUsage();
-    const response = await usage.track(() => chain.invoke({
-      question: sanitizedQuestion,
-      chat_history: history,
-    }));
+    const response = await answerWithBilling(
+      prisma,
+      bot,
+      `Discord usage for bot: ${bot.name}`,
+      "discord",
+      () =>
+        chain.invoke({
+          question: sanitizedQuestion,
+          chat_history: history,
+        })
+    );
 
     await prisma.botDiscordHistory.create({
       data: {
@@ -174,14 +179,6 @@ export const discordBotHandler = async (
         bot: response,
       },
     });
-
-    await chargeChatUsage(
-      prisma,
-      bot,
-      usage,
-      `Discord usage for bot: ${bot.name}`,
-      "discord"
-    );
 
     await prisma.$disconnect();
 

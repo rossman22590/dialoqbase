@@ -14,10 +14,9 @@ import {
 } from "./openai-response";
 import { groupOpenAiMessages } from "./other";
 import { nextTick } from "../../../../utils/nextTick";
-import { ChatUsage } from "../../../../utils/usage-tracker";
 import {
     INSUFFICIENT_CREDITS_MESSAGE,
-    chargeChatUsage,
+    answerWithBilling,
     checkCanAnswer,
 } from "../../../../utils/billing";
 
@@ -164,45 +163,39 @@ export const createChatCompletionHandler = async (
             retriever,
         });
 
-        const usage = new ChatUsage();
-
         if (!request.body.stream) {
-            const res = await usage.track(() => chain.invoke({
-                question: messages[messages.length - 1].content,
-                chat_history: groupOpenAiMessages(messages),
-            }));
-
-            await chargeChatUsage(
+            const res = await answerWithBilling(
                 prisma,
                 bot,
-                usage,
                 `OpenAI API usage for bot: ${bot.name}`,
-                "openai-api"
+                "openai-api",
+                () => chain.invoke({
+                    question: messages[messages.length - 1].content,
+                    chat_history: groupOpenAiMessages(messages),
+                })
             );
 
             return reply.status(200).send(openaiNonStreamResponse(res, bot.name));
         }
 
-        await usage.track(async () => {
-            const stream = await chain.stream({
-                question: messages[messages.length - 1].content,
-                chat_history: groupOpenAiMessages(messages),
-            });
-            reply.raw.setHeader("Content-Type", "text/event-stream");
-
-            for await (const token of stream) {
-                reply.sse({
-                    data: openaiStreamResponse(token || "", bot.name),
-                });
-            }
-        });
-
-        await chargeChatUsage(
+        await answerWithBilling(
             prisma,
             bot,
-            usage,
             `OpenAI API stream usage for bot: ${bot.name}`,
-            "openai-api"
+            "openai-api",
+            async () => {
+                const stream = await chain.stream({
+                    question: messages[messages.length - 1].content,
+                    chat_history: groupOpenAiMessages(messages),
+                });
+                reply.raw.setHeader("Content-Type", "text/event-stream");
+
+                for await (const token of stream) {
+                    reply.sse({
+                        data: openaiStreamResponse(token || "", bot.name),
+                    });
+                }
+            }
         );
         reply.sse({
             data: "[DONE]\n\n",

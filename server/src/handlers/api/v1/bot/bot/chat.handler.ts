@@ -9,10 +9,9 @@ import { chatModelProvider } from "../../../../../utils/models";
 import { createChain, groupMessagesByConversation } from "../../../../../chain";
 import { getModelInfo } from "../../../../../utils/get-model-info";
 import { nextTick } from "../../../../../utils/nextTick";
-import { ChatUsage } from "../../../../../utils/usage-tracker";
 import {
   INSUFFICIENT_CREDITS_MESSAGE,
-  chargeChatUsage,
+  answerWithBilling,
   checkCanAnswer,
 } from "../../../../../utils/billing";
 
@@ -152,9 +151,8 @@ async function handleChatRequest(
       retriever,
     });
 
-    const usage = new ChatUsage();
     let response = "";
-    await usage.track(async () => {
+    await answerWithBilling(request.server.prisma, bot, `Chat usage for bot: ${bot.name}`, "v1-api", async () => {
       if (isStreaming) {
         const stream = await chain.stream({
           question: sanitizedQuestion,
@@ -194,13 +192,6 @@ async function handleChatRequest(
       },
     });
 
-    await chargeChatUsage(
-      request.server.prisma,
-      bot,
-      usage,
-      `Chat usage for bot: ${bot.name}`,
-      "v1-api"
-    );
 
     const result = {
       bot: { text: response, sourceDocuments: documents },

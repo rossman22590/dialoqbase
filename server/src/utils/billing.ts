@@ -25,7 +25,7 @@ export const checkCanAnswer = async (
   if (usesOwnKey(bot)) {
     return null;
   }
-  if (!owner?.credit || owner.credit.balance.lessThan(0)) {
+  if (!owner?.credit || owner.credit.balance.lessThanOrEqualTo(0)) {
     return INSUFFICIENT_CREDITS_MESSAGE;
   }
   return null;
@@ -81,4 +81,28 @@ export const chargeChatUsage = async (
   } catch (err) {
     console.error(`Failed to deduct credits for ${source}`, err);
   }
+};
+
+// Runs fn (the chain call) with usage tracking and charges for it as soon as
+// it settles, before anything else in the handler can fail. If fn throws after
+// an LLM call already succeeded, that call is still charged.
+export const answerWithBilling = async <T>(
+  prisma: any,
+  bot: any,
+  description: string,
+  source: string,
+  fn: () => Promise<T>
+): Promise<T> => {
+  const usage = new ChatUsage();
+  let answer: T;
+  try {
+    answer = await usage.track(fn);
+  } catch (err) {
+    if (usage.callCount > 0) {
+      await chargeChatUsage(prisma, bot, usage, `${description} (failed)`, source);
+    }
+    throw err;
+  }
+  await chargeChatUsage(prisma, bot, usage, description, source);
+  return answer;
 };

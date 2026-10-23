@@ -9,10 +9,9 @@ import { DialoqbaseHybridRetrival } from "../../utils/hybrid";
 import { createChain, groupMessagesByConversation } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
 import { nextTick } from "../../utils/nextTick";
-import { ChatUsage } from "../../utils/usage-tracker";
 import {
   INSUFFICIENT_CREDITS_MESSAGE,
-  chargeChatUsage,
+  answerWithBilling,
   checkCanAnswer,
 } from "../../utils/billing";
 
@@ -181,8 +180,7 @@ export const chatRequestAPIHandler = async (
         retriever,
       });
 
-      const usage = new ChatUsage();
-      let response = await usage.track(() => chain.invoke({
+      let response = await answerWithBilling(prisma, bot, `API stream usage for bot: ${bot.name}`, "api", () => chain.invoke({
         question: sanitizedQuestion,
         chat_history: groupMessagesByConversation(
           history.map((message) => ({
@@ -202,7 +200,6 @@ export const chatRequestAPIHandler = async (
         },
       });
 
-      await chargeChatUsage(prisma, bot, usage, `API stream usage for bot: ${bot.name}`, "api");
 
       reply.sse({
         event: "result",
@@ -381,8 +378,7 @@ export const chatRequestAPIHandler = async (
         retriever,
       });
 
-      const usage = new ChatUsage();
-      const botResponse = await usage.track(() => chain.invoke({
+      const botResponse = await answerWithBilling(prisma, bot, `API chat usage for bot: ${bot.name}`, "api", () => chain.invoke({
         question: sanitizedQuestion,
         chat_history: groupMessagesByConversation(
           history.map((message) => ({
@@ -403,7 +399,6 @@ export const chatRequestAPIHandler = async (
         },
       });
 
-      await chargeChatUsage(prisma, bot, usage, `API chat usage for bot: ${bot.name}`, "api");
 
       return {
         bot: {

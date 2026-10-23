@@ -10,9 +10,8 @@ import { createChain, groupMessagesByConversation } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
 import { nextTick } from "../../utils/nextTick";
 import { jwtBotVerify } from "../../utils/jwt";
-import { ChatUsage } from "../../utils/usage-tracker";
 import {
-  chargeChatUsage,
+  answerWithBilling,
   checkCanAnswer,
 } from "../../utils/billing";
 
@@ -278,8 +277,7 @@ export const chatRequestHandler = async (
       retriever,
     });
 
-    const usage = new ChatUsage();
-    const botResponse = await usage.track(() => chain.invoke({
+    const botResponse = await answerWithBilling(request.server.prisma, bot, `Public chat usage for bot: ${bot.name}`, "web", () => chain.invoke({
       question: sanitizedQuestion,
       chat_history: groupMessagesByConversation(
         history.map((message) => ({
@@ -309,13 +307,6 @@ export const chatRequestHandler = async (
       },
     });
 
-    await chargeChatUsage(
-      request.server.prisma,
-      bot,
-      usage,
-      `Public chat usage for bot: ${bot.name}`,
-      "web"
-    );
 
     return {
       bot: {
@@ -721,8 +712,7 @@ export const chatRequestStreamHandler = async (
       retriever,
     });
 
-    const usage = new ChatUsage();
-    let response = await usage.track(() => chain.invoke({
+    let response = await answerWithBilling(request.server.prisma, bot, `Public stream usage for bot: ${bot.name}`, "web", () => chain.invoke({
       question: sanitizedQuestion,
       chat_history: groupMessagesByConversation(
         history.map((message) => ({
@@ -752,13 +742,6 @@ export const chatRequestStreamHandler = async (
       },
     });
 
-    await chargeChatUsage(
-      request.server.prisma,
-      bot,
-      usage,
-      `Public stream usage for bot: ${bot.name}`,
-      "web"
-    );
 
     reply.sse({
       event: "result",
