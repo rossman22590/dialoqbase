@@ -118,7 +118,7 @@ export default function SettingsApplicationRoot() {
               onFinish={updateApplicationSettings}
             >
               <div className="sm:overflow-hidden ">
-                <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-[#171717] dark:border-gray-600">
+                <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-surface dark:border-line-strong">
                   <Form.Item
                     label="No of bots per user"
                     name="noOfBotsPerUser"
@@ -195,7 +195,7 @@ export default function SettingsApplicationRoot() {
                     <Switch />
                   </Form.Item>
                 </div>
-                <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-[#141414] dark:border-gray-600">
+                <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-surface-2 dark:border-line-strong">
                   <button
                     disabled={isLoading}
                     type="submit"
@@ -220,7 +220,7 @@ export default function SettingsApplicationRoot() {
               onFinish={updateModelSettings}
             >
               <div className="sm:overflow-hidden ">
-                <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-[#171717] dark:border-gray-600">
+                <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-surface dark:border-line-strong">
                   <Form.Item
                     label="Default Chat Model"
                     name="defaultChatModel"
@@ -311,7 +311,7 @@ export default function SettingsApplicationRoot() {
                     <Switch />
                   </Form.Item>
                 </div>
-                <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-[#141414] dark:border-gray-600">
+                <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-surface-2 dark:border-line-strong">
                   <button
                     disabled={isModelLoading}
                     type="submit"
@@ -337,7 +337,7 @@ export default function SettingsApplicationRoot() {
                 layout="vertical"
                 onFinish={updateRagSettings}
               >
-                <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-[#171717] dark:border-gray-600">
+                <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-surface dark:border-line-strong">
                   <Form.Item
                     label="Default Chunk Size"
                     name="defaultChunkSize"
@@ -364,7 +364,7 @@ export default function SettingsApplicationRoot() {
                     <InputNumber size="large" style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
-                <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-[#141414] dark:border-gray-600">
+                <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-surface-2 dark:border-line-strong">
                   <button
                     disabled={isRagLoading}
                     type="submit"

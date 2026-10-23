@@ -26,7 +26,7 @@ export default function DefaultSearchBox({
             placeholder={placeholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full py-3 pr-16 text-gray-900 border rounded-md outline-none dark:bg-[#1e1e1e] dark:border-gray-700 dark:text-gray-100 bg-white border-gray-300 transition-colors duration-300 resize-none ring-0"
+            className="w-full py-3 pr-16 text-gray-900 border rounded-md outline-none dark:bg-surface dark:border-line-strong dark:text-gray-100 bg-white border-line-strong transition-colors duration-300 resize-none ring-0"
             rows={3}
           />
           <button

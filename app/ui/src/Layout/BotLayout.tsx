@@ -1,7 +1,6 @@
 import React, { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import {
-  Bars3BottomLeftIcon,
   XMarkIcon,
   CircleStackIcon,
   CogIcon,
@@ -17,7 +16,7 @@ import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { Tooltip } from "antd";
-import { ApplicationMenu } from "./ApplicationMenu";
+import { AppHeader } from "./AppHeader";
 import { useSettings } from "../hooks/useSettings";
 import api from "../services/api";
 import { OnboardingModal } from "../components/Common/OnboardingModal";
@@ -117,10 +116,10 @@ export default function BotLayout({
     const path = href.replace(":id", params.id!);
     if (location.pathname === path) return true;
     // Saved playground chats live under /bot/:id/playground/:history_id.
-    return (
-      href === "/bot/:id" &&
-      location.pathname.startsWith(`/bot/${params.id}/playground/`)
-    );
+    if (href === "/bot/:id") {
+      return location.pathname.startsWith(`/bot/${params.id}/playground/`);
+    }
+    return location.pathname.startsWith(`${path}/`);
   };
 
   return (
@@ -130,7 +129,7 @@ export default function BotLayout({
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog
             as="div"
-            className="relative z-40 md:hidden"
+            className="relative z-[1002] md:hidden"
             onClose={setSidebarOpen}
           >
             <Transition.Child
@@ -142,7 +141,7 @@ export default function BotLayout({
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
+              <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px]" />
             </Transition.Child>
 
             <div className="fixed inset-0 z-40 flex">
@@ -155,7 +154,7 @@ export default function BotLayout({
                 leaveFrom="translate-x-0"
                 leaveTo="-translate-x-full"
               >
-                <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white pt-5 pb-4 dark:bg-[#171717]">
+                <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col border-r border-line bg-chrome pt-5 pb-4 shadow-float">
                   <Transition.Child
                     as={Fragment}
                     enter="ease-in-out duration-300"
@@ -181,21 +180,19 @@ export default function BotLayout({
                   </Transition.Child>
                   <Link
                     to="/"
-                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 flex items-center px-3"
+                    className="flex items-center px-4 text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   >
                     <img
                       className="h-8 w-auto"
                       src="/logo.png"
                       alt="Botcraft Pro"
                     />
-                    <span className="ml-1 text-xl font-bold">Botcraft Pro</span>
-                    <span className="inline-block flex-shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 ml-2">
-                      {/* @ts-ignore */}
-                      {`v${__APP_VERSION__}`}
+                    <span className="ml-1 text-lg font-semibold tracking-tight">
+                      Botcraft Pro
                     </span>
                   </Link>
-                  <div className="mt-5 h-0 flex-1 overflow-y-auto">
-                    <nav className="space-y-1 px-2">
+                  <div className="mt-6 h-0 flex-1 overflow-y-auto">
+                    <nav className="space-y-1 px-3">
                       {navigation.map((item) => {
                         if (
                           item.key === "search" &&
@@ -212,16 +209,16 @@ export default function BotLayout({
                             className={classNames(
                               isActive(item.href)
                                 ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-100"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white dark:hover:bg-[#262626]",
-                              "group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                                : "text-fg-muted hover:bg-surface-2 hover:text-fg",
+                              "group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
                             )}
                           >
                             <item.icon
                               className={classNames(
                                 isActive(item.href)
                                   ? "text-indigo-600 dark:text-indigo-300"
-                                  : "text-gray-400 group-hover:text-gray-500",
-                                "mr-4 flex-shrink-0 h-6 w-6"
+                                  : "text-fg-subtle group-hover:text-fg-muted",
+                                "mr-3 h-5 w-5 flex-shrink-0"
                               )}
                               aria-hidden="true"
                             />
@@ -241,41 +238,10 @@ export default function BotLayout({
         </Transition.Root>
 
         <div className="flex flex-col">
-          <header className="sticky top-0 z-[999] flex h-14 border-b border-line bg-chrome/80 backdrop-blur-xl backdrop-saturate-150">
-            <button
-              type="button"
-              className="border-r border-line px-4 text-fg-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <span className="sr-only">Open sidebar</span>
-              <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
-            </button>
-            <Link
-              to="/"
-              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 flex shrink-0 items-center px-3 text-fg"
-            >
-              <img className="h-8 w-auto" src="/logo.png" alt="Botcraft Pro" />
-              <span className="ml-1 whitespace-nowrap text-lg font-semibold tracking-tight sm:text-xl">
-                Botcraft Pro
-              </span>
-              <span className="ml-2 hidden flex-shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/15 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20 sm:inline-block">
-                {/* @ts-ignore */}
-                {`v${__APP_VERSION__}`}
-              </span>
-            </Link>
-            <div className="flex min-w-0 flex-1 justify-end px-3 sm:px-4">
-              <div className="ml-2 flex items-center md:ml-6">
-                <div
-                  title="Credits"
-                  className="mr-2 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[13px] font-medium tabular-nums text-fg-muted shadow-soft sm:mr-4"
-                >
-                  <span className="hidden sm:inline">Credits: </span>$
-                  {Number(creditData?.balance || 0).toFixed(4)}
-                </div>
-                <ApplicationMenu />
-              </div>
-            </div>
-          </header>
+          <AppHeader
+            balance={creditData?.balance}
+            onOpenNav={() => setSidebarOpen(true)}
+          />
           <div className="flex flex-1">
             <aside className="hidden md:flex md:flex-col md:w-16 md:fixed md:inset-y-0">
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-line bg-chrome pt-5">

@@ -225,19 +225,68 @@ export default function App() {
           fontFamily:
             'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
           colorPrimary: "#7c3aed",
+          colorLink: "#7c3aed",
           borderRadius: 8,
+          borderRadiusLG: 14,
+          controlHeight: 36,
+          boxShadowSecondary:
+            "0 2px 4px rgb(16 16 24 / 0.04), 0 16px 40px -16px rgb(16 16 24 / 0.28)",
           ...(mode === "dark"
             ? {
                 colorBgBase: "#161619",
+                colorBgLayout: "#0f0f11",
                 colorBgContainer: "#1c1c20",
                 colorBgElevated: "#232328",
                 colorBorder: "#37373f",
                 colorBorderSecondary: "#27272d",
+                colorFillAlter: "#1f1f23",
               }
             : {
+                colorBgLayout: "#f8f8fa",
                 colorBorder: "#dadae2",
                 colorBorderSecondary: "#e9e9ee",
+                colorFillAlter: "#f7f7f9",
               }),
+        },
+        components: {
+          Button: {
+            fontWeight: 500,
+            primaryShadow:
+              "0 1px 2px rgb(76 29 149 / 0.25), 0 4px 12px -4px rgb(124 58 237 / 0.5)",
+            defaultShadow: "0 1px 2px rgb(16 16 24 / 0.05)",
+          },
+          Input: {
+            activeShadow: "0 0 0 4px rgb(124 58 237 / 0.12)",
+          },
+          InputNumber: {
+            activeShadow: "0 0 0 4px rgb(124 58 237 / 0.12)",
+          },
+          Select: {
+            optionSelectedBg:
+              mode === "dark" ? "rgb(139 92 246 / 0.16)" : "#f5f3ff",
+          },
+          Card: {
+            headerFontSize: 15,
+          },
+          Modal: {
+            borderRadiusLG: 16,
+            titleFontSize: 17,
+          },
+          Table: {
+            headerBg: mode === "dark" ? "#1f1f23" : "#f7f7f9",
+            headerColor: mode === "dark" ? "#a8a8b2" : "#52525b",
+            headerSplitColor: "transparent",
+            rowHoverBg: mode === "dark" ? "#222227" : "#fafafb",
+            borderColor: mode === "dark" ? "#27272d" : "#ececf1",
+          },
+          Tabs: {
+            itemSelectedColor: mode === "dark" ? "#c4b5fd" : "#6d28d9",
+            inkBarColor: "#7c3aed",
+            titleFontSize: 14,
+          },
+          Segmented: {
+            itemSelectedBg: mode === "dark" ? "#2e2e34" : "#ffffff",
+          },
         },
       }}
     >

@@ -53,7 +53,7 @@ export const SettingsPwdP: React.FC<Props> = ({
       layout="vertical"
       onFinish={mutate}
     >
-      <div className="px-4 py-5 bg-white  border sm:rounded-lg sm:p-6 dark:bg-[#1e1e1e] dark:border-gray-700">
+      <div className="px-4 py-5 bg-white  border sm:rounded-lg sm:p-6 dark:bg-surface dark:border-line-strong">
         <div className="md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">

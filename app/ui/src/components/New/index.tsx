@@ -325,7 +325,7 @@ export default function NewBody() {
                       id="comments"
                       name="comments"
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      className="h-4 w-4 rounded border-line-strong text-indigo-600 focus:ring-indigo-600"
                     />
                   </div>
                   <div className="text-sm leading-6">
@@ -346,7 +346,7 @@ export default function NewBody() {
                       id="candidates"
                       name="candidates"
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      className="h-4 w-4 rounded border-line-strong text-indigo-600 focus:ring-indigo-600"
                     />
                   </div>
                   <div className="text-sm leading-6">
@@ -367,7 +367,7 @@ export default function NewBody() {
                       id="offers"
                       name="offers"
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      className="h-4 w-4 rounded border-line-strong text-indigo-600 focus:ring-indigo-600"
                     />
                   </div>
                   <div className="text-sm leading-6">
@@ -397,7 +397,7 @@ export default function NewBody() {
                     id="push-everything"
                     name="push-notifications"
                     type="radio"
-                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    className="h-4 w-4 border-line-strong text-indigo-600 focus:ring-indigo-600"
                   />
                   <label
                     htmlFor="push-everything"
@@ -411,7 +411,7 @@ export default function NewBody() {
                     id="push-email"
                     name="push-notifications"
                     type="radio"
-                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    className="h-4 w-4 border-line-strong text-indigo-600 focus:ring-indigo-600"
                   />
                   <label
                     htmlFor="push-email"
@@ -425,7 +425,7 @@ export default function NewBody() {
                     id="push-nothing"
                     name="push-notifications"
                     type="radio"
-                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    className="h-4 w-4 border-line-strong text-indigo-600 focus:ring-indigo-600"
                   />
                   <label
                     htmlFor="push-nothing"

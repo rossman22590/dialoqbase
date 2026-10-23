@@ -28,7 +28,7 @@ export const ConversationSidebar = ({
       id="menu"
       className={`bg-white z-[999] border fixed md:inset-y-0 md:flex md:w-[350px] md:flex-col transition-transform  max-md:w-3/4  ${
         hideMenu ? "translate-x-[-100%]" : "translate-x-[0%]"
-      } dark:bg-[#171717] dark:border-gray-600`}
+      } dark:bg-surface dark:border-line-strong`}
     >
       <div className="flex mt-16 h-full min-h-0 flex-col">
         <div className="flex h-full w-full flex-1 items-start">
@@ -67,9 +67,9 @@ export const ConversationSidebar = ({
                       key={index}
                       className={`"w-full p-2 hover:bg-gray-100 cursor-pointer transition-colors duration-300 ease-in-out  border-b  ${
                         defaultIndex === index
-                          ? "bg-gray-100 dark:bg-[#232222]"
-                          : "dark:hover:bg-[#232222]"
-                      } dark:border-gray-600 dark:hover:bg-[#232222]`}
+                          ? "bg-gray-100 dark:bg-surface-2"
+                          : "dark:hover:bg-surface-2"
+                      } dark:border-line-strong dark:hover:bg-surface-2`}
                     >
                       <div className="flex text-gray-500 justify-between">
                         <h3 className="text-xs font-thin dark:text-gray-200">

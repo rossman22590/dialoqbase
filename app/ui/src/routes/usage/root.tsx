@@ -181,7 +181,7 @@ export default function UsageRoot() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 {/* Battery / Credit Status Card */}
-                <div className="bg-white dark:bg-[#171717] overflow-hidden shadow rounded-lg border dark:border-gray-700 p-6 col-span-1">
+                <div className="bg-white dark:bg-surface overflow-hidden shadow rounded-lg border dark:border-line-strong p-6 col-span-1">
                     <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                         {isBotUsage ? "Account Balance" : "Balance"}
                     </h3>
@@ -224,14 +224,14 @@ export default function UsageRoot() {
                 </div>
 
                 {/* Usage Chart */}
-                <div className="bg-white dark:bg-[#171717] overflow-hidden shadow rounded-lg border dark:border-gray-700 p-6 col-span-2">
+                <div className="bg-white dark:bg-surface overflow-hidden shadow rounded-lg border dark:border-line-strong p-6 col-span-2">
                     <Bar options={options} data={chartData} />
                 </div>
             </div>
 
             {/* Transactions Table */}
-            <div className="bg-white dark:bg-[#171717] overflow-hidden shadow rounded-lg border dark:border-gray-700">
-                <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-600">
+            <div className="bg-white dark:bg-surface overflow-hidden shadow rounded-lg border dark:border-line-strong">
+                <div className="px-4 py-5 sm:px-6 border-b border-line dark:border-line-strong">
                     <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                         Transaction History
                     </h3>

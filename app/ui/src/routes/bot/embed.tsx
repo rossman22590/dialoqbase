@@ -57,7 +57,7 @@ export default function BotEmbedRoot() {
               </div>
               <div className="grid grid-cols-1 gap-4">
                 <section aria-labelledby="section-2-title">
-                  <div className="overflow-hidden rounded-lg bg-white border dark:bg-[#0a0a0a] dark:border-gray-700">
+                  <div className="overflow-hidden rounded-lg bg-white border dark:bg-canvas dark:border-line-strong">
                     <div>
                       <PreviewIframe public_id={data.public_id} />
                     </div>

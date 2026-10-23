@@ -23,19 +23,20 @@ const LinkComponent = (item: {
     <li>
       <Link
         to={item.href}
+        aria-current={item.current === item.href ? "page" : undefined}
         className={classNames(
           item.current === item.href
-            ? "bg-gray-100 text-indigo-600 dark:bg-[#262626] dark:text-white"
-            : "text-gray-700 hover:text-indigo-600 hover:bg-gray-100 dark:text-gray-200 dark:hover:text-white dark:hover:bg-[#262626]",
-          "group flex gap-x-3 rounded-md py-2 pl-2 pr-3 text-sm leading-6 font-semibold"
+            ? "bg-surface text-fg shadow-soft ring-1 ring-line"
+            : "text-fg-muted hover:bg-surface-2 hover:text-fg",
+          "group flex items-center gap-x-2.5 rounded-xl py-2 pl-2.5 pr-3 text-sm font-medium leading-6 transition-colors"
         )}
       >
         <item.icon
           className={classNames(
             item.current === item.href
-              ? "text-indigo-600 dark:text-white"
-              : "text-gray-400 group-hover:text-indigo-600 dark:text-gray-200 dark:group-hover:text-white",
-            "h-6 w-6 shrink-0"
+              ? "text-indigo-600 dark:text-indigo-300"
+              : "text-fg-subtle group-hover:text-fg-muted",
+            "h-5 w-5 shrink-0"
           )}
           aria-hidden="true"
         />
@@ -51,8 +52,11 @@ export const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <div className="mx-auto max-w-7xl lg:flex lg:gap-x-16 lg:px-8">
-        <aside className="flex lg:rounded-md bg-white lg:h-auto lg:self-start lg:p-4 lg:mt-20 overflow-x-auto lg:border border-b  py-4 lg:block lg:w-64 lg:flex-none  dark:bg-[#171717] dark:border-gray-600">
-          <nav className="flex-none  px-4 sm:px-6 lg:px-0">
+        <aside className="flex overflow-x-auto border-b border-line py-3 lg:sticky lg:top-24 lg:mt-12 lg:block lg:w-60 lg:flex-none lg:self-start lg:border-0 lg:py-0">
+          <nav className="flex-none px-4 sm:px-6 lg:px-0">
+            <p className="mb-2 hidden px-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-fg-subtle lg:block">
+              Settings
+            </p>
             <ul
               role="list"
               className="flex gap-x-3 gap-y-1 whitespace-nowrap lg:flex-col"
@@ -100,10 +104,10 @@ export const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
 
         <main
           className={
-            "px-4 py-16 sm:px-6 lg:flex-auto lg:px-0 lg:py-20 lg:mx-auto lg:max-w-2xl"
+            "px-4 py-10 sm:px-6 lg:flex-auto lg:px-0 lg:py-12 lg:mx-auto lg:max-w-3xl"
           }
         >
-          <div className="mx-auto max-w-2xl space-y-16 sm:space-y-10 lg:mx-0 lg:max-w-none">
+          <div className="mx-auto max-w-3xl space-y-10 lg:mx-0 lg:max-w-none">
             {children}
           </div>
         </main>

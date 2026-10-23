@@ -65,6 +65,81 @@ html {
 @tailwind components;
 @tailwind utilities;
 
+/* ---------- Shared UI components (see src/components/ui) ---------- */
+@layer components {
+  .ui-card {
+    @apply rounded-2xl border border-line bg-surface shadow-soft;
+  }
+
+  .ui-card-hover {
+    @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-line-strong hover:shadow-raised;
+  }
+
+  .ui-icon-tile {
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20 [&_svg]:h-4 [&_svg]:w-4;
+  }
+
+  .ui-btn {
+    @apply inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-3.5 text-sm font-medium transition-all duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50 [&_svg]:h-4 [&_svg]:w-4;
+  }
+
+  .ui-btn-primary {
+    @apply ui-btn bg-gradient-to-b from-indigo-500 to-indigo-600 text-white shadow-brand ring-1 ring-inset ring-white/10 hover:brightness-110;
+  }
+
+  .ui-btn-secondary {
+    @apply ui-btn border border-line bg-surface text-fg shadow-soft hover:border-line-strong hover:bg-surface-2;
+  }
+
+  .ui-btn-ghost {
+    @apply ui-btn text-fg-muted hover:bg-surface-2 hover:text-fg;
+  }
+
+  .ui-btn-danger {
+    @apply ui-btn bg-red-600 text-white shadow-soft hover:bg-red-500;
+  }
+
+  .ui-input {
+    @apply block w-full rounded-xl border border-line-strong bg-surface px-3 py-2 text-sm text-fg shadow-soft transition placeholder:text-fg-subtle hover:border-fg-subtle/50 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 dark:bg-canvas;
+  }
+
+  .ui-label {
+    @apply block text-sm font-medium text-fg;
+  }
+
+  .ui-help {
+    @apply mt-1 text-xs leading-relaxed text-fg-subtle;
+  }
+
+  .ui-badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset;
+  }
+
+  .ui-badge-neutral {
+    @apply bg-surface-2 text-fg-muted ring-line;
+  }
+
+  .ui-badge-brand {
+    @apply bg-indigo-50 text-indigo-700 ring-indigo-600/15 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20;
+  }
+
+  .ui-badge-success {
+    @apply bg-emerald-50 text-emerald-700 ring-emerald-600/15 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20;
+  }
+
+  .ui-badge-warning {
+    @apply bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-400/20;
+  }
+
+  .ui-badge-danger {
+    @apply bg-red-50 text-red-700 ring-red-600/15 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-400/20;
+  }
+
+  .ui-page {
+    @apply mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8;
+  }
+}
+
 .scroll-to-bottom {
   position: relative;
 }

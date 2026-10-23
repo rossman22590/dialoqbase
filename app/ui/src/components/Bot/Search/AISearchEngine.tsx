@@ -32,7 +32,7 @@ export default function AISearchEngine({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Enter your search query..."
-          className="flex-grow px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-gray-100"
+          className="flex-grow px-4 py-2 border border-line-strong dark:border-line-strong rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-surface text-gray-900 dark:text-gray-100"
         />
         <button
           type="submit"

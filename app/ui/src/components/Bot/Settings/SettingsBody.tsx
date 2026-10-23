@@ -177,7 +177,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
           layout="vertical"
           className="space-y-6 mb-6 "
         >
-          <div className="px-4 py-5 bg-white  border sm:rounded-lg sm:p-6 dark:bg-[#1e1e1e] dark:border-gray-700">
+          <div className="px-4 py-5 bg-white  border sm:rounded-lg sm:p-6 dark:bg-surface dark:border-line-strong">
             <div className="md:grid md:grid-cols-3 md:gap-6">
               <div className="md:col-span-1">
                 <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
@@ -280,7 +280,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
                     min={0}
                     max={1}
                     step={0.1}
-                    className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-line-strong py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                   />
                 </Form.Item>
 
@@ -377,7 +377,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
                         qaPrompt: HELPFUL_ASSISTANT_WITH_CONTEXT_PROMPT,
                       });
                     }}
-                    className="flex items-center rounded-md py-[0.4375rem] pl-2 pr-2 lg:pr-3 bg-white border text-xs dark:bg-[#0a0a0a] dark:border-gray-700"
+                    className="flex items-center rounded-md py-[0.4375rem] pl-2 pr-2 lg:pr-3 bg-white border text-xs dark:bg-canvas dark:border-line-strong"
                   >
                     PROMPT WITH CONTEXT
                   </button>
@@ -388,7 +388,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
                         qaPrompt: HELPFUL_ASSISTANT_WITHOUT_CONTEXT_PROMPT,
                       });
                     }}
-                    className="flex items-center rounded-md py-[0.4375rem] pl-2 pr-2 lg:pr-3 bg-white border text-xs dark:bg-[#0a0a0a] dark:border-gray-700"
+                    className="flex items-center rounded-md py-[0.4375rem] pl-2 pr-2 lg:pr-3 bg-white border text-xs dark:bg-canvas dark:border-line-strong"
                   >
                     PROMPT WITHOUT CONTEXT
                   </button>
@@ -483,14 +483,14 @@ export const SettingsBody: React.FC<BotSettings> = ({
           </div>
         </Form>
 
-        <div className="bg-white border sm:rounded-lg dark:bg-[#1e1e1e] dark:border-gray-700">
+        <div className="bg-white border sm:rounded-lg dark:bg-surface dark:border-line-strong">
           <SettingsPwdP
             publicBotPwd={data.publicBotPwd}
             publicBotPwdProtected={data.publicBotPwdProtected}
           />
         </div>
 
-        <div className="bg-white border sm:rounded-lg dark:bg-[#1e1e1e] dark:border-gray-700">
+        <div className="bg-white border sm:rounded-lg dark:bg-surface dark:border-line-strong">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
               Make a copy of your bot
@@ -521,7 +521,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
           </div>
         </div>
 
-        <div className="bg-white border sm:rounded-lg dark:bg-[#1e1e1e] dark:border-gray-700">
+        <div className="bg-white border sm:rounded-lg dark:bg-surface dark:border-line-strong">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
               Delete your bot

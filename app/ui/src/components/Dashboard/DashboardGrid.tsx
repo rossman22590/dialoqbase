@@ -34,7 +34,7 @@ export const DashboardGrid = () => {
               autoComplete="off"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full pl-11 pr-4 py-3 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-700 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm hover:border-gray-300 dark:hover:border-gray-600 dark:text-white"
+              className="block w-full pl-11 pr-4 py-3 bg-white dark:bg-surface border border-line dark:border-line-strong rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm hover:border-line-strong dark:hover:border-line-strong dark:text-white"
             />
           </div>
         </div>
@@ -44,7 +44,7 @@ export const DashboardGrid = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((item) => (
             <div
-              className="flex animate-pulse h-28 px-3 py-4 bg-gray-200 dark:bg-[#1e1e1e] rounded-xl shadow-sm border border-gray-100 dark:border-gray-800"
+              className="flex animate-pulse h-28 px-3 py-4 bg-gray-200 dark:bg-surface rounded-xl shadow-sm border border-line dark:border-line"
               key={item}
             ></div>
           ))}
@@ -68,7 +68,7 @@ export const DashboardGrid = () => {
               {filteredData.map((bot: any) => (
                 <Link
                   to={`/bot/${bot.id}`}
-                  className="group flex rounded-2xl hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 ease-in-out cursor-pointer border border-gray-200 bg-white dark:bg-[#1e1e1e] dark:border-gray-800 dark:hover:bg-[#232323] dark:hover:border-gray-700 hover:bg-gray-50 hover:border-indigo-200 dark:hover:border-indigo-500/30 overflow-hidden"
+                  className="group flex rounded-2xl hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 ease-in-out cursor-pointer border border-line bg-white dark:bg-surface dark:border-line dark:hover:bg-surface-2 dark:hover:border-line-strong hover:bg-gray-50 hover:border-indigo-200 dark:hover:border-indigo-500/30 overflow-hidden"
                   key={bot.id}
                 >
                   <div className="w-full truncate ">
@@ -92,7 +92,7 @@ export const DashboardGrid = () => {
                       </div>
                     </div>
 
-                    <div className="px-6 pb-5 flex flex-wrap gap-2 text-gray-500 text-xs dark:text-gray-400 border-t border-gray-50 dark:border-gray-800/50 pt-3">
+                    <div className="px-6 pb-5 flex flex-wrap gap-2 text-gray-500 text-xs dark:text-gray-400 border-t border-line dark:border-line/50 pt-3">
                       {bot.source.map((source: any, idx: number) => (
                         <span
                           title={`${source.type} source`}

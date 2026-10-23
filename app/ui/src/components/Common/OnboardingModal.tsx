@@ -146,7 +146,7 @@ export const OnboardingModal: React.FC = () => {
             bodyStyle={{ padding: 0 }}
             closeIcon={null} // Cleaner look
         >
-            <div className="flex flex-col lg:flex-row min-h-[580px] bg-white dark:bg-[#0A0A0A] overflow-hidden rounded-[32px] font-sans selection:bg-purple-100 dark:selection:bg-purple-900/40">
+            <div className="flex flex-col lg:flex-row min-h-[580px] bg-white dark:bg-canvas overflow-hidden rounded-[32px] font-sans selection:bg-purple-100 dark:selection:bg-purple-900/40">
 
                 {/* Left Side: Visual / Mood */}
                 <div className={`relative w-full lg:w-[400px] bg-gradient-to-br ${current.color} overflow-hidden flex flex-col items-center justify-center p-12 transition-all duration-700 ease-in-out`}>
@@ -188,7 +188,7 @@ export const OnboardingModal: React.FC = () => {
                 </div>
 
                 {/* Right Side: Content */}
-                <div className="flex-1 flex flex-col p-10 lg:p-16 relative bg-white dark:bg-[#0A0A0A]">
+                <div className="flex-1 flex flex-col p-10 lg:p-16 relative bg-white dark:bg-canvas">
 
                     {/* Header / Subtitle */}
                     <AnimatePresence mode="wait">
@@ -215,7 +215,7 @@ export const OnboardingModal: React.FC = () => {
                     </AnimatePresence>
 
                     {/* Interactive Preview Concept (Static but looks dynamic) */}
-                    <div className={`mt-auto mb-12 p-6 rounded-3xl border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center gap-4 transition-all duration-700 ${current.glow}`}>
+                    <div className={`mt-auto mb-12 p-6 rounded-3xl border border-line dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center gap-4 transition-all duration-700 ${current.glow}`}>
                         <div className={`p-2 rounded-xl bg-gradient-to-br ${current.color} shadow-lg`}>
                             <SparklesIcon className="h-5 w-5 text-white" />
                         </div>
@@ -239,7 +239,7 @@ export const OnboardingModal: React.FC = () => {
                             {currentStep > 0 && (
                                 <button
                                     onClick={handleBack}
-                                    className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-100 dark:border-white/5 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-200 dark:hover:border-white/20 transition-all font-bold"
+                                    className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-line dark:border-white/5 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-200 dark:hover:border-white/20 transition-all font-bold"
                                 >
                                     <ChevronLeftIcon className="h-5 w-5" />
                                 </button>

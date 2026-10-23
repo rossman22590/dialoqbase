@@ -1,7 +1,6 @@
 import React, { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import {
-  Bars3BottomLeftIcon,
   XMarkIcon,
   CircleStackIcon,
   CogIcon,
@@ -17,7 +16,7 @@ import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { Tooltip } from "antd";
-import { ApplicationMenu } from "./ApplicationMenu";
+import { AppHeader } from "./AppHeader";
 import { useSettings } from "../hooks/useSettings";
 import api from "../services/api";
 
@@ -109,13 +108,23 @@ export default function BotPlaygroundLayout({
     }
   }, [isLogged]);
 
+  const isActive = (href: string) => {
+    const path = href.replace(":id", params.id!);
+    if (location.pathname === path) return true;
+    // Saved playground chats live under /bot/:id/playground/:history_id.
+    if (href === "/bot/:id") {
+      return location.pathname.startsWith(`/bot/${params.id}/playground/`);
+    }
+    return location.pathname.startsWith(`${path}/`);
+  };
+
   return (
     <>
       <div>
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog
             as="div"
-            className="relative z-40 md:hidden"
+            className="relative z-[10000] md:hidden"
             onClose={setSidebarOpen}
           >
             <Transition.Child
@@ -127,20 +136,20 @@ export default function BotPlaygroundLayout({
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
+              <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px]" />
             </Transition.Child>
 
             <div className="fixed inset-0 z-40 flex">
               <Transition.Child
                 as={Fragment}
-                enter="transition ease-in-out duration-300 transform"
+                enter="transition ease-out duration-300 transform"
                 enterFrom="-translate-x-full"
                 enterTo="translate-x-0"
-                leave="transition ease-in-out duration-300 transform"
+                leave="transition ease-in duration-200 transform"
                 leaveFrom="translate-x-0"
                 leaveTo="-translate-x-full"
               >
-                <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white pt-5 pb-4 dark:bg-[#171717]">
+                <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col border-r border-line bg-chrome pt-5 pb-4 shadow-float">
                   <Transition.Child
                     as={Fragment}
                     enter="ease-in-out duration-300"
@@ -166,21 +175,19 @@ export default function BotPlaygroundLayout({
                   </Transition.Child>
                   <Link
                     to="/"
-                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 flex items-center px-3"
+                    className="flex items-center px-4 text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   >
                     <img
                       className="h-8 w-auto"
                       src="/logo.png"
                       alt="Botcraft Pro"
                     />
-                    <span className="ml-1 text-xl font-bold">Botcraft Pro</span>
-                    <span className="inline-block flex-shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 ml-2">
-                      {/* @ts-ignore */}
-                      {`v${__APP_VERSION__}`}
+                    <span className="ml-1 text-lg font-semibold tracking-tight">
+                      Botcraft Pro
                     </span>
                   </Link>
-                  <div className="mt-5 h-0 flex-1 overflow-y-auto">
-                    <nav className="space-y-1 px-2">
+                  <div className="mt-6 h-0 flex-1 overflow-y-auto">
+                    <nav className="space-y-1 px-3">
                       {navigation.map((item) => {
                         if (
                           item.key === "search" &&
@@ -196,20 +203,18 @@ export default function BotPlaygroundLayout({
                               pathname: item.href.replace(":id", params.id!),
                             }}
                             className={classNames(
-                              location.pathname ===
-                                item.href.replace(":id", params.id!)
-                                ? "bg-gray-100 text-gray-900 dark:bg-[#262626] dark:text-white"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white dark:hover:bg-[#262626]",
-                              "group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                              isActive(item.href)
+                                ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-100"
+                                : "text-fg-muted hover:bg-surface-2 hover:text-fg",
+                              "group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
                             )}
                           >
                             <item.icon
                               className={classNames(
-                                location.pathname ===
-                                  item.href.replace(":id", params.id!)
-                                  ? "text-gray-500"
-                                  : "text-gray-400 group-hover:text-gray-500",
-                                "mr-4 flex-shrink-0 h-6 w-6"
+                                isActive(item.href)
+                                  ? "text-indigo-600 dark:text-indigo-300"
+                                  : "text-fg-subtle group-hover:text-fg-muted",
+                                "mr-3 h-5 w-5 flex-shrink-0"
                               )}
                               aria-hidden="true"
                             />
@@ -229,9 +234,9 @@ export default function BotPlaygroundLayout({
         </Transition.Root>
 
         <div className="hidden md:fixed md:inset-y-0 md:flex md:flex-col">
-          <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-5 dark:bg-[#171717] dark:border-gray-600">
+          <div className="flex flex-grow flex-col overflow-y-auto border-r border-line bg-chrome pt-5">
             <div className="mt-14 flex flex-grow flex-col">
-              <nav className="flex-1 space-y-1 px-2 pb-4">
+              <nav className="flex-1 space-y-1.5 px-2 pb-4">
                 {navigation.map((item) => {
                   if (
                     item.key === "search" &&
@@ -244,30 +249,25 @@ export default function BotPlaygroundLayout({
                       placement="right"
                       key={item.name}
                       title={item.name}
+                      mouseEnterDelay={0.05}
                     >
                       <Link
                         to={{
                           pathname: item.href.replace(":id", params.id!),
                         }}
+                        aria-label={item.name}
+                        aria-current={isActive(item.href) ? "page" : undefined}
                         className={classNames(
-                          location.pathname ===
-                            item.href.replace(":id", params.id!)
-                            ? "bg-gray-100 text-gray-900 dark:bg-[#262626] dark:text-white"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white dark:hover:bg-[#262626]",
-                          "group  flex items-center px-2 py-2 text-sm font-medium rounded-md"
+                          isActive(item.href)
+                            ? "bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-200/70 dark:bg-indigo-500/15 dark:text-indigo-300 dark:ring-indigo-400/20"
+                            : "text-fg-subtle hover:bg-surface-2 hover:text-fg",
+                          "group flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-150 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                         )}
                       >
                         <item.icon
-                          className={classNames(
-                            location.pathname ===
-                              item.href.replace(":id", params.id!)
-                              ? "text-gray-500 dark:text-white"
-                              : "text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-white",
-                            "flex-shrink-0 h-6 w-6"
-                          )}
+                          className="h-5 w-5 flex-shrink-0"
                           aria-hidden="true"
                         />
-                        {/* {item.name} */}
                       </Link>
                     </Tooltip>
                   );
@@ -277,37 +277,12 @@ export default function BotPlaygroundLayout({
           </div>
         </div>
 
-        <div className="flex flex-col min-h-screen">
-          <div className="sticky top-0 z-[9999] flex h-14  bg-white border-b border-gray-200 dark:bg-[#171717] dark:border-gray-600">
-            <button
-              type="button"
-              className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden dark:border-gray-600 dark:text-gray-200"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <span className="sr-only">Open sidebar</span>
-              <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
-            </button>
-            <Link
-              to="/"
-              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 flex items-center px-3 dark:text-white"
-            >
-              <img className="h-8 w-auto" src="/logo.png" alt="Botcraft Pro" />
-              <span className="ml-1 text-xl font-bold">Botcraft Pro</span>
-              <span className="inline-block flex-shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 ml-2">
-                {/* @ts-ignore */}
-                {`v${__APP_VERSION__}`}
-              </span>
-            </Link>
-
-            <div className="flex flex-1 justify-end px-4">
-              <div className="ml-4 flex items-center md:ml-6">
-                <div className="mr-4 text-sm font-medium text-gray-700 dark:text-gray-200 border px-3 py-1 rounded-full border-gray-300 dark:border-gray-600">
-                  Credits: ${Number(creditData?.balance || 0).toFixed(4)}
-                </div>
-                <ApplicationMenu />
-              </div>
-            </div>
-          </div>
+        <div className="flex min-h-screen flex-col">
+          <AppHeader
+            balance={creditData?.balance}
+            onOpenNav={() => setSidebarOpen(true)}
+            zIndex="z-[9999]"
+          />
           {children}
         </div>
       </div>

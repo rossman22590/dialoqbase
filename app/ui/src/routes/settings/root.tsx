@@ -101,7 +101,7 @@ export default function SettingsRoot() {
               Update your profile details.
             </p>
 
-            <dl className="mt-6 space-y-6 divide-y divide-gray-100  border-gray-200 text-sm leading-6 dark:text-gray-200">
+            <dl className="mt-6 space-y-6 divide-y divide-line  border-line text-sm leading-6 dark:text-gray-200">
               <div className="mt-5 md:col-span-2 md:mt-0">
                 <Form
                   form={form}
@@ -112,7 +112,7 @@ export default function SettingsRoot() {
                   onFinish={updateProfile}
                 >
                   <div className="sm:overflow-hidden ">
-                    <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-[#141414] dark:border-gray-600">
+                    <div className="space-y-6 border-t border rounded-t-md  bg-white px-4 py-5 sm:p-6 dark:bg-surface-2 dark:border-line-strong">
                       <Form.Item
                         label="Username"
                         name="username"
@@ -138,11 +138,11 @@ export default function SettingsRoot() {
                         <Input
                           size="large"
                           type="email"
-                          className="mt-1 block w-full border-gray-300 rounded-md  focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full border-line-strong rounded-md  focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         />
                       </Form.Item>
                     </div>
-                    <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-[#141414] dark:border-gray-600">
+                    <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md px-4 py-3 text-right sm:px-6 dark:bg-surface-2 dark:border-line-strong">
                       <button
                         disabled={isLoading}
                         type="submit"
@@ -165,11 +165,11 @@ export default function SettingsRoot() {
               Update your password.
             </p>
 
-            <dl className="mt-6 space-y-6 divide-y divide-gray-100  border-gray-200 text-sm leading-6 dark:text-gray-200">
+            <dl className="mt-6 space-y-6 divide-y divide-line  border-line text-sm leading-6 dark:text-gray-200">
               <div className="mt-5 md:col-span-2 md:mt-0">
                 <Form layout="vertical" onFinish={updatePassowrd}>
                   <div className="overflow-hidden sm:rounded-md">
-                    <div className="bg-white border-t border rounded-t-md  px-4 py-5 sm:p-6 dark:bg-[#141414] dark:border-gray-600">
+                    <div className="bg-white border-t border rounded-t-md  px-4 py-5 sm:p-6 dark:bg-surface-2 dark:border-line-strong">
                       <Form.Item
                         label="Current Password"
                         name="oldPassword"
@@ -195,7 +195,7 @@ export default function SettingsRoot() {
                         <Input.Password size="large" />
                       </Form.Item>
                     </div>
-                    <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md  px-4 py-3 text-right sm:px-6 dark:bg-[#141414] dark:border-gray-600">
+                    <div className="bg-gray-50 border-x border-b rounded-b-md rounded-x-md  px-4 py-3 text-right sm:px-6 dark:bg-surface-2 dark:border-line-strong">
                       <button
                         disabled={isPasswordLoading}
                         type="submit"

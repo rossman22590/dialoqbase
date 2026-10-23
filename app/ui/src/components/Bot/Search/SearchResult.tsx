@@ -28,7 +28,7 @@ export function SearchResult({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-[#1e1e1e]"
+      className="border border-line dark:border-line-strong rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-surface"
     >
       <p className="text-gray-600 dark:text-gray-300 mb-3">
         {truncatedContext}
@@ -48,7 +48,7 @@ export function SearchResult({
         {icon}
         <span className="ml-2">{source}</span>
       </div>
-      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-end bg-gray-50 dark:bg-[#2a2a2a] rounded-b-lg -mx-4 -mb-4 px-4 py-2">
+      <div className="mt-2 pt-2 border-t border-line dark:border-line-strong flex items-center justify-end bg-gray-50 dark:bg-surface-2 rounded-b-lg -mx-4 -mb-4 px-4 py-2">
         <span className="text-xs text-gray-600 dark:text-gray-300">
           Similarity: {`${score}%`}
         </span> 
@@ -62,7 +62,7 @@ export function SkeletonSearchResult() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-[#1e1e1e]"
+      className="border border-line dark:border-line-strong rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-surface"
     >
       <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
       <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>

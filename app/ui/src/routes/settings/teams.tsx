@@ -206,7 +206,7 @@ export default function SettingsTeamsRoot() {
               Manage all users in your Dialoqbase Application
             </p>
 
-            <dl className="mt-6 space-y-6 divide-y divide-gray-100 sm:overflow-x-none overflow-x-auto  text-sm leading-6 ">
+            <dl className="mt-6 space-y-6 divide-y divide-line sm:overflow-x-none overflow-x-auto  text-sm leading-6 ">
               <div className="mt-5 md:col-span-2 md:mt-0">
                 <Table
                   bordered
@@ -391,7 +391,7 @@ export default function SettingsTeamsRoot() {
             <div className="flex justify-end mt-4">
               <button
                 onClick={() => setDeleteUserModal(false)}
-                className="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-line-strong rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 Cancel
               </button>

@@ -138,13 +138,13 @@ export const DsTable = ({
           <div className="inline-block min-w-full p-2 align-middle md:px-6 lg:px-8">
           {searchNode}
             
-            <div className="overflow-hidden bg-white ring-1 ring-black ring-opacity-5 rounded-lg dark:bg-[#262626]">
+            <div className="overflow-hidden bg-white ring-1 ring-black ring-opacity-5 rounded-lg dark:bg-surface-2">
               {data.length === 0 && (
                 <Empty description="No data sources found." className="m-8" />
               )}
               {data.length > 0 && (
-                <table className="min-w-full divide-y divide-gray-300">
-                  <thead className="bg-gray-50 dark:bg-[#292828]">
+                <table className="min-w-full divide-y divide-line-strong">
+                  <thead className="bg-gray-50 dark:bg-surface-2">
                     <tr>
                       <th
                         scope="col"
@@ -174,7 +174,7 @@ export const DsTable = ({
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y  divide-gray-200 bg-white dark:bg-[#1e1e1e] dark:divide-gray-800">
+                  <tbody className="divide-y  divide-line bg-white dark:bg-surface dark:divide-line">
                     {data.map((source) => (
                       <tr key={source.id}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">

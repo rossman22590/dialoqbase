@@ -43,6 +43,10 @@ export default {
           subtle: token('fg-subtle'),
         },
       },
+      // Bare `border` / `divide-*` classes pick up the theme hairline.
+      borderColor: {
+        DEFAULT: token('line'),
+      },
       boxShadow: {
         soft: '0 1px 2px rgb(16 16 24 / 0.04), 0 1px 3px rgb(16 16 24 / 0.04)',
         raised:

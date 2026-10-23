@@ -88,7 +88,7 @@ export const BotForm = ({
         >
           <Input.TextArea
             placeholder="Enter the text"
-            className=" block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+            className=" block w-full shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-line-strong rounded-md"
           />
         </Form.Item>
       ),
@@ -518,11 +518,11 @@ export const BotForm = ({
                   classNames(
                     checked
                       ? "border-transparent"
-                      : "border-gray-300 dark:border-gray-700",
+                      : "border-line-strong dark:border-line-strong",
                     active
-                      ? "border-indigo-500 ring-0 ring-indigo-500 dark:border-gray-700 dark:ring-gray-900"
+                      ? "border-indigo-500 ring-0 ring-indigo-500 dark:border-line-strong dark:ring-gray-900"
                       : "",
-                    "relative  items-center justify-center flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none dark:bg-[#141414]"
+                    "relative  items-center justify-center flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none dark:bg-surface-2"
                   )
                 }
               >

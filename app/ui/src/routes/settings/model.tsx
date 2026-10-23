@@ -109,7 +109,7 @@ export default function SettingsModelRoot() {
                 Manage all the AI models in your organization.
               </p>
 
-              <dl className="mt-6 space-y-6 divide-y divide-gray-100   text-sm leading-6 ">
+              <dl className="mt-6 space-y-6 divide-y divide-line   text-sm leading-6 ">
                 <div className="mt-5 md:col-span-2 md:mt-0 ">
                   <div className="my-3 justify-end flex">
                     <Radio.Group

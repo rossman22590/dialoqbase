@@ -16,7 +16,7 @@ export const ApplicationCard = ({
         {description}
       </p>
 
-      <dl className="mt-6 space-y-6 divide-y divide-gray-100  border-gray-200 text-sm leading-6 dark:text-gray-200">
+      <dl className="mt-6 space-y-6 divide-y divide-line  border-line text-sm leading-6 dark:text-gray-200">
         <div className="mt-5 md:col-span-2 md:mt-0">{children}</div>
       </dl>
     </div>

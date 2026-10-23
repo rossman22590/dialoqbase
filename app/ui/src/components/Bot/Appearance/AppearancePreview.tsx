@@ -21,7 +21,7 @@ export const AppearancePreview = ({ form }: { form: FormInstance }) => {
       className="flex bg-white flex-col"
     >
       <div className="sticky top-0 z-10 ">
-        <div className="flex justify-between bg-white border-b border-gray-100 p-4 items-center">
+        <div className="flex justify-between bg-white border-b border-line p-4 items-center">
           <p className="font-bold text-lg">{botName}</p>
           <div className="flex items-center">
             <span className="mr-3">
