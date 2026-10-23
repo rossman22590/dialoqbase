@@ -127,6 +127,7 @@ export const PlaygroundChat = ({
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const stickToBottom = React.useRef(true);
   const prevLength = React.useRef(0);
+  const lastScrollTop = React.useRef(0);
   const [showJump, setShowJump] = React.useState(false);
 
   const [sourceData, setSourceData] = React.useState<any>(null);
@@ -158,7 +159,16 @@ export const PlaygroundChat = ({
     const el = scrollRef.current;
     if (!el) return;
     const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
-    stickToBottom.current = distance < 80;
+    // Only a scroll up lets go of the bottom. Our own smooth scroll moves
+    // down and passes through positions far from the bottom while new
+    // tokens keep growing the reply, so distance alone would drop it.
+    const scrolledUp = el.scrollTop < lastScrollTop.current;
+    lastScrollTop.current = el.scrollTop;
+    if (distance < 80) {
+      stickToBottom.current = true;
+    } else if (scrolledUp) {
+      stickToBottom.current = false;
+    }
     setShowJump(distance > 240);
   };
 

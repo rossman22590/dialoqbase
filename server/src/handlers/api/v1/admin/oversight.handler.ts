@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Prisma } from "@prisma/client";
+import { usesOwnKey } from "../../../../utils/billing";
 
 // Admin-only oversight endpoints. Every route here is registered with
 // fastify.authenticateAdmin, so request.user is always an administrator.
@@ -240,10 +241,13 @@ export const adminSetUserSuspendedHandler = async (
   if (user_id === request.user.user_id) {
     return reply.status(400).send({ message: "You cannot suspend yourself" });
   }
-  await request.server.prisma.user.update({
+  const { count } = await request.server.prisma.user.updateMany({
     where: { user_id },
     data: { isSuspended: suspended },
   });
+  if (count === 0) {
+    return reply.status(404).send({ message: "User not found" });
+  }
   return { message: suspended ? "User suspended" : "User reactivated" };
 };
 
@@ -256,10 +260,13 @@ export const adminSetUserAdminHandler = async (
   if (user_id === request.user.user_id && !is_admin) {
     return reply.status(400).send({ message: "You cannot remove your own admin access" });
   }
-  await request.server.prisma.user.update({
+  const { count } = await request.server.prisma.user.updateMany({
     where: { user_id },
     data: { isAdministrator: is_admin },
   });
+  if (count === 0) {
+    return reply.status(404).send({ message: "User not found" });
+  }
   return { message: is_admin ? "User is now an admin" : "Admin access removed" };
 };
 
@@ -331,7 +338,7 @@ export const adminBotsHandler = async (
         createdAt: bot.createdAt,
         owner: bot.User,
         sources: bot._count.source,
-        uses_own_key: Boolean(bot.bot_model_api_key?.trim()),
+        uses_own_key: usesOwnKey(bot),
         messages_30d: num(row.messages_30d),
         credits_used_30d: num(row.credits_used_30d),
         messages_total: num(row.messages_total),
@@ -489,6 +496,10 @@ export const adminQueueJobActionHandler = async (
     return reply.status(404).send({ message: "Job not found" });
   }
   if (action === "retry") {
+    // BullMQ only retries failed jobs and throws for any other state
+    if (!(await job.isFailed())) {
+      return reply.status(400).send({ message: "Only failed jobs can be retried" });
+    }
     await job.retry();
   } else {
     await job.remove();

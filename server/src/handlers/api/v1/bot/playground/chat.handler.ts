@@ -1,4 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import { Document } from "langchain/document";
 import { ChatRequestBody } from "./types";
 import { embeddings } from "../../../../../utils/embeddings";
 import { createChain, groupMessagesByConversation } from "../../../../../chain";
@@ -11,9 +12,8 @@ import {
   handleErrorResponse,
   saveChatHistory,
 } from "./chat.service";
-import { ChatUsage } from "../../../../../utils/usage-tracker";
 import {
-  chargeChatUsage,
+  answerWithBilling,
   checkCanAnswer,
 } from "../../../../../utils/billing";
 
@@ -89,7 +89,12 @@ export const chatRequestHandler = async (
       { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
     );
 
-    const retriever = await createRetriever(bot, embeddingModel);
+    let retrievedDocuments: Document[] | undefined;
+    const retriever = await createRetriever(
+      bot,
+      embeddingModel,
+      (documents) => (retrievedDocuments = documents)
+    );
 
     const modelinfo = await getModelInfo({
       model: bot.model,
@@ -113,8 +118,7 @@ export const chatRequestHandler = async (
     });
 
     const sanitizedQuestion = message.trim().replaceAll("\n", " ");
-    const usage = new ChatUsage();
-    const botResponse = await usage.track(() => chain.invoke({
+    const botResponse = await answerWithBilling(request.server.prisma, bot, `Playground chat usage for bot: ${bot.name}`, "playground", () => chain.invoke({
       question: sanitizedQuestion,
       chat_history: groupMessagesByConversation(
         history.slice(-bot.noOfChatHistoryInContext).map((message) => ({
@@ -124,7 +128,10 @@ export const chatRequestHandler = async (
       ),
     }));
 
-    const documents = await retriever.getRelevantDocuments(sanitizedQuestion);
+    // Fall back to searching only if the chain never reached the retriever
+    const documents =
+      retrievedDocuments ??
+      (await retriever.getRelevantDocuments(sanitizedQuestion));
     const historyId = await saveChatHistory(
       prisma,
       bot.id,
@@ -134,13 +141,6 @@ export const chatRequestHandler = async (
       documents
     );
 
-    await chargeChatUsage(
-      request.server.prisma,
-      bot,
-      usage,
-      `Playground chat usage for bot: ${bot.name}`,
-      "playground"
-    );
 
     return {
       bot: { text: botResponse, sourceDocuments: documents },
@@ -239,7 +239,12 @@ export const chatRequestStreamHandler = async (
       { ...((embeddingInfo?.config as any) || {}), apiKey: bot.bot_model_api_key }
     );
 
-    const retriever = await createRetriever(bot, embeddingModel);
+    let retrievedDocuments: Document[] | undefined;
+    const retriever = await createRetriever(
+      bot,
+      embeddingModel,
+      (documents) => (retrievedDocuments = documents)
+    );
 
     const modelinfo = await getModelInfo({
       model: bot.model,
@@ -275,9 +280,8 @@ export const chatRequestStreamHandler = async (
     });
 
     const sanitizedQuestion = message.trim().replaceAll("\n", " ");
-    const usage = new ChatUsage();
     let response = "";
-    await usage.track(async () => {
+    await answerWithBilling(request.server.prisma, bot, `Playground stream usage for bot: ${bot.name}`, "playground", async () => {
       const stream = await chain.stream({
         question: sanitizedQuestion,
         chat_history: groupMessagesByConversation(
@@ -298,7 +302,10 @@ export const chatRequestStreamHandler = async (
       }
     });
 
-    const documents = await retriever.getRelevantDocuments(sanitizedQuestion);
+    // Fall back to searching only if the chain never reached the retriever
+    const documents =
+      retrievedDocuments ??
+      (await retriever.getRelevantDocuments(sanitizedQuestion));
     const historyId = await saveChatHistory(
       prisma,
       bot.id,
@@ -308,13 +315,6 @@ export const chatRequestStreamHandler = async (
       documents
     );
 
-    await chargeChatUsage(
-      request.server.prisma,
-      bot,
-      usage,
-      `Playground stream usage for bot: ${bot.name}`,
-      "playground"
-    );
 
     reply.sse({
       event: "result",

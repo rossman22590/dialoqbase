@@ -201,49 +201,38 @@ export const updateUserCreditsHandler = async (
     where: { user_id },
   });
 
-  if (!userCredit) {
-    // Should not happen if registered correctly, but handle gracefully
-    if (type === "add") {
-      await prisma.userCredit.create({
+  // Should not happen if registered correctly, but handle gracefully
+  if (!userCredit && type !== "add") {
+    return reply.status(404).send({ message: "User credit account not found" });
+  }
+
+  const creditChange = !userCredit
+    ? prisma.userCredit.create({
         data: {
           user_id,
           balance: amount
         }
-      });
-    } else {
-      return reply.status(404).send({ message: "User credit account not found" });
-    }
-  } else {
-    if (type === "add") {
-      await prisma.userCredit.update({
+      })
+    : prisma.userCredit.update({
         where: { user_id },
         data: {
-          balance: {
-            increment: amount
-          }
+          balance: type === "add" ? { increment: amount } : { decrement: amount }
         }
       });
-    } else {
-      await prisma.userCredit.update({
-        where: { user_id },
-        data: {
-          balance: {
-            decrement: amount
-          }
-        }
-      });
-    }
-  }
 
-  await prisma.userTransaction.create({
-    data: {
-      user_id,
-      amount: type === "add" ? amount : -amount,
-      type: "admin_adjustment",
-      description: `Credits ${type === "add" ? "added" : "removed"} by admin ${user.username}`,
-      metadata: { admin_user_id: user.user_id },
-    },
-  });
+  // The balance and its audit row change together or not at all
+  await prisma.$transaction([
+    creditChange,
+    prisma.userTransaction.create({
+      data: {
+        user_id,
+        amount: type === "add" ? amount : -amount,
+        type: "admin_adjustment",
+        description: `Credits ${type === "add" ? "added" : "removed"} by admin ${user.username}`,
+        metadata: { admin_user_id: user.user_id },
+      },
+    }),
+  ]);
 
   return {
     message: "User credits updated successfully",

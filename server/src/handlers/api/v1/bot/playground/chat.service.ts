@@ -2,6 +2,7 @@ import { DialoqbaseVectorStore } from "../../../../../utils/store";
 import { chatModelProvider } from "../../../../../utils/models";
 import { DialoqbaseHybridRetrival } from "../../../../../utils/hybrid";
 import { PrismaClient } from "@prisma/client";
+import { Document } from "langchain/document";
 
 export const handleErrorResponse = (
   history: {
@@ -22,8 +23,16 @@ export const handleErrorResponse = (
   ],
 });
 
-export const createRetriever = async (bot: any, embeddingModel: any) => {
-  const callbacks = [];
+// onDocuments receives the documents the chain retrieves, so callers can show
+// them as sources without running the search a second time.
+export const createRetriever = async (
+  bot: any,
+  embeddingModel: any,
+  onDocuments?: (documents: Document[]) => void
+) => {
+  const callbacks = onDocuments
+    ? [{ handleRetrieverEnd: (documents: Document[]) => onDocuments(documents) }]
+    : [];
 
   if (bot.use_hybrid_search) {
     return new DialoqbaseHybridRetrival(embeddingModel, {
