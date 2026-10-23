@@ -6,6 +6,8 @@ import Avatar from "../components/Common/Avatar";
 import { Link, useNavigate } from "react-router-dom";
 import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 import { useDarkMode } from "../hooks/useDarkmode";
+import { useQuery } from "@tanstack/react-query";
+import api from "../services/api";
 
 //@ts-ignore
 function classNames(...classes) {
@@ -16,6 +18,11 @@ export const ApplicationMenu = () => {
   const { profile, logout } = useAuth();
   const { mode, toggleDarkMode } = useDarkMode();
   const navigate = useNavigate();
+  // Not useIsAdmin: that one suspends, and this menu sits outside any boundary
+  const { data: adminInfo } = useQuery(["fetchDialoqbaseUserInfo"], async () => {
+    const response = await api.get("/user/is-admin");
+    return response.data as { is_admin: boolean };
+  });
   return (
     <Menu as="div" className="relative ml-3">
       <div>
@@ -47,6 +54,21 @@ export const ApplicationMenu = () => {
               </Link>
             )}
           </Menu.Item>
+          {adminInfo?.is_admin && (
+            <Menu.Item>
+              {({ active }) => (
+                <Link
+                  className={classNames(
+                    active ? "bg-gray-100" : "",
+                    "block px-4 py-2 text-sm text-gray-700 dark:text-white dark:hover:bg-[#262626] "
+                  )}
+                  to="/admin"
+                >
+                  Admin panel
+                </Link>
+              )}
+            </Menu.Item>
+          )}
           <Menu.Item>
             {({ active }) => (
               <div

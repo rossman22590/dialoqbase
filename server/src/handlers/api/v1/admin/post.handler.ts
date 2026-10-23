@@ -235,6 +235,16 @@ export const updateUserCreditsHandler = async (
     }
   }
 
+  await prisma.userTransaction.create({
+    data: {
+      user_id,
+      amount: type === "add" ? amount : -amount,
+      type: "admin_adjustment",
+      description: `Credits ${type === "add" ? "added" : "removed"} by admin ${user.username}`,
+      metadata: { admin_user_id: user.user_id },
+    },
+  });
+
   return {
     message: "User credits updated successfully",
   };

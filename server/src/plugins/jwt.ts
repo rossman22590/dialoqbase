@@ -46,6 +46,11 @@ export default fp<FastifyJWTOptions>(async (fastify, opts) => {
             message: "Unauthorized",
           });
         }
+        if (apiKey.User.isSuspended) {
+          return reply.status(403).send({
+            message: "User account is suspended",
+          });
+        }
         request.user = {
           user_id: apiKey.User.user_id,
           username: apiKey.User.username,
@@ -64,6 +69,11 @@ export default fp<FastifyJWTOptions>(async (fastify, opts) => {
         if (!user) {
           throw new Error("User not found");
         }
+        if (user.isSuspended) {
+          return reply.status(403).send({
+            message: "User account is suspended",
+          });
+        }
         request.user = {
           user_id: user.user_id,
           username: user.username,
@@ -78,6 +88,9 @@ export default fp<FastifyJWTOptions>(async (fastify, opts) => {
   async function authenticateAdmin(request: FastifyRequest, reply: FastifyReply) {
     try {
       await authenticate(request, reply)
+      if (reply.sent) {
+        return;
+      }
 
       if (!request.user || !request.user.is_admin) {
         return reply.status(403).send({
@@ -126,6 +139,11 @@ export default fp<FastifyJWTOptions>(async (fastify, opts) => {
               }
             });
           }
+          if (apiKey.User.isSuspended) {
+            return reply.status(403).send({
+              message: "User account is suspended",
+            });
+          }
           request.user = {
             user_id: apiKey.User.user_id,
             username: apiKey.User.username,
@@ -149,6 +167,11 @@ export default fp<FastifyJWTOptions>(async (fastify, opts) => {
                 param: null,
                 code: "invalid_api_key"
               }
+            });
+          }
+          if (user.isSuspended) {
+            return reply.status(403).send({
+              message: "User account is suspended",
             });
           }
           request.user = {

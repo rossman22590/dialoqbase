@@ -9,8 +9,12 @@ import { chatModelProvider } from "../../../../../utils/models";
 import { createChain, groupMessagesByConversation } from "../../../../../chain";
 import { getModelInfo } from "../../../../../utils/get-model-info";
 import { nextTick } from "../../../../../utils/nextTick";
-import { COST_MULTIPLIER, MIN_CHAT_COST, MODEL_PRICING } from "../../../../../utils/pricing";
-import { countTokens } from "../../../../../utils/tokenizer";
+import { ChatUsage } from "../../../../../utils/usage-tracker";
+import {
+  INSUFFICIENT_CREDITS_MESSAGE,
+  chargeChatUsage,
+  checkCanAnswer,
+} from "../../../../../utils/billing";
 
 async function getBotAndEmbedding(request: FastifyRequest<ChatAPIRequest>) {
   const bot_id = request.params.id;
@@ -108,19 +112,13 @@ async function handleChatRequest(
   try {
     const { message, history } = request.body;
     const { bot, embeddingModel } = await getBotAndEmbedding(request);
-    const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
 
     // Credit Check
-    if (!usesOwnKey) {
-      const userCredit = await request.server.prisma.userCredit.findUnique({
-        where: { user_id: request.user.user_id },
-      });
-
-      if (!userCredit || userCredit.balance.lessThan(0)) {
-        return reply
-          .status(402)
-          .send({ message: "Insufficient credits. Please top up." });
-      }
+    const denied = await checkCanAnswer(request.server.prisma, bot);
+    if (denied) {
+      return reply
+        .status(denied === INSUFFICIENT_CREDITS_MESSAGE ? 402 : 403)
+        .send({ message: denied });
     }
 
     let knowledge_base_ids: string[] = [];
@@ -154,33 +152,36 @@ async function handleChatRequest(
       retriever,
     });
 
+    const usage = new ChatUsage();
     let response = "";
-    if (isStreaming) {
-      const stream = await chain.stream({
-        question: sanitizedQuestion,
-        chat_history: chatHistory,
-      });
-      for await (const token of stream) {
-        reply.sse({
-          id: "",
-          event: "chunk",
-          data: JSON.stringify({
-            bot: { text: token || "", sourceDocuments: [] },
-            history: [
-              ...history,
-              { type: "human", text: message },
-              { type: "ai", text: token || "" },
-            ],
-          }),
+    await usage.track(async () => {
+      if (isStreaming) {
+        const stream = await chain.stream({
+          question: sanitizedQuestion,
+          chat_history: chatHistory,
         });
-        response += token;
+        for await (const token of stream) {
+          reply.sse({
+            id: "",
+            event: "chunk",
+            data: JSON.stringify({
+              bot: { text: token || "", sourceDocuments: [] },
+              history: [
+                ...history,
+                { type: "human", text: message },
+                { type: "ai", text: token || "" },
+              ],
+            }),
+          });
+          response += token;
+        }
+      } else {
+        response = await chain.invoke({
+          question: sanitizedQuestion,
+          chat_history: chatHistory,
+        });
       }
-    } else {
-      response = await chain.invoke({
-        question: sanitizedQuestion,
-        chat_history: chatHistory,
-      });
-    }
+    });
 
     const documents = await documentPromise;
 
@@ -193,48 +194,13 @@ async function handleChatRequest(
       },
     });
 
-    // Calculate and Deduct Credits
-    try {
-      const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
-      const inputTokens = await countTokens(inputTextField);
-      const outputTokens = await countTokens(response);
-
-      const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
-      const baseCost =
-        (Number(pricing.input) * inputTokens) / 1000000 +
-        (Number(pricing.output) * outputTokens) / 1000000 +
-        Number(pricing.request ?? 0);
-      const cost = Math.max(baseCost * COST_MULTIPLIER, MIN_CHAT_COST);
-
-      if (!usesOwnKey) {
-        await request.server.prisma.userCredit.update({
-          where: { user_id: request.user.user_id },
-          data: {
-            balance: {
-              decrement: cost,
-            },
-          },
-        });
-      }
-
-      await request.server.prisma.userTransaction.create({
-        data: {
-          user_id: request.user.user_id,
-          amount: usesOwnKey ? 0 : -cost,
-          type: "usage",
-          description: `Chat usage for bot: ${bot.name}`,
-          metadata: {
-            bot_id: bot.id,
-            input_tokens: inputTokens,
-            output_tokens: outputTokens,
-            estimated_cost: cost,
-            used_own_key: usesOwnKey,
-          }
-        }
-      });
-    } catch (err) {
-      console.error("Failed to deduct credits", err);
-    }
+    await chargeChatUsage(
+      request.server.prisma,
+      bot,
+      usage,
+      `Chat usage for bot: ${bot.name}`,
+      "v1-api"
+    );
 
     const result = {
       bot: { text: response, sourceDocuments: documents },

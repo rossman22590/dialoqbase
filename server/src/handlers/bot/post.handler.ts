@@ -10,8 +10,11 @@ import { createChain, groupMessagesByConversation } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
 import { nextTick } from "../../utils/nextTick";
 import { jwtBotVerify } from "../../utils/jwt";
-import { COST_MULTIPLIER, MIN_CHAT_COST, MODEL_PRICING } from "../../utils/pricing";
-import { countTokens } from "../../utils/tokenizer";
+import { ChatUsage } from "../../utils/usage-tracker";
+import {
+  chargeChatUsage,
+  checkCanAnswer,
+} from "../../utils/billing";
 
 export const chatRequestHandler = async (
   request: FastifyRequest<ChatRequestBody>,
@@ -138,31 +141,25 @@ export const chatRequestHandler = async (
     }
 
     // Credit Check
-    const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
-    if (!usesOwnKey) {
-      const userCredit = await prisma.userCredit.findUnique({
-        where: { user_id: bot.user_id },
-      });
-
-      if (!userCredit || userCredit.balance.lessThan(0)) {
-        return {
-          bot: {
-            text: "Insufficient credits. Please contact the administrator.",
-            sourceDocuments: [],
+        const denied = await checkCanAnswer(prisma, bot);
+    if (denied) {
+      return {
+        bot: {
+          text: denied,
+          sourceDocuments: [],
+        },
+        history: [
+          ...history,
+          {
+            type: "human",
+            text: message,
           },
-          history: [
-            ...history,
-            {
-              type: "human",
-              text: message,
-            },
-            {
-              type: "ai",
-              text: "Insufficient credits. Please contact the administrator.",
-            },
-          ],
-        };
-      }
+          {
+            type: "ai",
+            text: denied,
+          },
+        ],
+      };
     }
 
     const temperature = bot.temperature;
@@ -281,7 +278,8 @@ export const chatRequestHandler = async (
       retriever,
     });
 
-    const botResponse = await chain.invoke({
+    const usage = new ChatUsage();
+    const botResponse = await usage.track(() => chain.invoke({
       question: sanitizedQuestion,
       chat_history: groupMessagesByConversation(
         history.map((message) => ({
@@ -289,7 +287,7 @@ export const chatRequestHandler = async (
           content: message.text,
         }))
       ),
-    });
+    }));
 
     const documents = await documentPromise;
 
@@ -311,48 +309,13 @@ export const chatRequestHandler = async (
       },
     });
 
-    // Calculate and Deduct Credits
-    try {
-      const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
-      const inputTokens = await countTokens(inputTextField);
-      const outputTokens = await countTokens(botResponse);
-
-      const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
-      const baseCost =
-        (Number(pricing.input) * inputTokens) / 1000000 +
-        (Number(pricing.output) * outputTokens) / 1000000 +
-        Number(pricing.request ?? 0);
-      const cost = Math.max(baseCost * COST_MULTIPLIER, MIN_CHAT_COST);
-
-      if (!usesOwnKey) {
-        await request.server.prisma.userCredit.update({
-          where: { user_id: bot.user_id },
-          data: {
-            balance: {
-              decrement: cost,
-            },
-          },
-        });
-      }
-
-      await request.server.prisma.userTransaction.create({
-        data: {
-          user_id: bot.user_id,
-          amount: usesOwnKey ? 0 : -cost,
-          type: "usage",
-          description: `Public chat usage for bot: ${bot.name}`,
-          metadata: {
-            bot_id: bot.id,
-            input_tokens: inputTokens,
-            output_tokens: outputTokens,
-            estimated_cost: cost,
-            used_own_key: usesOwnKey,
-          }
-        }
-      });
-    } catch (err) {
-      console.error("Failed to deduct credits in public chat", err);
-    }
+    await chargeChatUsage(
+      request.server.prisma,
+      bot,
+      usage,
+      `Public chat usage for bot: ${bot.name}`,
+      "web"
+    );
 
     return {
       bot: {
@@ -439,40 +402,34 @@ export const chatRequestStreamHandler = async (
     }
 
     // Credit Check
-    const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
-    if (!usesOwnKey) {
-      const userCredit = await prisma.userCredit.findUnique({
-        where: { user_id: bot.user_id },
-      });
+        const denied = await checkCanAnswer(prisma, bot);
+    if (denied) {
+      reply.raw.setHeader("Content-Type", "text/event-stream");
 
-      if (!userCredit || userCredit.balance.lessThan(0)) {
-        reply.raw.setHeader("Content-Type", "text/event-stream");
-
-        reply.sse({
-          event: "result",
-          id: "",
-          data: JSON.stringify({
-            bot: {
-              text: "Insufficient credits. Please contact the administrator.",
-              sourceDocuments: [],
+      reply.sse({
+        event: "result",
+        id: "",
+        data: JSON.stringify({
+          bot: {
+            text: denied,
+            sourceDocuments: [],
+          },
+          history: [
+            ...history,
+            {
+              type: "human",
+              text: message,
             },
-            history: [
-              ...history,
-              {
-                type: "human",
-                text: message,
-              },
-              {
-                type: "ai",
-                text: "Insufficient credits. Please contact the administrator.",
-              },
-            ],
-          }),
-        });
-        await nextTick();
+            {
+              type: "ai",
+              text: denied,
+            },
+          ],
+        }),
+      });
+      await nextTick();
 
-        return reply.raw.end();
-      }
+      return reply.raw.end();
     }
 
     if (bot.bot_protect) {
@@ -764,7 +721,8 @@ export const chatRequestStreamHandler = async (
       retriever,
     });
 
-    let response = await chain.invoke({
+    const usage = new ChatUsage();
+    let response = await usage.track(() => chain.invoke({
       question: sanitizedQuestion,
       chat_history: groupMessagesByConversation(
         history.map((message) => ({
@@ -772,7 +730,7 @@ export const chatRequestStreamHandler = async (
           content: message.text,
         }))
       ),
-    });
+    }));
 
     const documents = await documentPromise;
 
@@ -794,48 +752,13 @@ export const chatRequestStreamHandler = async (
       },
     });
 
-    // Calculate and Deduct Credits
-    try {
-      const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
-      const inputTokens = await countTokens(inputTextField);
-      const outputTokens = await countTokens(response);
-
-      const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
-      const baseCost =
-        (Number(pricing.input) * inputTokens) / 1000000 +
-        (Number(pricing.output) * outputTokens) / 1000000 +
-        Number(pricing.request ?? 0);
-      const cost = Math.max(baseCost * COST_MULTIPLIER, MIN_CHAT_COST);
-
-      if (!usesOwnKey) {
-        await request.server.prisma.userCredit.update({
-          where: { user_id: bot.user_id },
-          data: {
-            balance: {
-              decrement: cost,
-            },
-          },
-        });
-      }
-
-      await request.server.prisma.userTransaction.create({
-        data: {
-          user_id: bot.user_id,
-          amount: usesOwnKey ? 0 : -cost,
-          type: "usage",
-          description: `Public stream usage for bot: ${bot.name}`,
-          metadata: {
-            bot_id: bot.id,
-            input_tokens: inputTokens,
-            output_tokens: outputTokens,
-            estimated_cost: cost,
-            used_own_key: usesOwnKey,
-          }
-        }
-      });
-    } catch (err) {
-      console.error("Failed to deduct credits in public stream", err);
-    }
+    await chargeChatUsage(
+      request.server.prisma,
+      bot,
+      usage,
+      `Public stream usage for bot: ${bot.name}`,
+      "web"
+    );
 
     reply.sse({
       event: "result",

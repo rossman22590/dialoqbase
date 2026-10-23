@@ -1,4 +1,5 @@
 import { ChatOpenAI } from "@langchain/openai";
+import { trackedFetch } from "./usage-tracker";
 
 export const chatModelProvider = (
   provider: string,
@@ -68,6 +69,8 @@ export const chatModelProvider = (
         "HTTP-Referer": process.env.LOCAL_REFER_URL || "https://myapps.ai/", // Optional. Site URL for rankings on openrouter.ai.
         "X-Title": process.env.LOCAL_TITLE || "Botcraft", // Optional. Site title for rankings on openrouter.ai.
       },
+      // Reports each call's real token usage to the active ChatUsage for billing
+      fetch: trackedFetch,
       ...otherFields?.configuration,
     },
   };
@@ -77,20 +80,26 @@ export const chatModelProvider = (
 
 
 export const streamingSupportedModels = [
-  "openai/gpt-5",
-  "openai/gpt-5.2",
-  "anthropic/claude-opus-4.5",
-  "anthropic/claude-sonnet-4.5",
-  "anthropic/claude-haiku-4.5",
-  "google/gemini-2.5-pro",
-  "google/gemini-2.5-flash",
-  "x-ai/grok-4.1-fast",
+  "openai/gpt-6.1-sol",
+  "openai/gpt-6-luna",
+  "openai/gpt-5.6-sol",
+  "openai/gpt-5.6-terra",
+  "anthropic/claude-fable-5.1",
+  "anthropic/claude-opus-5.5",
+  "anthropic/claude-sonnet-5.5",
+  "anthropic/claude-haiku-5.5",
+  "google/gemini-4-argon",
+  "google/gemini-3.1-pro-preview",
+  "google/gemini-3.8-flash",
+  "x-ai/grok-4.7",
   "meta-llama/llama-4-maverick",
   "meta-llama/llama-4-scout",
-  "mistralai/mistral-large-2512",
+  "mistralai/mistral-large-4-0",
   "mistralai/ministral-14b-2512",
-  "minimax/minimax-m2.1",
-  "z-ai/glm-4.7"
+  "minimax/minimax-m3",
+  "minimax/minimax-m3.1-flash",
+  "z-ai/glm-5.3",
+  "z-ai/glm-5.3-flash"
 ];
 
 export const isStreamingSupported = (model: string) => {
@@ -104,20 +113,26 @@ export const notChatModels = [
 ];
 
 export const supportedModels = [
-  "openai/gpt-5",
-  "openai/gpt-5.2",
-  "anthropic/claude-opus-4.5",
-  "anthropic/claude-sonnet-4.5",
-  "anthropic/claude-haiku-4.5",
-  "google/gemini-2.5-pro",
-  "google/gemini-2.5-flash",
-  "x-ai/grok-4.1-fast",
+  "openai/gpt-6.1-sol",
+  "openai/gpt-6-luna",
+  "openai/gpt-5.6-sol",
+  "openai/gpt-5.6-terra",
+  "anthropic/claude-fable-5.1",
+  "anthropic/claude-opus-5.5",
+  "anthropic/claude-sonnet-5.5",
+  "anthropic/claude-haiku-5.5",
+  "google/gemini-4-argon",
+  "google/gemini-3.1-pro-preview",
+  "google/gemini-3.8-flash",
+  "x-ai/grok-4.7",
   "meta-llama/llama-4-maverick",
   "meta-llama/llama-4-scout",
-  "mistralai/mistral-large-2512",
+  "mistralai/mistral-large-4-0",
   "mistralai/ministral-14b-2512",
-  "minimax/minimax-m2.1",
-  "z-ai/glm-4.7",
+  "minimax/minimax-m3",
+  "minimax/minimax-m3.1-flash",
+  "z-ai/glm-5.3",
+  "z-ai/glm-5.3-flash",
   "perplexity/sonar-pro-search",
   "perplexity/sonar-reasoning-pro",
   "perplexity/sonar-pro",

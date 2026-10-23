@@ -24,7 +24,7 @@ model Bot {
   publicBotPwd                  String?
   publicBotPwdHash              String?
   semanticSearchSimilarityScore String?          @default("none")
-  model                         String           @default("gpt-3.5-turbo")
+  model                         String           @default("openai/gpt-5.6-terra")
   provider                      String           @default("openai")
   embedding                     String           @default("openai")
   streaming                     Boolean          @default(false)
@@ -129,7 +129,7 @@ model DialoqbaseSettings {
   hideDefaultModels            Boolean? @default(false)
   internetSearchEnabled        Boolean? @default(false)
   internalSearchEnabled        Boolean? @default(false)
-  defaultChatModel             String   @default("gpt-3.5-turbo-dbase")
+  defaultChatModel             String   @default("openai/gpt-5.6-terra")
   defaultEmbeddingModel        String   @default("dialoqbase_eb_text-embedding-ada-002")
   ollamaURL                    String?  @default("http://host.docker.internal:11434")
   usePuppeteerFetch            Boolean? @default(false)

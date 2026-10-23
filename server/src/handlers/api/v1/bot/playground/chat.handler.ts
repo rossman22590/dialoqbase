@@ -11,8 +11,11 @@ import {
   handleErrorResponse,
   saveChatHistory,
 } from "./chat.service";
-import { COST_MULTIPLIER, MIN_CHAT_COST, MODEL_PRICING } from "../../../../../utils/pricing";
-import { countTokens } from "../../../../../utils/tokenizer";
+import { ChatUsage } from "../../../../../utils/usage-tracker";
+import {
+  chargeChatUsage,
+  checkCanAnswer,
+} from "../../../../../utils/billing";
 
 export const chatRequestHandler = async (
   request: FastifyRequest<ChatRequestBody>,
@@ -37,19 +40,13 @@ export const chatRequestHandler = async (
     }
 
     // Credit Check
-    const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
-    if (!usesOwnKey) {
-      const userCredit = await prisma.userCredit.findUnique({
-        where: { user_id: request.user.user_id },
-      });
-
-      if (!userCredit || userCredit.balance.lessThan(0)) {
-        return handleErrorResponse(
-          history,
-          message,
-          "Insufficient credits. Please top up."
-        );
-      }
+        const denied = await checkCanAnswer(prisma, bot);
+    if (denied) {
+      return handleErrorResponse(
+        history,
+        message,
+        denied
+      );
     }
 
 
@@ -116,7 +113,8 @@ export const chatRequestHandler = async (
     });
 
     const sanitizedQuestion = message.trim().replaceAll("\n", " ");
-    const botResponse = await chain.invoke({
+    const usage = new ChatUsage();
+    const botResponse = await usage.track(() => chain.invoke({
       question: sanitizedQuestion,
       chat_history: groupMessagesByConversation(
         history.slice(-bot.noOfChatHistoryInContext).map((message) => ({
@@ -124,7 +122,7 @@ export const chatRequestHandler = async (
           content: message.text,
         }))
       ),
-    });
+    }));
 
     const documents = await retriever.getRelevantDocuments(sanitizedQuestion);
     const historyId = await saveChatHistory(
@@ -136,49 +134,13 @@ export const chatRequestHandler = async (
       documents
     );
 
-    // Calculate and Deduct Credits
-    try {
-      // Approximate history tokens by concatenating all text
-      const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
-      const inputTokens = Number(await countTokens(inputTextField));
-      const outputTokens = Number(await countTokens(botResponse));
-
-      const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
-      const baseCost =
-        (Number(pricing.input) * inputTokens) / 1000000 +
-        (Number(pricing.output) * outputTokens) / 1000000 +
-        Number(pricing.request ?? 0);
-      const cost = Math.max(baseCost * COST_MULTIPLIER, MIN_CHAT_COST);
-
-      if (!usesOwnKey) {
-        await request.server.prisma.userCredit.update({
-          where: { user_id: request.user.user_id },
-          data: {
-            balance: {
-              decrement: cost,
-            },
-          },
-        });
-      }
-
-      await request.server.prisma.userTransaction.create({
-        data: {
-          user_id: request.user.user_id,
-          amount: usesOwnKey ? 0 : -cost,
-          type: "usage",
-          description: `Playground chat usage for bot: ${bot.name}`,
-          metadata: {
-            bot_id: bot.id,
-            input_tokens: inputTokens,
-            output_tokens: outputTokens,
-            estimated_cost: cost,
-            used_own_key: usesOwnKey,
-          }
-        }
-      });
-    } catch (err) {
-      console.error("Failed to deduct credits in playground", err);
-    }
+    await chargeChatUsage(
+      request.server.prisma,
+      bot,
+      usage,
+      `Playground chat usage for bot: ${bot.name}`,
+      "playground"
+    );
 
     return {
       bot: { text: botResponse, sourceDocuments: documents },
@@ -222,19 +184,13 @@ export const chatRequestStreamHandler = async (
     }
 
     // Credit Check
-    const usesOwnKey = Boolean(bot.bot_model_api_key?.trim());
-    if (!usesOwnKey) {
-      const userCredit = await prisma.userCredit.findUnique({
-        where: { user_id: request.user.user_id },
-      });
-
-      if (!userCredit || userCredit.balance.lessThan(0)) {
-        return handleErrorResponse(
-          history,
-          message,
-          "Insufficient credits. Please top up."
-        );
-      }
+        const denied = await checkCanAnswer(prisma, bot);
+    if (denied) {
+      return handleErrorResponse(
+        history,
+        message,
+        denied
+      );
     }
 
 
@@ -319,25 +275,28 @@ export const chatRequestStreamHandler = async (
     });
 
     const sanitizedQuestion = message.trim().replaceAll("\n", " ");
+    const usage = new ChatUsage();
     let response = "";
-    const stream = await chain.stream({
-      question: sanitizedQuestion,
-      chat_history: groupMessagesByConversation(
-        history.slice(-bot.noOfChatHistoryInContext).map((message) => ({
-          type: message.type,
-          content: message.text,
-        }))
-      ),
-    });
-
-    for await (const token of stream) {
-      reply.sse({
-        id: "",
-        event: "chunk",
-        data: JSON.stringify({ message: token || "" }),
+    await usage.track(async () => {
+      const stream = await chain.stream({
+        question: sanitizedQuestion,
+        chat_history: groupMessagesByConversation(
+          history.slice(-bot.noOfChatHistoryInContext).map((message) => ({
+            type: message.type,
+            content: message.text,
+          }))
+        ),
       });
-      response += token;
-    }
+
+      for await (const token of stream) {
+        reply.sse({
+          id: "",
+          event: "chunk",
+          data: JSON.stringify({ message: token || "" }),
+        });
+        response += token;
+      }
+    });
 
     const documents = await retriever.getRelevantDocuments(sanitizedQuestion);
     const historyId = await saveChatHistory(
@@ -349,48 +308,13 @@ export const chatRequestStreamHandler = async (
       documents
     );
 
-    // Calculate and Deduct Credits
-    try {
-      const inputTextField = history.map((h: any) => h.text).join(" ") + " " + message;
-      const inputTokens = Number(await countTokens(inputTextField));
-      const outputTokens = Number(await countTokens(response));
-
-      const pricing = MODEL_PRICING[bot.model] || MODEL_PRICING["default"];
-      const baseCost =
-        (Number(pricing.input) * inputTokens) / 1000000 +
-        (Number(pricing.output) * outputTokens) / 1000000 +
-        Number(pricing.request ?? 0);
-      const cost = Math.max(baseCost * COST_MULTIPLIER, MIN_CHAT_COST);
-
-      if (!usesOwnKey) {
-        await request.server.prisma.userCredit.update({
-          where: { user_id: request.user.user_id },
-          data: {
-            balance: {
-              decrement: cost,
-            },
-          },
-        });
-      }
-
-      await request.server.prisma.userTransaction.create({
-        data: {
-          user_id: request.user.user_id,
-          amount: usesOwnKey ? 0 : -cost,
-          type: "usage",
-          description: `Playground stream usage for bot: ${bot.name}`,
-          metadata: {
-            bot_id: bot.id,
-            input_tokens: inputTokens,
-            output_tokens: outputTokens,
-            estimated_cost: cost,
-            used_own_key: usesOwnKey,
-          }
-        }
-      });
-    } catch (err) {
-      console.error("Failed to deduct credits in playground stream", err);
-    }
+    await chargeChatUsage(
+      request.server.prisma,
+      bot,
+      usage,
+      `Playground stream usage for bot: ${bot.name}`,
+      "playground"
+    );
 
     reply.sse({
       event: "result",

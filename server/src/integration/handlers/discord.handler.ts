@@ -7,6 +7,11 @@ import { Document } from "langchain/document";
 import { BaseRetriever } from "@langchain/core/retrievers";
 import { createChain } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
+import { ChatUsage } from "../../utils/usage-tracker";
+import {
+  chargeChatUsage,
+  checkCanAnswer,
+} from "../../utils/billing";
 import { differenceInSeconds } from "date-fns";
 const prisma = new PrismaClient();
 
@@ -28,6 +33,11 @@ export const discordBotHandler = async (
 
     if (!bot) {
       return { text: "Opps! Bot not found" };
+    }
+
+    const denied = await checkCanAnswer(prisma, bot);
+    if (denied) {
+      return { text: denied };
     }
 
     const chat_history = await prisma.botDiscordHistory.findMany({
@@ -150,10 +160,11 @@ export const discordBotHandler = async (
       retriever,
     });
 
-    const response = await chain.invoke({
+    const usage = new ChatUsage();
+    const response = await usage.track(() => chain.invoke({
       question: sanitizedQuestion,
       chat_history: history,
-    });
+    }));
 
     await prisma.botDiscordHistory.create({
       data: {
@@ -163,6 +174,14 @@ export const discordBotHandler = async (
         bot: response,
       },
     });
+
+    await chargeChatUsage(
+      prisma,
+      bot,
+      usage,
+      `Discord usage for bot: ${bot.name}`,
+      "discord"
+    );
 
     await prisma.$disconnect();
 

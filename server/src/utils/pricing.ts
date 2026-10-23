@@ -2,52 +2,153 @@ export const COST_MULTIPLIER = 500;
 export const MIN_CHAT_COST = 0.04;
 export const MIN_EMBEDDING_COST = 0.004;
 
-export const MODEL_PRICING = {
-    // OpenAI
-    "openai/gpt-5": { input: 15.0, output: 60.0 },
-    "openai/gpt-5.2": { input: 30.0, output: 120.0 },
+// We always charge 50% over what the provider charges us
+export const PRICE_MARKUP = 1.5;
 
-    // Perplexity
-    "perplexity/sonar-pro-search": { input: 3.0, output: 15.0 },
-    "perplexity/sonar-reasoning-pro": { input: 2.0, output: 8.0 },
-    "perplexity/sonar-pro": { input: 3.0, output: 15.0 },
+type Rates = { input: number; output: number };
+
+type Pricing = Rates & {
+    request?: number;
+    // Higher rates applied to a call whose prompt reaches minPromptTokens
+    tiers?: (Rates & { minPromptTokens: number })[];
+};
+
+// One LLM call. providerCost is the USD amount OpenRouter reported for it, when known.
+export type ChatCall = {
+    inputTokens: number;
+    outputTokens: number;
+    providerCost?: number;
+};
+
+const withMarkup = <T>(value: T): T => {
+    if (typeof value === "number") {
+        return (value * PRICE_MARKUP) as T;
+    }
+    if (Array.isArray(value)) {
+        return value.map(withMarkup) as T;
+    }
+    if (value && typeof value === "object") {
+        return Object.fromEntries(
+            Object.entries(value).map(([k, v]) => [
+                k,
+                k === "minPromptTokens" ? v : withMarkup(v),
+            ])
+        ) as T;
+    }
+    return value;
+};
+
+// Provider cost in USD per 1M tokens (request = USD per call), from
+// https://openrouter.ai/api/v1/models as of 2026-10-23
+const MODEL_COST: Record<string, Pricing> = {
+    // OpenAI
+    "openai/gpt-6.1-sol": {
+        input: 2.0, output: 10.0,
+        tiers: [{ minPromptTokens: 272000, input: 4.0, output: 15.0 }],
+    },
+    "openai/gpt-6-luna": {
+        input: 0.1, output: 0.5,
+        tiers: [{ minPromptTokens: 272000, input: 0.2, output: 0.75 }],
+    },
+    "openai/gpt-5.6-sol": {
+        input: 4.0, output: 20.0,
+        tiers: [{ minPromptTokens: 272000, input: 8.0, output: 30.0 }],
+    },
+    "openai/gpt-5.6-terra": {
+        input: 2.0, output: 12.0,
+        tiers: [{ minPromptTokens: 272000, input: 4.0, output: 18.0 }],
+    },
+
+    // Perplexity (request = per-call web search fee)
+    "perplexity/sonar-pro-search": { input: 3.0, output: 15.0, request: 0.018 },
+    "perplexity/sonar-reasoning-pro": { input: 2.0, output: 8.0, request: 0.005 },
+    "perplexity/sonar-pro": { input: 3.0, output: 15.0, request: 0.005 },
     "perplexity/sonar-deep-research": { input: 2.0, output: 8.0, request: 0.005 },
 
     // Z.AI
-    "z-ai/glm-4.7": { input: 5.0, output: 20.0 },
+    "z-ai/glm-5.3": { input: 0.079, output: 1.4 },
+    "z-ai/glm-5.3-flash": { input: 0.15, output: 0.5 },
 
     // Anthropic
-    "anthropic/claude-opus-4.5": { input: 15.0, output: 75.0 },
-    "anthropic/claude-sonnet-4.5": { input: 3.0, output: 15.0 },
-    "anthropic/claude-haiku-4.5": { input: 0.25, output: 1.25 },
+    "anthropic/claude-fable-5.1": { input: 10.0, output: 50.0 },
+    "anthropic/claude-opus-5.5": { input: 4.0, output: 20.0 },
+    "anthropic/claude-sonnet-5.5": { input: 2.0, output: 10.0 },
+    "anthropic/claude-haiku-5.5": {
+        input: 0.1, output: 0.5,
+        tiers: [{ minPromptTokens: 100000, input: 0.5, output: 2.5 }],
+    },
 
     // Google
-    "google/gemini-2.5-pro": { input: 1.25, output: 2.5 },
-    "google/gemini-2.5-flash": { input: 0.075, output: 0.30 },
+    "google/gemini-4-argon": { input: 2.0, output: 10.0 },
+    "google/gemini-3.1-pro-preview": {
+        input: 2.0, output: 12.0,
+        tiers: [{ minPromptTokens: 200000, input: 4.0, output: 18.0 }],
+    },
+    "google/gemini-3.8-flash": { input: 0.825, output: 4.125 },
 
     // xAI
-    "x-ai/grok-4.1-fast": { input: 2.0, output: 8.0 },
+    "x-ai/grok-4.7": {
+        input: 2.0, output: 6.0,
+        tiers: [{ minPromptTokens: 200000, input: 4.0, output: 12.0 }],
+    },
 
     // Meta
-    "meta-llama/llama-4-maverick": { input: 3.5, output: 5.0 },
-    "meta-llama/llama-4-scout": { input: 0.2, output: 0.2 },
+    "meta-llama/llama-4-maverick": { input: 0.1875, output: 0.6525 },
+    "meta-llama/llama-4-scout": { input: 0.1, output: 0.3 },
 
     // Mistral
-    "mistralai/mistral-large-2512": { input: 2.0, output: 6.0 },
+    "mistralai/mistral-large-4-0": { input: 1.36, output: 4.18 },
     "mistralai/ministral-14b-2512": { input: 0.2, output: 0.2 },
 
     // MiniMax
-    "minimax/minimax-m2.1": { input: 5.0, output: 20.0 },
+    "minimax/minimax-m3": { input: 0.3, output: 1.2 },
+    "minimax/minimax-m3.1-flash": { input: 0.15, output: 0.6 },
 
     // Default
     "default": { input: 1.0, output: 1.0 }
 };
 
-export const EMBEDDING_PRICING = {
+// Provider cost in USD per 1M tokens (OpenAI)
+const EMBEDDING_COST: Record<string, { input: number }> = {
     "text-embedding-ada-002": { input: 0.10 },
     "text-embedding-3-small": { input: 0.02 },
     "text-embedding-3-large": { input: 0.13 },
     "default": { input: 0.10 }
+};
+
+export const MODEL_PRICING = withMarkup(MODEL_COST);
+export const EMBEDDING_PRICING = withMarkup(EMBEDDING_COST);
+
+export const normalizeChatModelId = (modelId: string) =>
+    modelId.replace("-dbase", "").replace(/_dialoqbase_[0-9]+$/, "");
+
+export const getModelPricing = (modelId: string): Pricing =>
+    MODEL_PRICING[modelId] ||
+    MODEL_PRICING[normalizeChatModelId(modelId)] ||
+    MODEL_PRICING.default;
+
+const ratesForPrompt = (pricing: Pricing, promptTokens: number): Rates =>
+    (pricing.tiers || [])
+        .filter((tier) => promptTokens >= tier.minPromptTokens)
+        .sort((a, b) => b.minPromptTokens - a.minPromptTokens)[0] || pricing;
+
+// What we charge for one call, in USD (markup included). Uses OpenRouter's
+// reported cost when that comes out higher than our table, e.g. for
+// pricing we don't model like image or audio input.
+export const priceChatCall = (modelId: string, call: ChatCall) => {
+    const pricing = getModelPricing(modelId);
+    const rates = ratesForPrompt(pricing, call.inputTokens);
+    const tablePrice =
+        (rates.input * call.inputTokens) / 1000000 +
+        (rates.output * call.outputTokens) / 1000000 +
+        Number(pricing.request ?? 0);
+    return Math.max(tablePrice, (call.providerCost ?? 0) * PRICE_MARKUP);
+};
+
+// Credits to charge for every LLM call made while answering one message
+export const calculateChatCost = (modelId: string, calls: ChatCall[]) => {
+    const usd = calls.reduce((sum, call) => sum + priceChatCall(modelId, call), 0);
+    return Math.max(usd * COST_MULTIPLIER, MIN_CHAT_COST);
 };
 
 export const normalizeEmbeddingModelId = (modelId: string) => {

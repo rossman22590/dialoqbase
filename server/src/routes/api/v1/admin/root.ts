@@ -13,7 +13,18 @@ import {
   saveEmbedddingModelFromInputedUrlHandler,
   updateDialoqbaseRAGSettingsHandler,
   adminDeleteUserHandler,
-  updateUserCreditsHandler
+  updateUserCreditsHandler,
+  adminOverviewHandler,
+  adminUsageHandler,
+  adminUsersHandler,
+  adminSetUserSuspendedHandler,
+  adminSetUserAdminHandler,
+  adminBotsHandler,
+  adminTransactionsHandler,
+  adminQueueHandler,
+  adminQueueJobsHandler,
+  adminQueueJobActionHandler,
+  adminQueueActionHandler,
 } from "../../../../handlers/api/v1/admin";
 import {
   dialoqbaseSettingsSchema,
@@ -162,6 +173,50 @@ const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       onRequest: [fastify.authenticateAdmin],
     },
     updateUserCreditsHandler
+  );
+
+  // Oversight panel (admin only)
+  const adminOnly = { schema: { tags: ["Admin"] }, onRequest: [fastify.authenticateAdmin] };
+  const adminBody = (properties: Record<string, any>, required: string[]) => ({
+    schema: { tags: ["Admin"], body: { type: "object", properties, required } },
+    onRequest: [fastify.authenticateAdmin],
+  });
+
+  fastify.get("/oversight/overview", adminOnly, adminOverviewHandler);
+  fastify.get("/oversight/usage", adminOnly, adminUsageHandler);
+  fastify.get("/oversight/users", adminOnly, adminUsersHandler);
+  fastify.post(
+    "/oversight/users/suspend",
+    adminBody({ user_id: { type: "number" }, suspended: { type: "boolean" } }, ["user_id", "suspended"]),
+    adminSetUserSuspendedHandler
+  );
+  fastify.post(
+    "/oversight/users/admin",
+    adminBody({ user_id: { type: "number" }, is_admin: { type: "boolean" } }, ["user_id", "is_admin"]),
+    adminSetUserAdminHandler
+  );
+  fastify.get("/oversight/bots", adminOnly, adminBotsHandler);
+  fastify.get("/oversight/transactions", adminOnly, adminTransactionsHandler);
+  fastify.get("/oversight/queue", adminOnly, adminQueueHandler);
+  fastify.get("/oversight/queue/jobs", adminOnly, adminQueueJobsHandler);
+  fastify.post(
+    "/oversight/queue/jobs/action",
+    adminBody(
+      { job_id: { type: "string" }, action: { type: "string", enum: ["retry", "remove"] } },
+      ["job_id", "action"]
+    ),
+    adminQueueJobActionHandler
+  );
+  fastify.post(
+    "/oversight/queue/action",
+    adminBody(
+      {
+        action: { type: "string", enum: ["pause", "resume", "clean"] },
+        status: { type: "string", enum: ["completed", "failed"] },
+      },
+      ["action"]
+    ),
+    adminQueueActionHandler
   );
 };
 

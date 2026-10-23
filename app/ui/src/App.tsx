@@ -26,6 +26,7 @@ import SettingsModelRoot from "./routes/settings/model";
 import { useDarkMode } from "./hooks/useDarkmode";
 import BotSearchRoot from "./routes/bot/serach";
 import UsageRoot from "./routes/usage/root";
+import AdminRoot from "./routes/admin/root";
 
 const router = createHashRouter([
   {
@@ -182,6 +183,26 @@ const router = createHashRouter([
       <DashboardLayout>
         <QueryBoundaries>
           <SettingsModelRoot />
+        </QueryBoundaries>
+      </DashboardLayout>
+    ),
+  },
+  {
+    path: "/admin",
+    element: (
+      <DashboardLayout>
+        <QueryBoundaries>
+          <AdminRoot />
+        </QueryBoundaries>
+      </DashboardLayout>
+    ),
+  },
+  {
+    path: "/admin/:tab",
+    element: (
+      <DashboardLayout>
+        <QueryBoundaries>
+          <AdminRoot />
         </QueryBoundaries>
       </DashboardLayout>
     ),

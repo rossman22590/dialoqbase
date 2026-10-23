@@ -485,7 +485,7 @@ export const BotForm = ({
           embedding:
             botConfig?.defaultEmbeddingModel ||
             "dialoqbase_eb_text-embedding-ada-002",
-          model: botConfig?.defaultChatModel || "gpt-3.5-turbo-dbase",
+          model: botConfig?.defaultChatModel || "openai/gpt-5.6-terra",
           maxDepth: 2,
           maxLinks: 10,
           options: {

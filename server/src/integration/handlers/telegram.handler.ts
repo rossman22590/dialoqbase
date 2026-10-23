@@ -6,6 +6,11 @@ import { DialoqbaseHybridRetrival } from "../../utils/hybrid";
 import { BaseRetriever } from "@langchain/core/retrievers";
 import { createChain } from "../../chain";
 import { getModelInfo } from "../../utils/get-model-info";
+import { ChatUsage } from "../../utils/usage-tracker";
+import {
+  chargeChatUsage,
+  checkCanAnswer,
+} from "../../utils/billing";
 import { differenceInSeconds } from 'date-fns';
 
 const prisma = new PrismaClient();
@@ -28,6 +33,11 @@ export const telegramBotHandler = async (
 
     if (!bot) {
       return "Opps! Bot not found";
+    }
+
+    const denied = await checkCanAnswer(prisma, bot);
+    if (denied) {
+      return denied;
     }
 
     const chat_history = await prisma.botTelegramHistory.findMany({
@@ -127,10 +137,11 @@ export const telegramBotHandler = async (
       retriever,
     });
 
-    const response = await chain.invoke({
+    const usage = new ChatUsage();
+    const response = await usage.track(() => chain.invoke({
       question: sanitizedQuestion,
       chat_history: history,
-    });
+    }));
 
     await prisma.botTelegramHistory.create({
       data: {
@@ -140,6 +151,14 @@ export const telegramBotHandler = async (
         bot: response,
       },
     });
+
+    await chargeChatUsage(
+      prisma,
+      bot,
+      usage,
+      `Telegram usage for bot: ${bot.name}`,
+      "telegram"
+    );
 
     await prisma.$disconnect();
 

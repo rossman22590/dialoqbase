@@ -34,6 +34,12 @@ export const userLoginHandler = async (
     });
   }
 
+  if (user.isSuspended) {
+    return reply.status(403).send({
+      message: "User account is suspended",
+    });
+  }
+
   const token = request.server.jwt.sign({
     user_id: user.user_id,
     username: user.username,
