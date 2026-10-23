@@ -222,8 +222,22 @@ export default function App() {
         algorithm:
           mode === "dark" ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
-          fontFamily: "Inter",
+          fontFamily:
+            'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
           colorPrimary: "#7c3aed",
+          borderRadius: 8,
+          ...(mode === "dark"
+            ? {
+                colorBgBase: "#161619",
+                colorBgContainer: "#1c1c20",
+                colorBgElevated: "#232328",
+                colorBorder: "#37373f",
+                colorBorderSecondary: "#27272d",
+              }
+            : {
+                colorBorder: "#dadae2",
+                colorBorderSecondary: "#e9e9ee",
+              }),
         },
       }}
     >

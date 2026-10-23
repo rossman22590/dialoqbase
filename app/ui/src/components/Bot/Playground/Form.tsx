@@ -12,9 +12,13 @@ export type PlaygroundPrefill = { text: string; key: number };
 
 export const PlaygroundgForm = ({
   prefill,
+  onSendStart,
+  onSendError,
 }: {
   // Text to drop into the composer (e.g. from a suggested prompt).
   prefill?: PlaygroundPrefill | null;
+  onSendStart?: () => void;
+  onSendError?: () => void;
 }) => {
   const { onSubmit } = useMessage();
   const form = useForm({
@@ -92,12 +96,16 @@ export const PlaygroundgForm = ({
   const { mutateAsync: sendMessage, isLoading: isSending } = useMutation(
     onSubmit,
     {
+      onMutate: () => {
+        onSendStart?.();
+      },
       onSuccess: () => {
         client.invalidateQueries(["getBotPlaygroundHistory"]);
         form.setFieldValue("message", "");
       },
       onError: (error) => {
         console.error(error);
+        onSendError?.();
       },
     }
   );
@@ -107,14 +115,23 @@ export const PlaygroundgForm = ({
   const canSend = !isSending && form.values.message.trim().length > 0;
 
   return (
-    <div className="shrink-0 bg-white px-3 pb-3 pt-1 dark:bg-[#171717] sm:px-6 sm:pb-4">
+    <div className="relative shrink-0 px-3 pb-3 sm:px-6 sm:pb-4">
+      {/* Messages fade out as they scroll under the composer. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 -top-8 h-8 bg-gradient-to-t from-canvas to-transparent"
+      />
       <div className="mx-auto w-full max-w-3xl">
         <form
           onSubmit={form.onSubmit(async (value) => {
             form.reset();
             await sendMessage(value.message);
           })}
-          className="flex items-end gap-2 rounded-2xl border border-gray-200 bg-white py-2 pl-4 pr-2 shadow-sm transition-shadow focus-within:border-indigo-400 focus-within:ring-4 focus-within:ring-indigo-500/10 dark:border-white/10 dark:bg-[#212121] dark:focus-within:border-indigo-400/60 dark:focus-within:ring-indigo-400/10"
+          className={`group/composer flex items-end gap-2 rounded-[22px] border bg-surface py-2 pl-4 pr-2 shadow-raised transition-all duration-200 ease-out focus-within:border-indigo-400/70 focus-within:shadow-[0_0_0_4px_rgb(124_58_237/0.12),0_12px_32px_-12px_rgb(124_58_237/0.35)] dark:focus-within:border-indigo-400/50 ${
+            listening
+              ? "border-red-300 dark:border-red-500/40"
+              : "border-line hover:border-line-strong"
+          }`}
         >
           <textarea
             ref={textareaRef}
@@ -130,11 +147,11 @@ export const PlaygroundgForm = ({
                 })();
               }
             }}
-            className="block max-h-[200px] min-w-0 flex-1 resize-none border-0 bg-transparent px-0 py-1.5 text-[15px] leading-6 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-0 dark:text-gray-100 dark:placeholder:text-gray-500"
+            className="block max-h-[200px] min-w-0 flex-1 resize-none border-0 bg-transparent px-0 py-1.5 text-[15px] leading-6 text-fg placeholder:text-fg-subtle focus:outline-none focus:ring-0"
             required
             rows={1}
             tabIndex={0}
-            placeholder={listening ? "Listening…" : "Send a message…"}
+            placeholder={listening ? "Listening…" : "Ask anything…"}
             aria-label="Message"
             onCompositionStart={() => setTyping(true)}
             onCompositionEnd={() => setTyping(false)}
@@ -156,29 +173,32 @@ export const PlaygroundgForm = ({
                       stop();
                     }
                   }}
-                  className={`relative flex h-9 w-9 items-center justify-center rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                  className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-all duration-150 active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                     listening
                       ? "bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-400"
-                      : "text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-100"
+                      : "text-fg-subtle hover:bg-surface-2 hover:text-fg"
                   }`}
                 >
                   {listening && (
-                    <span className="absolute right-1.5 top-1.5 flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
-                    </span>
+                    <span className="absolute inset-0 animate-ping rounded-full bg-red-400/20" />
                   )}
-                  <MicrophoneIcon className="h-5 w-5" />
+                  <MicrophoneIcon className="relative h-5 w-5" />
                 </button>
               </Tooltip>
             )}
 
-            <Tooltip title="Send (Enter)">
+            <Tooltip title="Send" mouseEnterDelay={0.4}>
               <button
                 type="submit"
                 aria-label="Send message"
                 disabled={!canSend}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-indigo-600/40 disabled:shadow-none dark:focus-visible:ring-offset-[#212121] dark:disabled:bg-indigo-500/30 dark:disabled:text-white/60"
+                className={`flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed ${
+                  canSend
+                    ? "scale-100 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-brand hover:brightness-110 active:scale-90"
+                    : isSending
+                    ? "bg-indigo-600 text-white"
+                    : "scale-95 bg-surface-3 text-fg-subtle"
+                }`}
               >
                 {isSending ? (
                   <svg
@@ -208,10 +228,15 @@ export const PlaygroundgForm = ({
             </Tooltip>
           </div>
         </form>
-        <p className="mt-2 hidden text-center text-[11px] text-gray-400 dark:text-gray-500 sm:block">
-          <kbd className="font-sans font-medium">Enter</kbd> to send ·{" "}
-          <kbd className="font-sans font-medium">Shift + Enter</kbd> for a new
-          line
+        <p className="mt-2 hidden text-center text-[11px] text-fg-subtle sm:block">
+          <kbd className="rounded border border-line bg-surface px-1 py-px font-sans text-[10px] font-medium">
+            Enter
+          </kbd>{" "}
+          to send ·{" "}
+          <kbd className="rounded border border-line bg-surface px-1 py-px font-sans text-[10px] font-medium">
+            Shift + Enter
+          </kbd>{" "}
+          for a new line
         </p>
       </div>
     </div>

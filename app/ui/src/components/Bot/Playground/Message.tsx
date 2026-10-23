@@ -1,8 +1,10 @@
 import {
+  ArrowPathIcon,
   CheckIcon,
   ChevronDownIcon,
   ClipboardIcon,
   DocumentTextIcon,
+  ExclamationTriangleIcon,
   SpeakerWaveIcon,
   StopIcon,
 } from "@heroicons/react/24/outline";
@@ -24,6 +26,9 @@ type Props = Message & {
   botAvatar?: JSX.Element;
   userAvatar?: JSX.Element;
   botName?: string;
+  // The request for this reply failed before it finished.
+  failed?: boolean;
+  onRetry?: () => void;
 };
 
 // useMessage appends this cursor while a streamed answer is arriving and
@@ -34,25 +39,34 @@ const PENDING_TEXT = "Hold on...";
 const CHAT_PROSE =
   "chat-prose prose max-w-none break-words dark:prose-invert prose-pre:p-0 prose-pre:bg-transparent";
 
-export const BotAvatar = ({ size = "md" }: { size?: "md" | "lg" }) => (
+export const BotAvatar = ({
+  size = "md",
+  live = false,
+}: {
+  size?: "md" | "lg";
+  live?: boolean;
+}) => (
   <div
-    className={`flex shrink-0 items-center justify-center bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white shadow-sm ${
-      size === "lg" ? "h-12 w-12 rounded-2xl" : "h-8 w-8 rounded-lg"
-    }`}
+    className={`relative flex shrink-0 items-center justify-center bg-gradient-to-br from-violet-500 via-indigo-600 to-fuchsia-600 text-white shadow-brand ring-1 ring-inset ring-white/20 ${
+      size === "lg" ? "h-14 w-14 rounded-2xl" : "h-8 w-8 rounded-[10px]"
+    } ${live ? "chat-avatar-live" : ""}`}
   >
-    <SparklesIcon className={size === "lg" ? "h-6 w-6" : "h-4 w-4"} />
+    <SparklesIcon className={size === "lg" ? "h-7 w-7" : "h-4 w-4"} />
   </div>
 );
 
 export const TypingIndicator = () => (
   <div
-    className="flex h-7 items-center gap-1"
+    className="flex h-7 items-center gap-2.5"
     role="status"
-    aria-label="Assistant is typing"
+    aria-label="Assistant is thinking"
   >
-    <span className="typing-dot h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-500" />
-    <span className="typing-dot h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-500" />
-    <span className="typing-dot h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-500" />
+    <span className="flex items-center gap-1">
+      <span className="typing-dot h-1.5 w-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400" />
+      <span className="typing-dot h-1.5 w-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400" />
+      <span className="typing-dot h-1.5 w-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400" />
+    </span>
+    <span className="chat-shimmer-text text-sm font-medium">Thinking…</span>
   </div>
 );
 
@@ -67,13 +81,13 @@ const ActionButton = ({
   disabled?: boolean;
   children: React.ReactNode;
 }) => (
-  <Tooltip title={title} mouseEnterDelay={0.3}>
+  <Tooltip title={title} mouseEnterDelay={0.25}>
     <button
       type="button"
       aria-label={title}
       disabled={disabled}
       onClick={onClick}
-      className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 dark:text-gray-500 dark:hover:bg-white/10 dark:hover:text-gray-200"
+      className="flex h-7 w-7 items-center justify-center rounded-lg text-fg-subtle transition-all duration-150 hover:bg-surface-2 hover:text-fg active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50"
     >
       {children}
     </button>
@@ -100,8 +114,8 @@ export const PlaygroundMessage = (props: Props) => {
 
   if (!props.isBot) {
     return (
-      <div className="chat-msg-in flex w-full justify-end gap-3">
-        <div className="min-w-0 max-w-[85%] rounded-2xl rounded-br-md bg-indigo-600 px-4 py-2.5 text-white shadow-sm sm:max-w-[75%]">
+      <div className="chat-msg-in-user flex w-full justify-end gap-3">
+        <div className="min-w-0 max-w-[85%] rounded-[20px] rounded-br-md bg-gradient-to-br from-indigo-500 to-indigo-600 px-4 py-2.5 text-white shadow-brand sm:max-w-[75%]">
           <Markdown
             className={`${CHAT_PROSE} chat-prose-user`}
             message={props.message}
@@ -116,6 +130,9 @@ export const PlaygroundMessage = (props: Props) => {
     props.message === STREAM_CURSOR || props.message === PENDING_TEXT;
   const isStreaming = !isWaiting && props.message.endsWith(STREAM_CURSOR);
   const text = isStreaming ? props.message.slice(0, -1) : props.message;
+  const failed = !!props.failed && (isWaiting || isStreaming);
+  const working = (isWaiting || isStreaming) && !failed;
+  const done = !isWaiting && !isStreaming;
   const hasSources = !!props.sources && props.sources.length > 0;
   const showWebTTS = props.textToSpeech && props.textToSpeechType === "web_api";
   const showElevenLabsTTS =
@@ -123,48 +140,70 @@ export const PlaygroundMessage = (props: Props) => {
   const hasActions = !props.hideCopy || showWebTTS || showElevenLabsTTS;
 
   return (
-    <div className="chat-msg-in group flex w-full gap-3">
+    <div className="chat-msg-in group flex w-full gap-3.5">
       {props.botAvatar ? (
         <AvatarSlot>{props.botAvatar}</AvatarSlot>
       ) : (
-        <BotAvatar />
+        <BotAvatar live={working} />
       )}
       <div className="min-w-0 flex-1">
-        <div className="mb-1 flex h-8 items-center text-sm font-semibold text-gray-900 dark:text-gray-100">
+        <div className="mb-0.5 flex h-8 items-center text-[13px] font-semibold tracking-tight text-fg">
           {props.botName || "Assistant"}
         </div>
 
-        {isWaiting ? (
+        {isWaiting && !failed ? (
           <TypingIndicator />
         ) : (
+          !isWaiting && (
+            <div className={isStreaming && !failed ? "chat-streaming" : ""}>
+              <Markdown className={CHAT_PROSE} message={text} />
+            </div>
+          )
+        )}
+
+        {failed && (
           <div
-            className={`text-gray-800 dark:text-gray-100 ${
-              isStreaming ? "chat-streaming" : ""
-            }`}
+            role="alert"
+            className="animate-fade-up mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-red-200 bg-red-50/70 px-3.5 py-2.5 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300"
           >
-            <Markdown className={CHAT_PROSE} message={text} />
+            <ExclamationTriangleIcon className="h-4 w-4 shrink-0" />
+            <span className="flex-1">
+              {isStreaming
+                ? "The response was interrupted."
+                : "Couldn't get a response. Check your connection and try again."}
+            </span>
+            {props.onRetry && (
+              <button
+                type="button"
+                onClick={props.onRetry}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1 text-xs font-medium text-red-700 shadow-soft ring-1 ring-red-200 transition hover:bg-red-50 dark:bg-white/5 dark:text-red-200 dark:ring-red-500/30 dark:hover:bg-white/10"
+              >
+                <ArrowPathIcon className="h-3.5 w-3.5" />
+                Edit &amp; retry
+              </button>
+            )}
           </div>
         )}
 
-        {hasSources && !isWaiting && !isStreaming && (
-          <div className="mt-3">
+        {hasSources && done && (
+          <div className="mt-3.5">
             <button
               type="button"
               onClick={() => setShowSources((v) => !v)}
               aria-expanded={showSources}
-              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-white/10 dark:bg-transparent dark:text-gray-300 dark:hover:bg-white/5"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-medium text-fg-muted shadow-soft transition-colors hover:border-line-strong hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
-              <DocumentTextIcon className="h-3.5 w-3.5" />
+              <DocumentTextIcon className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
               {props.sources.length}{" "}
               {props.sources.length === 1 ? "source" : "sources"}
               <ChevronDownIcon
-                className={`h-3 w-3 transition-transform ${
+                className={`h-3 w-3 transition-transform duration-200 ${
                   showSources ? "rotate-180" : ""
                 }`}
               />
             </button>
             {showSources && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
                 {props.sources.map((source, index) => {
                   const name = removeUUID(
                     `${
@@ -177,9 +216,13 @@ export const PlaygroundMessage = (props: Props) => {
                       type="button"
                       title={name}
                       onClick={props.onSourceClick.bind(null, source)}
-                      className="max-w-[16rem] truncate rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-xs text-gray-700 transition-colors hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:border-indigo-400/50 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-200"
+                      style={{ animationDelay: `${index * 40}ms` }}
+                      className="animate-scale-in group/source inline-flex max-w-[16rem] items-center gap-1.5 rounded-lg border border-line bg-surface-2/60 px-2 py-1 text-xs text-fg-muted transition-all hover:-translate-y-px hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 hover:shadow-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:border-indigo-400/40 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-200"
                     >
-                      {name}
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-surface text-[9px] font-semibold text-fg-subtle ring-1 ring-line group-hover/source:text-indigo-600 dark:group-hover/source:text-indigo-300">
+                        {index + 1}
+                      </span>
+                      <span className="truncate">{name}</span>
                     </button>
                   );
                 })}
@@ -188,11 +231,11 @@ export const PlaygroundMessage = (props: Props) => {
           </div>
         )}
 
-        {hasActions && !isWaiting && !isStreaming && (
-          <div className="-ml-1.5 mt-1.5 flex items-center gap-0.5 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
+        {hasActions && done && (
+          <div className="-ml-1.5 mt-2 flex translate-y-0.5 items-center gap-0.5 opacity-0 transition-all duration-200 ease-out focus-within:translate-y-0 focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100 [@media(hover:none)]:translate-y-0 [@media(hover:none)]:opacity-100">
             {!props.hideCopy && (
               <ActionButton
-                title={isBtnPressed ? "Copied" : "Copy"}
+                title={isBtnPressed ? "Copied!" : "Copy"}
                 onClick={async () => {
                   await clipbardCopy(props.message);
                   setIsBtnPressed(true);
@@ -204,7 +247,7 @@ export const PlaygroundMessage = (props: Props) => {
                 {!isBtnPressed ? (
                   <ClipboardIcon className="h-4 w-4" />
                 ) : (
-                  <CheckIcon className="h-4 w-4 text-green-500" />
+                  <CheckIcon className="animate-scale-in h-4 w-4 text-emerald-500" />
                 )}
               </ActionButton>
             )}

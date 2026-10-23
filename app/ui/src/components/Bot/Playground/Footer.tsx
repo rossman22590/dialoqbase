@@ -13,7 +13,7 @@ export default function PlaygroundFooter() {
           type="button"
           aria-label="Playground settings"
           onClick={() => setOpenModal(true)}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-100"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-fg-subtle shadow-soft transition-all duration-150 hover:text-fg hover:shadow-raised active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <Cog6ToothIcon className="h-5 w-5" />
         </button>

@@ -68,11 +68,13 @@ export const PlaygroundHistoryList = () => {
         <div>
           {data.history.length === 0 && (
             <div className="flex flex-col items-center px-4 pt-12 text-center">
-              <ChatBubbleLeftRightIcon className="h-8 w-8 text-gray-300 dark:text-gray-600" />
-              <p className="mt-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface shadow-soft ring-1 ring-line">
+                <ChatBubbleLeftRightIcon className="h-5 w-5 text-fg-subtle" />
+              </span>
+              <p className="mt-3 text-sm font-medium text-fg">
                 No chats yet
               </p>
-              <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
+              <p className="mt-1 text-xs leading-relaxed text-fg-subtle">
                 Your playground conversations will show up here.
               </p>
             </div>
@@ -96,7 +98,7 @@ export const PlaygroundHistoryList = () => {
           {[72, 56, 84, 64, 48, 76].map((width, index) => (
             <div key={index} className="flex h-9 items-center px-2">
               <div
-                className="h-3 animate-pulse rounded bg-gray-200 dark:bg-white/10"
+                className="skeleton h-3 rounded"
                 style={{ width: `${width}%` }}
               />
             </div>

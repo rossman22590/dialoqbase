@@ -241,10 +241,10 @@ export default function BotLayout({
         </Transition.Root>
 
         <div className="flex flex-col">
-          <header className="sticky top-0 z-[999] flex h-14 bg-white border-b border-gray-200 dark:bg-[#171717] dark:border-gray-600">
+          <header className="sticky top-0 z-[999] flex h-14 border-b border-line bg-chrome/80 backdrop-blur-xl backdrop-saturate-150">
             <button
               type="button"
-              className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden dark:border-gray-600 dark:text-gray-200"
+              className="border-r border-line px-4 text-fg-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
               onClick={() => setSidebarOpen(true)}
             >
               <span className="sr-only">Open sidebar</span>
@@ -252,13 +252,13 @@ export default function BotLayout({
             </button>
             <Link
               to="/"
-              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 flex shrink-0 items-center px-3 dark:text-white"
+              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 flex shrink-0 items-center px-3 text-fg"
             >
               <img className="h-8 w-auto" src="/logo.png" alt="Botcraft Pro" />
-              <span className="ml-1 whitespace-nowrap text-lg font-bold sm:text-xl">
+              <span className="ml-1 whitespace-nowrap text-lg font-semibold tracking-tight sm:text-xl">
                 Botcraft Pro
               </span>
-              <span className="ml-2 hidden flex-shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 sm:inline-block">
+              <span className="ml-2 hidden flex-shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/15 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20 sm:inline-block">
                 {/* @ts-ignore */}
                 {`v${__APP_VERSION__}`}
               </span>
@@ -267,7 +267,7 @@ export default function BotLayout({
               <div className="ml-2 flex items-center md:ml-6">
                 <div
                   title="Credits"
-                  className="mr-2 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-200 border px-3 py-1 rounded-full border-gray-300 dark:border-gray-600 sm:mr-4"
+                  className="mr-2 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[13px] font-medium tabular-nums text-fg-muted shadow-soft sm:mr-4"
                 >
                   <span className="hidden sm:inline">Credits: </span>$
                   {Number(creditData?.balance || 0).toFixed(4)}
@@ -278,9 +278,9 @@ export default function BotLayout({
           </header>
           <div className="flex flex-1">
             <aside className="hidden md:flex md:flex-col md:w-16 md:fixed md:inset-y-0">
-              <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-5 dark:bg-[#171717] dark:border-gray-600">
+              <div className="flex flex-grow flex-col overflow-y-auto border-r border-line bg-chrome pt-5">
                 <div className="mt-14 flex flex-grow flex-col">
-                  <nav className="flex-1 space-y-1 px-2 pb-4">
+                  <nav className="flex-1 space-y-1.5 px-2.5 pb-4">
                     {navigation.map((item) => {
                       if (
                         item.key === "search" &&
@@ -306,9 +306,9 @@ export default function BotLayout({
                             }
                             className={classNames(
                               isActive(item.href)
-                                ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300"
-                                : "text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-[#262626]",
-                              "group flex h-10 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                                ? "bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-200/70 dark:bg-indigo-500/15 dark:text-indigo-300 dark:ring-indigo-400/20"
+                                : "text-fg-subtle hover:bg-surface-2 hover:text-fg",
+                              "group flex h-10 items-center justify-center rounded-xl transition-all duration-150 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                             )}
                           >
                             <item.icon

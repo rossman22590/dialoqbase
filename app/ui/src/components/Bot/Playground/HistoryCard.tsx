@@ -83,15 +83,15 @@ export const PlaygroundHistoryCard = ({
     <div
       className={`group relative flex items-center rounded-lg text-sm transition-colors ${
         isActive
-          ? "bg-indigo-50 font-medium text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-100"
-          : "text-gray-700 hover:bg-gray-200/60 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white"
+          ? "bg-surface font-medium text-fg shadow-soft ring-1 ring-line before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-full before:bg-indigo-500"
+          : "text-fg-muted hover:bg-surface-2 hover:text-fg"
       }`}
     >
       <Link
         to={`/bot/${params.id}/playground/${item.id}`}
         title={item.title}
         aria-current={isActive ? "page" : undefined}
-        className="block min-w-0 flex-1 truncate rounded-lg py-2 pl-3 pr-9 text-inherit hover:text-inherit focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+        className="block min-w-0 flex-1 truncate rounded-lg py-2 pl-3 pr-9 text-[13px] text-inherit hover:text-inherit focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
       >
         {item.title}
       </Link>
@@ -119,7 +119,7 @@ export const PlaygroundHistoryCard = ({
                         }
                       }}
                     >
-                      <PencilIcon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+                      <PencilIcon className="w-3.5 h-3.5 text-fg-subtle" />
                       <span>Rename</span>
                     </button>
                   ),
@@ -145,7 +145,7 @@ export const PlaygroundHistoryCard = ({
             <button
               type="button"
               aria-label={`Options for ${item.title}`}
-              className={`flex h-7 w-7 items-center justify-center rounded-md text-gray-500 transition hover:bg-gray-300/50 hover:text-gray-800 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white [@media(hover:none)]:opacity-100 ${
+              className={`flex h-7 w-7 items-center justify-center rounded-md text-fg-subtle transition hover:bg-surface-3 hover:text-fg focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 [@media(hover:none)]:opacity-100 ${
                 isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               }`}
             >
