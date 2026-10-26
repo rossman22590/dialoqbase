@@ -1,4 +1,4 @@
-import { Bot, Context } from "grammy";
+import { Bot, Context, GrammyError } from "grammy";
 import axios from "axios";
 import {
   deleteTelegramChatHistory,
@@ -21,13 +21,15 @@ export default class TelegramBot {
   }
 
   private static _clients: Map<string, any> = new Map();
+  private static _retries: Map<string, NodeJS.Timeout> = new Map();
 
   static totolClients() {
     return this._clients.size;
   }
 
-  static async connect(identifier: string, token: string) {
+  static async connect(identifier: string, token: string, attempt = 0) {
     try {
+      this.cancelRetry(identifier);
       if (this._clients.has(identifier)) {
         await this.disconnect(identifier);
       }
@@ -143,8 +145,30 @@ export default class TelegramBot {
         }
       });
 
-      bot.start();
       bot.catch((err) => console.log(`${identifier} error: ${err}`));
+      // grammY rethrows 401/409 from polling instead of retrying, so an
+      // uncaught start() would take the whole server down with it.
+      bot.start().catch((error) => {
+        if (this._clients.get(identifier) !== bot) return;
+        this._clients.delete(identifier);
+        if (error instanceof GrammyError && error.error_code === 409) {
+          // Another instance is polling this token, e.g. the previous
+          // container during a deploy. Keep trying until it goes away.
+          const delay = Math.min(60, 5 * 2 ** attempt);
+          console.log(
+            `[TelegramBot] ${identifier}: another instance is polling this token, retrying in ${delay}s`
+          );
+          this._retries.set(
+            identifier,
+            setTimeout(() => {
+              this._retries.delete(identifier);
+              this.connect(identifier, token, attempt + 1);
+            }, delay * 1000)
+          );
+          return;
+        }
+        console.log(`[TelegramBot] ${identifier}: polling stopped: `, error);
+      });
       this._clients.set(identifier, bot);
     } catch (error) {
       console.log("[TelegramBot] error: ", error);
@@ -156,8 +180,18 @@ export default class TelegramBot {
   }
 
   static async disconnect(identifier: string) {
-    this._clients.get(identifier)?.stop();
+    this.cancelRetry(identifier);
+    const bot = this._clients.get(identifier);
     this._clients.delete(identifier);
+    // stop() makes one last getUpdates call, which can fail the same way
+    await bot?.stop().catch((error: unknown) => {
+      console.log(`[TelegramBot] ${identifier}: stop failed: `, error);
+    });
+  }
+
+  private static cancelRetry(identifier: string) {
+    clearTimeout(this._retries.get(identifier));
+    this._retries.delete(identifier);
   }
 
   static async isValidate(token: string) {
