@@ -18,6 +18,8 @@ import { StyleProvider } from "@ant-design/cssinjs";
 import BotPlaygroundLayout from "./Layout/BotPlaygroundLayout";
 import BotConversationsRoot from "./routes/bot/conversations";
 import RegisterRoot from "./routes/register";
+import ForgotPasswordRoot from "./routes/forgot-password";
+import ResetPasswordRoot from "./routes/reset-password";
 import { QueryBoundaries } from "./components/Common/QueryBoundaries";
 import SettingsApplicationRoot from "./routes/settings/application";
 import SettingsTeamsRoot from "./routes/settings/teams";
@@ -210,6 +212,14 @@ const router = createHashRouter([
   {
     path: "/register",
     element: <RegisterRoot />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPasswordRoot />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPasswordRoot />,
   },
 ]);
 const queryClient = new QueryClient({});

@@ -167,18 +167,6 @@ export default function SettingsRoot() {
             <Form layout="vertical" onFinish={updatePassowrd}>
               <CardBody className="pb-1">
                 <Form.Item
-                  label="Current Password"
-                  name="oldPassword"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your current password!",
-                    },
-                  ]}
-                >
-                  <Input.Password size="large" type="password" />
-                </Form.Item>
-                <Form.Item
                   label="New Password"
                   name="newPassword"
                   rules={[

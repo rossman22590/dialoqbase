@@ -53,9 +53,40 @@ export const updatePasswordSchema: FastifySchema = {
   },
   body: {
     type: "object",
-    required: ["oldPassword", "newPassword"],
+    required: ["newPassword"],
     properties: {
       oldPassword: {
+        type: "string",
+      },
+      newPassword: {
+        type: "string",
+      },
+    },
+  },
+};
+
+export const forgotPasswordSchema: FastifySchema = {
+  tags: ["User"],
+  summary: "API to request a password reset email",
+  body: {
+    type: "object",
+    required: ["email"],
+    properties: {
+      email: {
+        type: "string",
+      },
+    },
+  },
+};
+
+export const resetPasswordSchema: FastifySchema = {
+  tags: ["User"],
+  summary: "API to reset a password using an emailed token",
+  body: {
+    type: "object",
+    required: ["token", "newPassword"],
+    properties: {
+      token: {
         type: "string",
       },
       newPassword: {

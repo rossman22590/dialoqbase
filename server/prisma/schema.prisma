@@ -92,6 +92,19 @@ model User {
   apiKeys         UserApiKey[]
   credit          UserCredit?
   transactions    UserTransaction[]
+  passwordResets  PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  user_id   Int
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  User      User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
 }
 
 model UserCredit {

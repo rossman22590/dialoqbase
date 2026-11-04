@@ -14,7 +14,20 @@ export interface UpdateUsernameRequestBody {
 
 export interface UpdatePasswordRequestBody {
   Body: {
-    oldPassword: string;
+    oldPassword?: string;
+    newPassword: string;
+  };
+}
+
+export interface ForgotPasswordRequestBody {
+  Body: {
+    email: string;
+  };
+}
+
+export interface ResetPasswordRequestBody {
+  Body: {
+    token: string;
     newPassword: string;
   };
 }

@@ -119,6 +119,14 @@ export const AuthLogin = () => {
             placeholder="Password"
           />
         </Form.Item>
+        <div className="-mt-2 mb-4 text-right">
+          <Link
+            to="/forgot-password"
+            className="text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+          >
+            Forgot password?
+          </Link>
+        </div>
         <div className="pt-1">
           <button
             type="submit"

@@ -10,10 +10,14 @@ import {
   deleteApiKey,
   getAllApiKeyByUser,
   getUserCreditsHandler,
-  getUserTransactionsHandler
+  getUserTransactionsHandler,
+  forgotPasswordHandler,
+  resetPasswordHandler
 } from "../../../../handlers/api/v1/user";
 import {
+  forgotPasswordSchema,
   isRegisterationAllowedSchema,
+  resetPasswordSchema,
   updatePasswordSchema,
   updateProfileSchema,
   userLoginSchema,
@@ -51,6 +55,22 @@ const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       onRequest: [fastify.authenticate],
     },
     updatePasswordHandler
+  );
+
+  fastify.post(
+    "/forgot-password",
+    {
+      schema: forgotPasswordSchema,
+    },
+    forgotPasswordHandler
+  );
+
+  fastify.post(
+    "/reset-password",
+    {
+      schema: resetPasswordSchema,
+    },
+    resetPasswordHandler
   );
 
   fastify.get(
