@@ -1,23 +1,15 @@
 import React from "react";
 import { BotIntegrationAPI } from "../../../../@types/bot";
-import { CopyBtn } from "../../../Common/CopyBtn";
-import { Form, Input, Select, Switch, Tooltip, notification } from "antd";
-import {
-  ArrowPathIcon,
-  BeakerIcon,
-  CodeBracketIcon,
-  GlobeAltIcon,
-  MinusIcon,
-  PaperAirplaneIcon,
-  PlusIcon,
-} from "@heroicons/react/24/outline";
+import { Form, Input, Select, notification } from "antd";
+import { ArrowPathIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { CopyTextButton } from "../../Embed/EmbedBoardCard";
+import { SwitchControl } from "../../Settings/SettingsControls";
 import APICodeGenerator from "./APICodeGenerator";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ApiResponse } from "./ApiResponse";
 import api from "../../../../services/api";
 import { useParams } from "react-router-dom";
-import { Card, CardBody, CardHeader } from "../../../ui";
 const ApiPlaygroundComponent: React.FC<BotIntegrationAPI> = ({ data }) => {
   const [form] = Form.useForm();
 
@@ -95,109 +87,91 @@ const ApiPlaygroundComponent: React.FC<BotIntegrationAPI> = ({ data }) => {
 
   const fieldLabel = (name: string, type: string) => (
     <span className="flex items-baseline gap-2">
-      <span className="font-mono text-[13px] font-semibold text-fg">
-        {name}
-      </span>
+      <span className="font-mono text-[13px] font-medium text-fg">{name}</span>
       <span className="font-mono text-[11px] font-normal text-fg-subtle">
         {type}
       </span>
     </span>
   );
 
+  const endpoint = `${hostUrl}/bot/${data.public_url}/api`;
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader
-          icon={<GlobeAltIcon />}
-          title="Endpoint"
-          description="Send a POST request with your API key in the x-api-key header."
-        />
-        <CardBody>
-          <div className="flex items-center gap-2">
-            <span className="ui-badge ui-badge-success shrink-0 font-mono">
-              POST
-            </span>
-            <div className="min-w-0 flex-1">
-              <Input
-                size="large"
-                type="text"
-                readOnly
-                className="font-mono text-[13px]"
-                value={`${hostUrl}/bot/${data.public_url}/api`}
-                // className="block w-full rounded-md border-line focus:border-sky-500 focus:ring-sky-500 sm:text-sm bg-gray-50"
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-2.5 rounded-[10px] border border-line px-3 py-2.5 font-mono text-[13px] text-fg">
+          <span className="rounded-md bg-indigo-50 px-2 py-0.5 font-semibold text-indigo-800 dark:bg-indigo-500/10 dark:text-indigo-300">
+            POST
+          </span>
+          <span className="min-w-0 flex-[1_1_260px] [overflow-wrap:anywhere]">
+            {endpoint}
+          </span>
+          <CopyTextButton value={endpoint} />
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5 rounded-[10px] border border-line px-3 py-2.5 font-mono text-[13px] text-fg">
+          <span className="rounded-md bg-surface-2 px-2 py-0.5 font-semibold text-fg-muted">
+            x-api-key
+          </span>
+          <span className="min-w-0 flex-[1_1_260px] [overflow-wrap:anywhere]">
+            {data.api_key || ""}
+          </span>
+          <div className="flex gap-2">
+            <CopyTextButton value={data.api_key || ""} />
+            <button
+              type="button"
+              onClick={() => !isGeneratingAPIKey && regenerateAPIKey()}
+              className="ui-btn-secondary h-[30px] px-2.5 text-xs font-normal"
+            >
+              <ArrowPathIcon
+                className={isGeneratingAPIKey ? "animate-spin" : ""}
               />
-            </div>
-            <div className="flex flex-row gap-2">
-              <CopyBtn
-                showText={false}
-                iconSize="h-4 w-4"
-                className="ui-btn-secondary h-10 w-10 rounded-xl px-0"
-                value={`${hostUrl}/bot/${data.public_url}/api`}
-              />
-            </div>
+              Regenerate
+            </button>
           </div>
-        </CardBody>
-      </Card>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
-        <Card className="min-w-0">
-          <CardHeader
-            icon={<BeakerIcon />}
-            title="Try it"
-            description="Fill in the body and send a live request."
-          />
-          <CardBody className="space-y-6">
-            <div>
-              <h6 className="ui-label mb-2">API key</h6>
-              <div className="flex flex-row items-center gap-2">
-                <div className="min-w-0 flex-1">
-                  <Input
-                    size="large"
-                    type="text"
-                    readOnly
-                    className="font-mono text-[13px]"
-                    value={data.api_key || ""}
-                  />
-                </div>
-                <CopyBtn
-                  showText={false}
-                  iconSize="h-4 w-4"
-                  className="ui-btn-secondary h-10 w-10 rounded-xl px-0"
-                  value={data.api_key || ""}
-                />
-                <Tooltip title="Regenerate API Key">
-                  <button
-                    aria-label="Regenerate API key"
-                    onClick={() => !isGeneratingAPIKey && regenerateAPIKey()}
-                    className="ui-btn-secondary h-10 w-10 rounded-xl px-0"
-                  >
-                    <ArrowPathIcon
-                      className={`text-fg-muted ${
-                        isGeneratingAPIKey ? "animate-spin" : ""
-                      }`}
-                    />
-                  </button>
-                </Tooltip>
-              </div>
-            </div>
+      <div className="flex flex-wrap items-stretch gap-5">
+        <APICodeGenerator
+          api={endpoint}
+          xApiKey={data.api_key || ""}
+          body={JSON.stringify(
+            {
+              message,
+              history,
+              stream,
+            },
+            null,
+            2
+          )}
+        />
 
-            <div>
-              <h6 className="mb-3 text-xs font-semibold uppercase tracking-[0.08em] text-fg-subtle">
-                Body params
-              </h6>
-
-              <Form
-                form={form}
-                layout="vertical"
-                onFinish={showResponse}
-                initialValues={{
-                  stream: true,
-                  history: [],
-                  message: "",
-                }}
-              >
+        <section
+          aria-labelledby="api-try-h"
+          className="ui-card flex min-w-0 flex-[1_1_320px] flex-col gap-3 p-4"
+        >
+          <h2 id="api-try-h" className="m-0 text-[15px] font-semibold text-fg">
+            Try it
+          </h2>
+          <Form
+            form={form}
+            layout="vertical"
+            requiredMark={false}
+            onFinish={showResponse}
+            className="flex flex-col gap-3 [&_.ant-form-item]:mb-0"
+            initialValues={{
+              stream: true,
+              history: [],
+              message: "",
+            }}
+          >
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="api-message">
+                {fieldLabel("message", "string")}
+              </label>
+              <div className="flex items-start gap-2">
                 <Form.Item
-                  label={fieldLabel("message", "string")}
+                  className="min-w-0 flex-1"
                   rules={[
                     {
                       required: true,
@@ -207,142 +181,110 @@ const ApiPlaygroundComponent: React.FC<BotIntegrationAPI> = ({ data }) => {
                   name="message"
                 >
                   <Input
+                    id="api-message"
                     size="large"
                     type="text"
                     placeholder="Enter your message here"
                   />
                 </Form.Item>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="ui-btn-primary h-10 shrink-0"
+                >
+                  {isLoading ? "Sending..." : "Send"}
+                </button>
+              </div>
+            </div>
 
-                <Form.List name="history">
-                  {(fields, { add, remove }) => (
-                    <div className="mb-6 rounded-xl border border-line bg-surface-2/60 p-3 sm:p-4">
-                      <div className="mb-3">{fieldLabel("history", "array")}</div>
-                      {fields.map((field, index) => (
-                        <div
-                          key={index}
-                          className="mb-3 rounded-xl border border-line bg-surface p-3 shadow-soft"
-                        >
-                          <div className="mb-2 flex flex-row items-center justify-between">
-                            <div>
-                              <span className="font-mono text-xs font-medium text-fg-muted">
-                                {"Object"}
-                              </span>
-                            </div>
-                            <div>
-                              <button
-                                type="button"
-                                aria-label="Remove history item"
-                                onClick={() => remove(field.name)}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg text-fg-subtle transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                              >
-                                <MinusIcon className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                          <Form.Item
-                            label={fieldLabel("role", "string")}
-                            required={true}
-                            key={field.key}
-                            name={[field.name, "role"]}
-                            help="The role of the messages author. One of ai or human."
-                          >
-                            <Select
-                              placeholder="Select a type"
-                              options={[
-                                {
-                                  label: "human",
-                                  value: "human",
-                                },
-                                {
-                                  label: "ai",
-                                  value: "ai",
-                                },
-                              ]}
-                            />
-                          </Form.Item>
-
-                          <Form.Item
-                            label={fieldLabel("text", "string")}
-                            required={true}
-                            key={field.key}
-                            name={[field.name, "text"]}
-                            help="The text of the message. text is required for all messages."
-                          >
-                            <Input
-                              size="large"
-                              placeholder="Enter your message here"
-                            />
-                          </Form.Item>
-                        </div>
-                      ))}
-
+            <Form.List name="history">
+              {(fields, { add, remove }) => (
+                <div className="flex flex-col gap-2 rounded-lg border border-line p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    {fieldLabel("history", "array")}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        add({
+                          role: "",
+                          text: "",
+                        })
+                      }
+                      className="ui-btn-ghost h-7 px-2 text-xs"
+                    >
+                      <PlusIcon />
+                      Add
+                    </button>
+                  </div>
+                  {fields.map((field, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col gap-2 rounded-lg bg-surface-2 p-2.5 sm:flex-row sm:items-start"
+                    >
+                      <Form.Item
+                        required={true}
+                        key={field.key}
+                        name={[field.name, "role"]}
+                        className="sm:w-28"
+                      >
+                        <Select
+                          aria-label="role"
+                          placeholder="role"
+                          options={[
+                            {
+                              label: "human",
+                              value: "human",
+                            },
+                            {
+                              label: "ai",
+                              value: "ai",
+                            },
+                          ]}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        required={true}
+                        key={`${field.key}-text`}
+                        name={[field.name, "text"]}
+                        className="min-w-0 flex-1"
+                      >
+                        <Input aria-label="text" placeholder="text" />
+                      </Form.Item>
                       <button
                         type="button"
-                        onClick={() =>
-                          add({
-                            role: "",
-                            text: "",
-                          })
-                        }
-                        className="ui-btn-ghost h-8 px-2.5 text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                        aria-label="Remove history item"
+                        onClick={() => remove(field.name)}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center self-end rounded-lg text-fg-subtle hover:bg-surface hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:hover:text-red-400 sm:self-auto"
                       >
-                        <PlusIcon />
-                        Add history
+                        <MinusIcon className="h-4 w-4" />
                       </button>
                     </div>
+                  ))}
+                  {fields.length === 0 && (
+                    <p className="m-0 text-xs text-fg-subtle">
+                      Earlier turns of the chat, each with a role (human or
+                      ai) and text.
+                    </p>
                   )}
-                </Form.List>
-
-                <Form.Item
-                  label={fieldLabel("stream", "boolean")}
-                  name="stream"
-                  valuePropName="checked"
-                >
-                  <Switch />
-                </Form.Item>
-
-                <div className="-mx-5 -mb-5 flex flex-row justify-end rounded-b-2xl border-t border-line bg-surface-2/50 px-5 py-3 sm:-mx-6 sm:px-6">
-                  <button type="submit" className="ui-btn-primary">
-                    <PaperAirplaneIcon />
-                    {isLoading ? "Loading..." : "Test API"}
-                  </button>
                 </div>
-              </Form>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="min-w-0">
-          <CardHeader
-            icon={<CodeBracketIcon />}
-            title="Code"
-            description="Snippets update as you edit the request."
-          />
-          <CardBody className="space-y-5">
-            <APICodeGenerator
-              api={`${hostUrl}/bot/${data.public_url}/api`}
-              xApiKey={data.api_key || ""}
-              body={JSON.stringify(
-                {
-                  message,
-                  history,
-                  stream,
-                },
-                null,
-                2
               )}
-            />
+            </Form.List>
 
-            {apiResponse && (
-              <div className="border-t border-line pt-5">
-                <ApiResponse
-                  status={apiResponse.status}
-                  data={JSON.stringify(apiResponse.data, null, 2)}
-                />
-              </div>
-            )}
-          </CardBody>
-        </Card>
+            <div className="flex items-center gap-3">
+              <div className="flex-1">{fieldLabel("stream", "boolean")}</div>
+              <Form.Item name="stream" valuePropName="checked" noStyle>
+                <SwitchControl label="stream" />
+              </Form.Item>
+            </div>
+          </Form>
+
+          {apiResponse && (
+            <ApiResponse
+              status={apiResponse.status}
+              data={JSON.stringify(apiResponse.data, null, 2)}
+            />
+          )}
+        </section>
       </div>
     </div>
   );

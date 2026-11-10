@@ -1,4 +1,4 @@
-import { Form, Input, Modal, Table, Tooltip, notification, Select, InputNumber } from "antd";
+import { Dropdown, Form, Input, InputNumber, Modal, notification } from "antd";
 import React from "react";
 import api from "../../services/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -7,23 +7,12 @@ import { SettingsLayout } from "../../Layout/SettingsLayout";
 import { SkeletonLoading } from "../../components/Common/SkeletonLoading";
 import { useNavigate } from "react-router-dom";
 import {
-  KeyIcon,
-  TrashIcon,
-  CurrencyDollarIcon,
-  UsersIcon,
-  UserPlusIcon,
+  EllipsisHorizontalIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import axios from "axios";
-import {
-  Badge,
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-} from "../../components/ui";
-
-const iconBtn =
-  "inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-subtle transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500";
+import { CreditTypeToggle } from "../../components/Admin/Users";
+import { formatCredits } from "../../components/Admin/shared";
 
 export default function SettingsTeamsRoot() {
   const [newUser] = Form.useForm();
@@ -40,6 +29,7 @@ export default function SettingsTeamsRoot() {
 
   const [creditModal, setCreditModal] = React.useState(false);
   const [creditUserId, setCreditUserId] = React.useState(0);
+  const creditPanelRef = React.useRef<HTMLDivElement>(null);
 
   const queryClient = useQueryClient();
 
@@ -51,6 +41,7 @@ export default function SettingsTeamsRoot() {
       email: string;
       bots: number;
       is_admin: boolean;
+      balance?: number;
     }[];
   });
 
@@ -177,6 +168,7 @@ export default function SettingsTeamsRoot() {
     onUpdateCredits,
     {
       onSuccess: (data) => {
+        queryClient.invalidateQueries(["fetchAllUsers"]);
         setCreditModal(false);
         creditForm.resetFields();
         notification.success({
@@ -201,139 +193,241 @@ export default function SettingsTeamsRoot() {
     }
   );
 
+  const creditUser = data?.find((u) => u.user_id === creditUserId);
+
+  React.useEffect(() => {
+    if (creditModal) {
+      creditPanelRef.current?.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+    }
+  }, [creditModal, creditUserId]);
+
   return (
     <SettingsLayout>
-      <PageHeader
-        eyebrow="Settings"
-        title="Teams"
-        description="Invite people, manage roles, credits and access."
-      />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="m-0 text-lg font-semibold text-fg">Team</h2>
+          <p className="mt-1 text-sm text-fg-muted">
+            People with an account here, and their credits.
+          </p>
+        </div>
+        {status === "success" && (
+          <button
+            type="button"
+            onClick={() => setNewUserModal(true)}
+            className="ui-btn-primary"
+          >
+            Add person
+          </button>
+        )}
+      </div>
       {status === "success" && (
         <>
-          <Card className="animate-fade-up overflow-hidden">
-            <CardHeader
-              icon={<UsersIcon />}
-              title="All Users"
-              description="Manage all users in your Dialoqbase Application"
-              actions={
-                <button
-                  type="button"
-                  onClick={() => setNewUserModal(true)}
-                  className="ui-btn-primary"
-                >
-                  <UserPlusIcon />
-                  <span className="hidden sm:inline">Add New User</span>
-                  <span className="sm:hidden">Add</span>
-                </button>
-              }
-            />
-
-            <div className="overflow-x-auto">
-              <Table
-                columns={[
-                  {
-                    title: "Username",
-                    dataIndex: "username",
-                    key: "username",
-                    render: (value) => (
-                      <div className="flex items-center gap-2.5">
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-semibold uppercase text-indigo-700 ring-1 ring-inset ring-indigo-600/15 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20">
-                          {String(value ?? "").charAt(0)}
-                        </span>
-                        <span className="font-medium text-fg">{value}</span>
-                      </div>
-                    ),
-                  },
-                  {
-                    title: "Email",
-                    dataIndex: "email",
-                    render: (value) => (
-                      <span className="text-fg-muted">{value}</span>
-                    ),
-                  },
-                  {
-                    title: "Total Bots",
-                    dataIndex: "bots",
-                    render: (value) => (
-                      <span className="tabular-nums text-fg">{value}</span>
-                    ),
-                  },
-                  {
-                    title: "Role",
-                    dataIndex: "is_admin",
-                    render: (value) => (
-                      <Badge tone={value ? "brand" : "neutral"}>
-                        {value ? "Admin" : "User"}
-                      </Badge>
-                    ),
-                  },
-                  {
-                    title: "Actions",
-                    align: "right",
-                    render: (_, user) => (
-                      <div className="flex justify-end gap-1">
-                        <Tooltip title="Reset Password">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setResetPasswordUserId(user.user_id);
-                              setResetPasswordModal(true);
+          <div className="flex flex-wrap items-start gap-5">
+            <section className="ui-card min-w-0 flex-[999_1_440px] overflow-x-auto">
+              <table className="ui-table min-w-[600px]">
+                <thead>
+                  <tr>
+                    <th scope="col">Person</th>
+                    <th scope="col">Role</th>
+                    <th scope="col" className="!text-right">
+                      Credits
+                    </th>
+                    <th scope="col" className="!text-right">
+                      Bots
+                    </th>
+                    <th scope="col" className="!text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(data || []).length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="!py-10 text-center text-sm text-fg-subtle"
+                      >
+                        No one here yet. Add a person to give them access.
+                      </td>
+                    </tr>
+                  )}
+                  {(data || []).map((user) => {
+                    const selected =
+                      creditModal && creditUserId === user.user_id;
+                    return (
+                      <tr
+                        key={user.user_id}
+                        className={
+                          selected
+                            ? "bg-indigo-50/60 dark:bg-indigo-500/10"
+                            : undefined
+                        }
+                      >
+                        <td>
+                          <div className="font-medium text-fg">
+                            {user.username}
+                          </div>
+                          <div className="text-fg-subtle">{user.email}</div>
+                        </td>
+                        <td className="text-fg-muted">
+                          {user.is_admin ? "Admin" : "Member"}
+                        </td>
+                        <td
+                          className={`text-right tabular-nums ${
+                            (user.balance ?? 0) <= 0
+                              ? "font-semibold text-red-700 dark:text-red-400"
+                              : "text-fg"
+                          }`}
+                        >
+                          {formatCredits(user.balance)}
+                        </td>
+                        <td className="text-right tabular-nums">
+                          {user.bots}
+                        </td>
+                        <td className="text-right">
+                          <Dropdown
+                            trigger={["click"]}
+                            placement="bottomRight"
+                            menu={{
+                              items: [
+                                { key: "password", label: "Reset password" },
+                                { key: "credits", label: "Manage credits" },
+                                ...(!user.is_admin
+                                  ? [
+                                      { type: "divider" as const },
+                                      {
+                                        key: "delete",
+                                        label: "Delete user",
+                                        danger: true,
+                                      },
+                                    ]
+                                  : []),
+                              ],
+                              onClick: ({ key }) => {
+                                if (key === "password") {
+                                  setResetPasswordUserId(user.user_id);
+                                  setResetPasswordModal(true);
+                                } else if (key === "credits") {
+                                  setCreditUserId(user.user_id);
+                                  setCreditModal(true);
+                                } else if (key === "delete") {
+                                  setDeleteUserId(user.user_id);
+                                  setDeleteUserModal(true);
+                                }
+                              },
                             }}
-                            aria-label="Reset Password"
-                            className={`${iconBtn} hover:bg-surface-2 hover:text-fg`}
                           >
-                            <KeyIcon className="h-4 w-4" />
-                          </button>
-                        </Tooltip>
-                        <Tooltip title="Manage Credits">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCreditUserId(user.user_id);
-                              setCreditModal(true);
-                            }}
-                            aria-label="Manage Credits"
-                            className={`${iconBtn} hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400`}
-                          >
-                            <CurrencyDollarIcon className="h-4 w-4" />
-                          </button>
-                        </Tooltip>
-                        {!user.is_admin && (
-                          <Tooltip title="Delete User">
                             <button
                               type="button"
-                              onClick={() => {
-                                setDeleteUserId(user.user_id);
-                                setDeleteUserModal(true);
-                              }}
-                              aria-label="Delete User"
-                              className={`${iconBtn} hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400`}
+                              aria-label={`Actions for ${user.username}`}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                             >
-                              <TrashIcon className="h-4 w-4" />
+                              <EllipsisHorizontalIcon className="h-4 w-4" />
                             </button>
-                          </Tooltip>
-                        )}
-                      </div>
-                    ),
-                  },
-                ]}
-                dataSource={data}
-                locale={{
-                  emptyText: (
-                    <EmptyState
-                      icon={<UsersIcon />}
-                      title="No users yet"
-                      description="Add a user to give them access to this workspace."
-                      className="py-10"
+                          </Dropdown>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </section>
+
+            {creditModal && (
+              <div
+                ref={creditPanelRef}
+                className="ui-card w-full px-5 py-[18px] sm:max-w-[320px] sm:flex-[1_1_260px]"
+              >
+                <Form
+                  form={creditForm}
+                  layout="vertical"
+                  requiredMark={false}
+                  onFinish={(values) => updateCreditsMutation(values)}
+                  initialValues={{ type: "add", amount: 10 }}
+                  aria-labelledby="adj-h"
+                >
+                  <div className="mb-3.5 flex items-start justify-between gap-2">
+                    <h3
+                      id="adj-h"
+                      className="m-0 text-[15px] font-semibold text-fg"
+                    >
+                      Manage credits
+                      {creditUser ? `: ${creditUser.username}` : ""}
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => setCreditModal(false)}
+                      aria-label="Close"
+                      className="-mr-1.5 -mt-1 inline-flex h-7 w-7 items-center justify-center rounded-lg text-fg-subtle hover:bg-surface-2 hover:text-fg"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <p className="mb-3.5 text-[13px] text-fg-muted">
+                    {creditUser && (
+                      <>
+                        Balance {formatCredits(creditUser.balance)}.{" "}
+                        {(creditUser.balance ?? 0) <= 0 && creditUser.bots > 0
+                          ? "Their bots that use credits have stopped answering. "
+                          : ""}
+                      </>
+                    )}
+                    Changes their balance in dollars. Bots stop answering when
+                    it reaches $0.
+                  </p>
+                  <Form.Item
+                    label="Action"
+                    name="type"
+                    className="!mb-3.5"
+                    rules={[
+                      { required: true, message: "Please select an action!" },
+                    ]}
+                  >
+                    <CreditTypeToggle />
+                  </Form.Item>
+
+                  <Form.Item
+                    label="Amount ($)"
+                    name="amount"
+                    className="!mb-4"
+                    rules={[
+                      { required: true, message: "Please input the amount!" },
+                    ]}
+                  >
+                    <InputNumber
+                      style={{ width: "100%" }}
+                      min={0.0001}
+                      step={0.0001}
+                      precision={4}
+                      prefix="$"
                     />
-                  ),
-                }}
-              />
-            </div>
-          </Card>
+                  </Form.Item>
+
+                  <Form.Item noStyle shouldUpdate>
+                    {() => (
+                      <button
+                        disabled={updateCreditsLoading}
+                        type="submit"
+                        className="ui-btn-primary h-10 w-full"
+                      >
+                        {updateCreditsLoading
+                          ? "Updating..."
+                          : creditForm.getFieldValue("type") === "remove"
+                          ? "Remove credits"
+                          : "Add credits"}
+                      </button>
+                    )}
+                  </Form.Item>
+                </Form>
+              </div>
+            )}
+          </div>
 
           <Modal
-            title="Reset Password"
+            title="Reset password"
             open={resetPasswordModal}
             onCancel={() => setResetPasswordModal(false)}
             footer={null}
@@ -369,7 +463,7 @@ export default function SettingsTeamsRoot() {
           </Modal>
 
           <Modal
-            title="Add New User"
+            title="Add person"
             open={newUserModal}
             onCancel={() => setNewUserModal(false)}
             footer={null}
@@ -429,7 +523,7 @@ export default function SettingsTeamsRoot() {
           </Modal>
 
           <Modal
-            title="Delete User"
+            title="Delete user"
             open={deleteUserModal}
             onCancel={() => setDeleteUserModal(false)}
             footer={null}
@@ -454,48 +548,6 @@ export default function SettingsTeamsRoot() {
             </div>
           </Modal>
 
-          <Modal
-            title="Manage User Credits"
-            open={creditModal}
-            onCancel={() => setCreditModal(false)}
-            footer={null}
-          >
-            <Form
-              form={creditForm}
-              layout="vertical"
-              onFinish={(values) => updateCreditsMutation(values)}
-              initialValues={{ type: "add", amount: 10 }}
-            >
-              <Form.Item
-                label="Action"
-                name="type"
-                rules={[{ required: true, message: "Please select an action!" }]}
-              >
-                <Select>
-                  <Select.Option value="add">Add Credits</Select.Option>
-                  <Select.Option value="remove">Remove Credits</Select.Option>
-                </Select>
-              </Form.Item>
-
-              <Form.Item
-                label="Amount ($)"
-                name="amount"
-                rules={[{ required: true, message: "Please input the amount!" }]}
-              >
-                <InputNumber style={{ width: "100%" }} min={0.0001} step={0.0001} precision={4} />
-              </Form.Item>
-
-              <div className="flex justify-end">
-                <button
-                  disabled={updateCreditsLoading}
-                  type="submit"
-                  className="ui-btn-primary"
-                >
-                  {updateCreditsLoading ? "Updating..." : "Update Credits"}
-                </button>
-              </div>
-            </Form>
-          </Modal>
         </>
       )}
       {status === "loading" && <SkeletonLoading />}

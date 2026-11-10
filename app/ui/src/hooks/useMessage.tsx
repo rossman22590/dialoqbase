@@ -1,4 +1,4 @@
-import { History, useStoreMessage } from "../store";
+import { History, Message, useStoreMessage } from "../store";
 import api, { baseURL } from "../services/api";
 import { useParams } from "react-router-dom";
 import { getToken } from "../services/cookie";
@@ -12,6 +12,7 @@ export type BotResponse = {
   };
   history: History;
   history_id: string;
+  message_id?: string;
 };
 
 const parsesStreamingResponse = (text: string) => {
@@ -81,6 +82,7 @@ export const useMessage = () => {
     const data = response.data as BotResponse;
     newMessage[newMessage.length - 1].message = data.bot.text;
     newMessage[newMessage.length - 1].sources = data.bot.sourceDocuments;
+    (newMessage[newMessage.length - 1] as Message).id = data.message_id;
     setHistoryId(data.history_id);
     setMessages(newMessage);
     setHistory(data.history);
@@ -165,6 +167,7 @@ export const useMessage = () => {
           const responseData = JSON.parse(message) as BotResponse;
           newMessage[appendingIndex].message = responseData.bot.text;
           newMessage[appendingIndex].sources = responseData.bot.sourceDocuments;
+          (newMessage[appendingIndex] as Message).id = responseData.message_id;
           setHistoryId(responseData.history_id);
           setHistory(responseData.history);
           setMessages(newMessage);

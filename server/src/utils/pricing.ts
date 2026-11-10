@@ -127,6 +127,41 @@ export const getModelPricing = (modelId: string): Pricing =>
     MODEL_PRICING[normalizeChatModelId(modelId)] ||
     MODEL_PRICING.default;
 
+const ownEntry = <T>(table: Record<string, T>, key: string): T | undefined =>
+    key !== "default" && Object.prototype.hasOwnProperty.call(table, key)
+        ? table[key]
+        : undefined;
+
+// Billed USD per 1M tokens (markup included) for a model, as shown in the
+// model settings. Prices are null when the model is not in our tables (it
+// is then charged at the default rate).
+export const listedModelPrices = (modelId: string, modelType: string) => {
+    if (modelType === "embedding") {
+        const pricing =
+            ownEntry(EMBEDDING_PRICING, modelId) ??
+            ownEntry(EMBEDDING_PRICING, normalizeEmbeddingModelId(modelId));
+        return {
+            input_price_per_1m: pricing ? pricing.input : null,
+            output_price_per_1m: null,
+            request_price: null,
+            price_tiers: [],
+        };
+    }
+    const pricing =
+        ownEntry(MODEL_PRICING, modelId) ??
+        ownEntry(MODEL_PRICING, normalizeChatModelId(modelId));
+    return {
+        input_price_per_1m: pricing ? pricing.input : null,
+        output_price_per_1m: pricing ? pricing.output : null,
+        request_price: pricing?.request ?? null,
+        price_tiers: (pricing?.tiers || []).map((tier) => ({
+            min_prompt_tokens: tier.minPromptTokens,
+            input_price_per_1m: tier.input,
+            output_price_per_1m: tier.output,
+        })),
+    };
+};
+
 const ratesForPrompt = (pricing: Pricing, promptTokens: number): Rates =>
     (pricing.tiers || [])
         .filter((tier) => promptTokens >= tier.minPromptTokens)

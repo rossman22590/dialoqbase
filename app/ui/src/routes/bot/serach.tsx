@@ -32,8 +32,10 @@ export default function BotSearchRoot() {
   return (
     <>
       {status === "loading" && (
-        <div className="ui-page max-w-5xl">
-          <SkeletonLoading className="mt-0" />
+        <div className="px-4 py-8 sm:px-8">
+          <div className="mx-auto max-w-[760px]">
+            <SkeletonLoading className="mt-0" />
+          </div>
         </div>
       )}
       {status === "success" && data.inProgress && <Cooking />}

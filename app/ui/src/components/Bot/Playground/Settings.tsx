@@ -101,10 +101,10 @@ export default function PlaygroundSettings({ close }: { close: () => void }) {
         <Tabs.TabPane tab="Speech to Text" key="1">
           {showWarningWebspeech && (
             <div className="flex flex-col">
-              <h1 className="font-semibold text-center text-gray-400 dark:text-gray-600">
+              <h1 className="font-semibold text-center text-fg-subtle">
                 Web Speech API is not supported by your browser
               </h1>
-              <p className="text-center text-gray-400 dark:text-gray-600">
+              <p className="text-center text-fg-subtle">
                 Please use Google Chrome or Microsoft Edge
               </p>
             </div>
@@ -119,7 +119,7 @@ export default function PlaygroundSettings({ close }: { close: () => void }) {
               >
                 <Form.Item label="Speech to Text Languages" name="language">
                   <select
-                    className="w-full h-10 px-3 text-base placeholder-gray-600 border rounded-lg focus:shadow-outline dark:bg-[#0a0a0a] dark:border-gray-700"
+                    className="ui-input"
                     name="language"
                     id="language"
                   >
@@ -133,7 +133,7 @@ export default function PlaygroundSettings({ close }: { close: () => void }) {
                 <Form.Item>
                   <button
                     disabled={isSavingSpeechToText}
-                    className="w-full h-10 placeholder-gray-600 border rounded-lg focus:shadow-outline  transition-all duration-200  bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-600"
+                    className="ui-btn-primary h-10 w-full"
                   >
                     {isSavingSpeechToText ? "Saving..." : "Save"}
                   </button>
@@ -169,7 +169,7 @@ export default function PlaygroundSettings({ close }: { close: () => void }) {
                 name="textToSpeechType"
               >
                 <select
-                  className="w-full h-10 px-3 text-base placeholder-gray-600 border rounded-lg focus:shadow-outline dark:bg-[#0a0a0a] dark:border-gray-700"
+                  className="ui-input"
                   name="textToSpeechType"
                   id="textToSpeechType"
                 >
@@ -193,7 +193,7 @@ export default function PlaygroundSettings({ close }: { close: () => void }) {
                         ]}
                       >
                         <select
-                          className="w-full h-10 px-3 text-base placeholder-gray-600 border rounded-lg focus:shadow-outline dark:bg-[#0a0a0a] dark:border-gray-700"
+                          className="ui-input"
                           name="webApiDefaultVoice"
                           id="webApiDefaultVoice"
                         >
@@ -207,10 +207,10 @@ export default function PlaygroundSettings({ close }: { close: () => void }) {
                     </>
                   ) : (
                     <div>
-                      <h1 className="font-semibold text-center text-gray-400 dark:text-gray-600">
+                      <h1 className="font-semibold text-center text-fg-subtle">
                         Web Speech API is not supported by your browser
                       </h1>
-                      <p className="text-center text-gray-400 dark:text-gray-600">
+                      <p className="text-center text-fg-subtle">
                         Please use Google Chrome or other browsers that support
                       </p>
                     </div>
@@ -222,12 +222,12 @@ export default function PlaygroundSettings({ close }: { close: () => void }) {
                 <>
                   {!elevenLabsApiKeyPresent && (
                     <div>
-                      <h1 className="font-semibold text-center text-gray-400 dark:text-gray-600">
+                      <h1 className="font-semibold text-center text-fg-subtle">
                         Eleven Labs API Key is not present
                       </h1>
-                      <p className="text-center text-gray-400 dark:text-gray-600">
+                      <p className="text-center text-fg-subtle">
                         Please add it in{" "}
-                        <code className="text-gray-400 dark:text-gray-600">
+                        <code className="text-fg-subtle">
                           .env
                         </code>{" "}
                         file
@@ -236,12 +236,12 @@ export default function PlaygroundSettings({ close }: { close: () => void }) {
                   )}
                   {elevenLabsApiKeyPresent && !elevenLabsApiKeyValid && (
                     <div>
-                      <h1 className="font-semibold text-center text-gray-400 dark:text-gray-600">
+                      <h1 className="font-semibold text-center text-fg-subtle">
                         Eleven Labs API Key is not valid
                       </h1>
-                      <p className="text-center text-gray-400 dark:text-gray-600">
+                      <p className="text-center text-fg-subtle">
                         Please add it in{" "}
-                        <code className="text-gray-400 dark:text-gray-600">
+                        <code className="text-fg-subtle">
                           .env
                         </code>{" "}
                         file
@@ -261,7 +261,7 @@ export default function PlaygroundSettings({ close }: { close: () => void }) {
                         ]}
                       >
                         <select
-                          className="w-full h-10 px-3 text-base placeholder-gray-600 border rounded-lg focus:shadow-outline dark:bg-[#0a0a0a] dark:border-gray-700"
+                          className="ui-input"
                           name="elevenLabsDefaultVoice"
                           id="elevenLabsDefaultVoice"
                         >
@@ -280,7 +280,7 @@ export default function PlaygroundSettings({ close }: { close: () => void }) {
                 <button
                   type="submit"
                   disabled={isSavingTextToSpeech}
-                  className="w-full h-10 placeholder-gray-600 border rounded-lg focus:shadow-outline  transition-all duration-200  bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-600"
+                  className="ui-btn-primary h-10 w-full"
                 >
                   {isSavingTextToSpeech ? "Saving..." : "Save"}
                 </button>

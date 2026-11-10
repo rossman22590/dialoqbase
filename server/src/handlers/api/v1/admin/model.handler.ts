@@ -7,6 +7,7 @@ import {
 } from "./type";
 import { removeTrailingSlash } from "../../../../utils/url";
 import { getSettings } from "../../../../utils/common";
+import { PRICE_MARKUP, listedModelPrices } from "../../../../utils/pricing";
 import {
   getModelFromUrl,
   getOllamaModels,
@@ -41,10 +42,15 @@ export const getAllModelsHandler = async (
       },
     },
   });
+  const withPrices = allModels.map((model) => ({
+    ...model,
+    ...listedModelPrices(model.model_id, model.model_type),
+  }));
   try {
     return {
-      data: allModels.filter((model) => model.model_type !== "embedding"),
-      embedding: allModels.filter((model) => model.model_type === "embedding"),
+      data: withPrices.filter((model) => model.model_type !== "embedding"),
+      embedding: withPrices.filter((model) => model.model_type === "embedding"),
+      price_markup: PRICE_MARKUP,
     };
   } catch (error) {
     console.error(error);

@@ -1,11 +1,11 @@
 import {
+  Dropdown,
   Form,
   Input,
   InputNumber,
   notification,
   Select,
   Slider,
-  Switch,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../../services/api";
@@ -18,20 +18,42 @@ import {
 } from "../../../utils/prompts";
 import { BotSettings } from "../../../@types/bot";
 import { SettingsPwdP } from "./SettingPwdP";
-import { Card, CardBody, CardFooter, CardHeader, PageHeader } from "../../ui";
-import {
-  ChatBubbleBottomCenterTextIcon,
-  CpuChipIcon,
-  DocumentDuplicateIcon,
-  ExclamationTriangleIcon,
-  MagnifyingGlassIcon,
-  ShieldCheckIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+import { SwitchControl, ToggleRow } from "./SettingsControls";
+import { PreviewIframe } from "../Preview/PreviewIFrame";
+import { DocumentDuplicateIcon, TrashIcon } from "@heroicons/react/24/outline";
 
-// Bordered tile that frames a single switch setting.
-const TOGGLE_TILE =
-  "rounded-xl border border-line bg-surface-2/40 px-4 pt-3 [&_.ant-form-item]:mb-3";
+type TabKey = "behavior" | "retrieval" | "access" | "advanced";
+
+const TABS: { key: TabKey; label: string }[] = [
+  { key: "behavior", label: "Behavior" },
+  { key: "retrieval", label: "Retrieval" },
+  { key: "access", label: "Access" },
+  { key: "advanced", label: "Advanced" },
+];
+
+// Which tab each form field lives on, so a failed save can jump to it.
+const FIELD_TAB: Record<string, TabKey> = {
+  name: "behavior",
+  model: "behavior",
+  qaPrompt: "behavior",
+  temperature: "behavior",
+  streaming: "behavior",
+  showRef: "behavior",
+  internetSearchEnabled: "behavior",
+  embedding: "retrieval",
+  noOfDocumentsToRetrieve: "retrieval",
+  noOfChatHistoryInContext: "retrieval",
+  semanticSearchSimilarityScore: "retrieval",
+  use_hybrid_search: "retrieval",
+  bot_model_api_key: "access",
+  inactivityTimeout: "access",
+  bot_protect: "access",
+  autoResetSession: "access",
+  questionGeneratorPrompt: "advanced",
+  autoSyncDataSources: "advanced",
+};
+
+const TOGGLE_LIST = "rounded-xl border border-line";
 
 export const SettingsBody: React.FC<BotSettings> = ({
   data,
@@ -40,6 +62,9 @@ export const SettingsBody: React.FC<BotSettings> = ({
 }) => {
   const [form] = Form.useForm();
   const [disableStreaming, setDisableStreaming] = React.useState(false);
+  const [tab, setTab] = React.useState<TabKey>("behavior");
+  const [dirty, setDirty] = React.useState(false);
+  const [previewKey, setPreviewKey] = React.useState(0);
   const params = useParams<{ id: string }>();
 
   const client = useQueryClient();
@@ -52,6 +77,9 @@ export const SettingsBody: React.FC<BotSettings> = ({
   const { mutate: updateBotSettings, isLoading } = useMutation(onFinish, {
     onSuccess: () => {
       client.invalidateQueries(["getBotSettings", params.id]);
+      setDirty(false);
+      // Reload the preview so it picks up the saved settings.
+      setPreviewKey((k) => k + 1);
 
       notification.success({
         message: "Bot updated successfully",
@@ -131,6 +159,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
   });
 
   const currentModel = Form.useWatch("model", form);
+  const temperature = Form.useWatch("temperature", form);
 
   const isStreamingSupported = (model: string) => {
     return chatModel.find((m) => m.value === model)?.stream === true;
@@ -150,68 +179,100 @@ export const SettingsBody: React.FC<BotSettings> = ({
     }
   }, [currentModel]);
 
-  const saveButton = (
-    <button type="submit" className="ui-btn-primary">
-      {isLoading ? "Saving..." : "Save"}
-    </button>
-  );
+  const panel = (key: TabKey) =>
+    `flex flex-col gap-5 ${tab === key ? "" : "hidden"}`;
 
   return (
-    <div>
-      <PageHeader
-        title="Settings"
-        description="Configure the model, retrieval and prompts behind your bot, plus who can reach it."
-      />
-      <div className="mt-8 space-y-6">
-        <Form
-          initialValues={{
-            name: data.name,
-            model: data.model,
-            temperature: data.temperature,
-            embedding: data.embedding,
-            qaPrompt: data.qaPrompt,
-            questionGeneratorPrompt: data.questionGeneratorPrompt,
-            streaming: data.streaming,
-            showRef: data.showRef,
-            use_hybrid_search: data.use_hybrid_search,
-            bot_protect: data.bot_protect,
-            use_rag: data.use_rag,
-            bot_model_api_key: data.bot_model_api_key,
-            noOfDocumentsToRetrieve: data.noOfDocumentsToRetrieve,
-            noOfChatHistoryInContext: data.noOfChatHistoryInContext,
-            semanticSearchSimilarityScore: data.semanticSearchSimilarityScore,
-            autoResetSession: data.autoResetSession,
-            inactivityTimeout: data.inactivityTimeout,
-            autoSyncDataSources: data.autoSyncDataSources,
-            internetSearchEnabled: data.internetSearchEnabled,
-          }}
-          form={form}
-          requiredMark={false}
-          onFinish={updateBotSettings}
-          layout="vertical"
-          className="space-y-6"
-        >
-          <Card>
-            <CardHeader
-              icon={<CpuChipIcon />}
-              title="General"
-              description="Bot name, chat model and how it generates answers."
-            />
-            <CardBody>
-              <Form.Item
-                name="name"
-                label="Project Name"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Project Name!",
-                  },
-                ]}
-              >
-                <Input size="large" />
-              </Form.Item>
+    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col lg:flex-row">
+      <div className="min-w-0 flex-1 px-4 pb-8 pt-6 sm:px-8 sm:pt-7">
+        <div className="flex max-w-3xl flex-col gap-5">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="m-0 flex-1 text-2xl font-semibold tracking-tight text-fg">
+              Settings
+            </h1>
+            {dirty && (
+              <span className="text-[13px] text-fg-muted">Unsaved changes</span>
+            )}
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={() => form.submit()}
+              className="ui-btn-primary"
+            >
+              {isLoading ? "Saving..." : "Save"}
+            </button>
+          </div>
 
-              <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
+          <div
+            role="tablist"
+            aria-label="Settings sections"
+            className="flex flex-wrap gap-1 border-b border-line"
+          >
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.key}
+                onClick={() => setTab(t.key)}
+                className={`ui-tab ${tab === t.key ? "ui-tab-active" : ""}`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Every tab stays mounted (just hidden) so the submit payload
+              still contains every field, as before. */}
+          <Form
+            initialValues={{
+              name: data.name,
+              model: data.model,
+              temperature: data.temperature,
+              embedding: data.embedding,
+              qaPrompt: data.qaPrompt,
+              questionGeneratorPrompt: data.questionGeneratorPrompt,
+              streaming: data.streaming,
+              showRef: data.showRef,
+              use_hybrid_search: data.use_hybrid_search,
+              bot_protect: data.bot_protect,
+              use_rag: data.use_rag,
+              bot_model_api_key: data.bot_model_api_key,
+              noOfDocumentsToRetrieve: data.noOfDocumentsToRetrieve,
+              noOfChatHistoryInContext: data.noOfChatHistoryInContext,
+              semanticSearchSimilarityScore: data.semanticSearchSimilarityScore,
+              autoResetSession: data.autoResetSession,
+              inactivityTimeout: data.inactivityTimeout,
+              autoSyncDataSources: data.autoSyncDataSources,
+              internetSearchEnabled: data.internetSearchEnabled,
+            }}
+            form={form}
+            requiredMark={false}
+            onFinish={updateBotSettings}
+            onValuesChange={() => setDirty(true)}
+            onFinishFailed={({ errorFields }) => {
+              const first = errorFields?.[0]?.name?.[0];
+              const target = first ? FIELD_TAB[String(first)] : undefined;
+              if (target) setTab(target);
+            }}
+            layout="vertical"
+            className="[&_.ant-form-item]:mb-0"
+          >
+            {/* Behavior */}
+            <div role="tabpanel" className={panel("behavior")}>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Form.Item
+                  name="name"
+                  label="Name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your Project Name!",
+                    },
+                  ]}
+                >
+                  <Input size="large" />
+                </Form.Item>
                 <Form.Item
                   name="model"
                   label="Model"
@@ -223,6 +284,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
                   ]}
                 >
                   <Select
+                    size="large"
                     showSearch
                     filterOption={(input, option) =>
                       (option?.label
@@ -238,85 +300,145 @@ export const SettingsBody: React.FC<BotSettings> = ({
                     options={chatModel}
                   />
                 </Form.Item>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-baseline justify-between gap-3">
+                  <label htmlFor="settings-qaPrompt" className="ui-label">
+                    Instructions
+                  </label>
+                  <Dropdown
+                    trigger={["click"]}
+                    placement="bottomRight"
+                    menu={{
+                      items: [
+                        { key: "with", label: "Prompt with context" },
+                        { key: "without", label: "Prompt without context" },
+                      ],
+                      onClick: ({ key }) => {
+                        form.setFieldsValue({
+                          qaPrompt:
+                            key === "with"
+                              ? HELPFUL_ASSISTANT_WITH_CONTEXT_PROMPT
+                              : HELPFUL_ASSISTANT_WITHOUT_CONTEXT_PROMPT,
+                        });
+                        setDirty(true);
+                      },
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="border-0 bg-transparent p-0 text-[13px] text-indigo-700 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-200"
+                    >
+                      Use template
+                    </button>
+                  </Dropdown>
+                </div>
                 <Form.Item
-                  label={"Embedding Method"}
-                  name="embedding"
-                  help={
-                    <>
-                      <p className="text-xs leading-relaxed text-fg-subtle">
-                        If you change the embedding method, make sure to
-                        re-fetch the data source or choose a model with the same
-                        dimensions
-                      </p>
-                    </>
-                  }
+                  name="qaPrompt"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input a prompt!",
+                    },
+                  ]}
                 >
-                  <Select
-                    placeholder="Select an embedding method"
-                    options={embeddingModel}
+                  <Input.TextArea id="settings-qaPrompt" rows={7} />
+                </Form.Item>
+                <p className="ui-help m-0">
+                  The system prompt your bot follows when it answers.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between text-[13px]">
+                  <label htmlFor="settings-temperature" className="ui-label">
+                    Creativity
+                  </label>
+                  <span className="tabular-nums text-fg-muted">
+                    {typeof temperature === "number" ? temperature : ""}
+                  </span>
+                </div>
+                <Form.Item
+                  name="temperature"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select a temperature!",
+                    },
+                  ]}
+                >
+                  <Slider
+                    id="settings-temperature"
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    className="mx-1"
                   />
                 </Form.Item>
+                <div className="flex justify-between text-xs text-fg-subtle">
+                  <span>Sticks to sources</span>
+                  <span>More varied</span>
+                </div>
               </div>
 
+              <div className={TOGGLE_LIST}>
+                <ToggleRow
+                  first
+                  label="Stream answers"
+                  help={
+                    disableStreaming
+                      ? "Streaming is not supported for this model."
+                      : "Show the answer as it is written."
+                  }
+                >
+                  <Form.Item name="streaming" valuePropName="checked" noStyle>
+                    <SwitchControl
+                      label="Stream answers"
+                      disabled={disableStreaming}
+                    />
+                  </Form.Item>
+                </ToggleRow>
+                <ToggleRow
+                  label="Cite sources"
+                  help="Show which sources an answer came from."
+                >
+                  <Form.Item name="showRef" valuePropName="checked" noStyle>
+                    <SwitchControl label="Cite sources" />
+                  </Form.Item>
+                </ToggleRow>
+                <ToggleRow
+                  label="Search the internet"
+                  help="Let it look beyond your sources. Experimental."
+                >
+                  <Form.Item
+                    name="internetSearchEnabled"
+                    valuePropName="checked"
+                    noStyle
+                  >
+                    <SwitchControl label="Search the internet" />
+                  </Form.Item>
+                </ToggleRow>
+              </div>
+            </div>
+
+            {/* Retrieval */}
+            <div role="tabpanel" className={panel("retrieval")}>
               <Form.Item
-                name="temperature"
-                label="Temperature"
-                className="mt-6"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select a temperature!",
-                  },
-                ]}
+                label="Embedding method"
+                name="embedding"
+                extra="If you change it, re-sync your data sources or pick a model with the same dimensions."
               >
-                <Slider
-                  min={0}
-                  max={1}
-                  step={0.1}
-                  className="mt-1 block w-full"
+                <Select
+                  size="large"
+                  placeholder="Select an embedding method"
+                  options={embeddingModel}
                 />
               </Form.Item>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className={TOGGLE_TILE}>
-                  <Form.Item
-                    hasFeedback={!isStreamingSupported(currentModel)}
-                    help={
-                      !isStreamingSupported(currentModel) &&
-                      "Streaming is not supported for this model."
-                    }
-                    name="streaming"
-                    label="Streaming"
-                    valuePropName="checked"
-                  >
-                    <Switch disabled={disableStreaming} />
-                  </Form.Item>
-                </div>
-
-                <div className={TOGGLE_TILE}>
-                  <Form.Item
-                    name="showRef"
-                    label="Cite sources in the chat"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader
-              icon={<MagnifyingGlassIcon />}
-              title="Retrieval"
-              description="How much context your bot pulls in before it answers."
-            />
-            <CardBody>
-              <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Form.Item
                   name="noOfDocumentsToRetrieve"
-                  label="Number of documents to retrieve"
+                  label="Documents to retrieve"
                   rules={[
                     {
                       required: true,
@@ -326,6 +448,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
                   ]}
                 >
                   <InputNumber
+                    size="large"
                     min={0}
                     style={{ width: "100%" }}
                     placeholder="Enter number of documents to retrieve"
@@ -333,7 +456,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
                 </Form.Item>
                 <Form.Item
                   name="noOfChatHistoryInContext"
-                  label="Number of chat histories in context"
+                  label="Chat history in context"
                   rules={[
                     {
                       required: true,
@@ -343,6 +466,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
                   ]}
                 >
                   <InputNumber
+                    size="large"
                     min={0}
                     style={{ width: "100%" }}
                     placeholder="Enter number of chat history in context"
@@ -350,7 +474,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
                 </Form.Item>
               </div>
               <Form.Item
-                label={"Semantic Search Similarity Score"}
+                label="Similarity threshold"
                 name="semanticSearchSimilarityScore"
                 rules={[
                   {
@@ -360,6 +484,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
                 ]}
               >
                 <Select
+                  size="large"
                   placeholder="Select a similarity score"
                   options={[
                     { label: "Consider all documents", value: "none" },
@@ -378,118 +503,39 @@ export const SettingsBody: React.FC<BotSettings> = ({
                   ]}
                 />
               </Form.Item>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className={TOGGLE_TILE}>
-                  <Form.Item
-                    name="internetSearchEnabled"
-                    label="Enable internet search"
-                    valuePropName="checked"
-                    help="This is experimental and may not work as expected."
-                  >
-                    <Switch />
-                  </Form.Item>
-                </div>
-                <div className={TOGGLE_TILE}>
+              <div className={TOGGLE_LIST}>
+                <ToggleRow
+                  first
+                  label="Hybrid search"
+                  help="Mix keyword and semantic search when finding sources. Playground only."
+                >
                   <Form.Item
                     name="use_hybrid_search"
-                    label="Use Hybrid Search Retrieval"
                     valuePropName="checked"
-                    tooltip="This will use the hybrid search retrieval method instead of the default semantic search retrieval method. Only work on playground ui."
+                    noStyle
                   >
-                    <Switch />
+                    <SwitchControl label="Hybrid search" />
                   </Form.Item>
-                </div>
+                </ToggleRow>
               </div>
-            </CardBody>
-          </Card>
+            </div>
 
-          <Card>
-            <CardHeader
-              icon={<ChatBubbleBottomCenterTextIcon />}
-              title="Prompts"
-              description="The instructions your bot follows when answering and rephrasing questions."
-            />
-            <CardBody>
-              <Form.Item
-                label={"Question Answering Prompt (System Prompt)"}
-                name="qaPrompt"
-                className="mb-3"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input a prompt!",
-                  },
-                ]}
-              >
-                <Input.TextArea size="large" rows={5} placeholder="" />
-              </Form.Item>
-
-              <div className="mb-6 flex flex-row flex-wrap items-center justify-start gap-2">
-                <span className="text-xs text-fg-subtle">Use a preset:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    form.setFieldsValue({
-                      qaPrompt: HELPFUL_ASSISTANT_WITH_CONTEXT_PROMPT,
-                    });
-                  }}
-                  className="ui-btn-secondary h-8 rounded-lg px-2.5 text-xs"
-                >
-                  Prompt with context
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    form.setFieldsValue({
-                      qaPrompt: HELPFUL_ASSISTANT_WITHOUT_CONTEXT_PROMPT,
-                    });
-                  }}
-                  className="ui-btn-secondary h-8 rounded-lg px-2.5 text-xs"
-                >
-                  Prompt without context
-                </button>
-              </div>
-
-              <Form.Item
-                label={"Question Generator Prompt"}
-                name="questionGeneratorPrompt"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input a prompt!",
-                  },
-                ]}
-              >
-                <Input.TextArea size="large" rows={5} />
-              </Form.Item>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader
-              icon={<ShieldCheckIcon />}
-              title="Access & sessions"
-              description="Protection, your own model key, and how chat sessions are kept fresh."
-            />
-            <CardBody>
+            {/* Access */}
+            <div role="tabpanel" className={panel("access")}>
               <Form.Item
                 name="bot_model_api_key"
-                label="Chat Model API Key"
-                help="Enter your API key here. If you don't have one, you can leave this field blank."
-                tooltip="Enter your API key to use your own chat model. OpenRouter API keys are supported for all models."
+                label="Chat model API key"
+                extra="Use your own key for the chat model. OpenRouter keys work for all models. Leave blank to use the default."
               >
                 <Input.Password
                   size="large"
                   placeholder="Enter your API key here"
                 />
               </Form.Item>
-
               <Form.Item
                 name="inactivityTimeout"
-                label="Inactivity Timeout"
-                className="mt-6"
-                help="Enter the time in seconds after which the chat session will be reset."
+                label="Inactivity timeout (seconds)"
+                extra="After this long without a message, the chat session resets."
                 rules={[
                   {
                     required: true,
@@ -498,127 +544,167 @@ export const SettingsBody: React.FC<BotSettings> = ({
                 ]}
               >
                 <InputNumber
+                  size="large"
                   min={0}
                   style={{ width: "100%" }}
                   placeholder="Enter inactivity timeout"
                 />
               </Form.Item>
-
-              <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className={TOGGLE_TILE}>
+              <div className={TOGGLE_LIST}>
+                <ToggleRow
+                  first
+                  label="Public bot protection"
+                  help="Uses sessions to stop misuse of the public bot."
+                >
                   <Form.Item
                     name="bot_protect"
-                    label="Activate Public Bot Protection"
                     valuePropName="checked"
-                    tooltip="This will activate the public bot protection using session to avoid misuse of the bot"
+                    noStyle
                   >
-                    <Switch />
+                    <SwitchControl label="Public bot protection" />
                   </Form.Item>
-                </div>
-                <div className={TOGGLE_TILE}>
+                </ToggleRow>
+                <ToggleRow
+                  label="Auto reset chat session"
+                  help="Reset after the inactivity timeout. Useful for Telegram, WhatsApp and similar."
+                >
                   <Form.Item
                     name="autoResetSession"
-                    label="Auto Reset Chat Session"
-                    tooltip="This will reset the chat session after a certain period of inactivity. Useful for platforms like Telegram, WhatsApp, etc."
+                    valuePropName="checked"
+                    noStyle
                   >
-                    <Switch />
+                    <SwitchControl label="Auto reset chat session" />
                   </Form.Item>
-                </div>
-                <div className={TOGGLE_TILE}>
+                </ToggleRow>
+              </div>
+            </div>
+
+            {/* Advanced */}
+            <div role="tabpanel" className={panel("advanced")}>
+              <Form.Item
+                label="Question generator prompt"
+                name="questionGeneratorPrompt"
+                extra="Rewrites follow-up questions so they make sense on their own."
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input a prompt!",
+                  },
+                ]}
+              >
+                <Input.TextArea rows={5} />
+              </Form.Item>
+              <div className={TOGGLE_LIST}>
+                <ToggleRow
+                  first
+                  label="Auto sync data sources"
+                  help="Re-fetch URL-based sources on a schedule."
+                >
                   <Form.Item
                     name="autoSyncDataSources"
-                    label="Auto Sync Data Source(s)"
-                    tooltip="This will automatically re-fetch the URL-based data sources at a certain interval."
+                    valuePropName="checked"
+                    noStyle
                   >
-                    <Switch />
+                    <SwitchControl label="Auto sync data sources" />
                   </Form.Item>
-                </div>
+                </ToggleRow>
               </div>
-            </CardBody>
-          </Card>
-
-          {/* One save for the whole form: every section above is a single submit. */}
-          <div className="sticky bottom-4 z-10 flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface/90 px-4 py-3 shadow-float backdrop-blur sm:px-5">
-            <p className="text-sm text-fg-muted">
-              Changes apply to all sections above.
-            </p>
-            {saveButton}
-          </div>
-        </Form>
-
-        <SettingsPwdP
-          publicBotPwd={data.publicBotPwd}
-          publicBotPwdProtected={data.publicBotPwdProtected}
-        />
-
-        <Card>
-          <CardHeader
-            icon={<DocumentDuplicateIcon />}
-            title="Make a copy of your bot"
-            description="This action will create a new bot with the same settings as this bot, except for the Integration settings that need to be reconfigured."
-          />
-          <CardFooter className="justify-start sm:justify-end">
-            <button
-              type="button"
-              onClick={() => {
-                const confirm = window.confirm(
-                  "Are you sure you want to make a copy of this bot?"
-                );
-                if (confirm) {
-                  copyBot();
-                }
-              }}
-              className="ui-btn-secondary"
-            >
-              <DocumentDuplicateIcon />
-              {isCopying ? "Copying..." : "Make a copy"}
-            </button>
-          </CardFooter>
-        </Card>
-
-        <section
-          aria-label="Danger zone"
-          className="rounded-2xl border border-red-200 bg-red-50/60 shadow-soft dark:border-red-500/25 dark:bg-red-500/[0.06]"
-        >
-          <div className="flex items-start gap-3 border-b border-red-200/80 px-5 py-4 dark:border-red-500/20 sm:px-6">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600 ring-1 ring-inset ring-red-200 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-400/20">
-              <ExclamationTriangleIcon className="h-4 w-4" />
             </div>
-            <div className="min-w-0">
-              <h2 className="text-[15px] font-semibold tracking-tight text-red-700 dark:text-red-300">
-                Danger zone
-              </h2>
-              <p className="mt-0.5 text-sm leading-relaxed text-red-700/80 dark:text-red-300/70">
-                Irreversible actions. Proceed with care.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-fg">Delete your bot</h3>
-              <p className="mt-1 max-w-xl text-sm leading-relaxed text-fg-muted">
-                This action cannot be undone. This will permanently delete your
-                bot and all of its data.
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                const confirm = window.confirm(
-                  "Are you sure you want to delete this bot?"
-                );
-                if (confirm) {
-                  deleteBot();
-                }
-              }}
-              type="button"
-              className="ui-btn-danger shrink-0 self-start sm:self-auto"
-            >
-              <TrashIcon />
-              {isDeleting ? "Deleting..." : "Delete bot"}
-            </button>
-          </div>
-        </section>
+          </Form>
+
+          {tab === "access" && (
+            <SettingsPwdP
+              publicBotPwd={data.publicBotPwd}
+              publicBotPwdProtected={data.publicBotPwdProtected}
+            />
+          )}
+
+          {tab === "advanced" && (
+            <>
+              <section className="ui-card flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <h2 className="m-0 text-sm font-medium text-fg">
+                    Make a copy
+                  </h2>
+                  <p className="m-0 mt-0.5 text-[13px] text-fg-muted">
+                    Creates a new bot with the same settings. Integrations need
+                    to be set up again.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const confirm = window.confirm(
+                      "Are you sure you want to make a copy of this bot?"
+                    );
+                    if (confirm) {
+                      copyBot();
+                    }
+                  }}
+                  className="ui-btn-secondary shrink-0 self-start sm:self-auto"
+                >
+                  <DocumentDuplicateIcon />
+                  {isCopying ? "Copying..." : "Make a copy"}
+                </button>
+              </section>
+
+              <section
+                aria-label="Danger zone"
+                className="flex flex-col gap-3 rounded-xl border border-red-200 px-4 py-4 dark:border-red-500/30 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <h2 className="m-0 text-sm font-medium text-red-700 dark:text-red-300">
+                    Delete this bot
+                  </h2>
+                  <p className="m-0 mt-0.5 text-[13px] text-fg-muted">
+                    Permanently deletes the bot and all of its data. This
+                    can't be undone.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const confirm = window.confirm(
+                      "Are you sure you want to delete this bot?"
+                    );
+                    if (confirm) {
+                      deleteBot();
+                    }
+                  }}
+                  type="button"
+                  className="ui-btn-danger-outline shrink-0 self-start sm:self-auto"
+                >
+                  <TrashIcon />
+                  {isDeleting ? "Deleting..." : "Delete bot"}
+                </button>
+              </section>
+            </>
+          )}
+        </div>
       </div>
+
+      <aside
+        aria-label="Live preview"
+        className="flex flex-col gap-3 border-t border-line bg-app p-5 lg:sticky lg:top-14 lg:h-[calc(100dvh-3.5rem)] lg:w-[360px] lg:shrink-0 lg:border-l lg:border-t-0"
+      >
+        <div className="flex items-center gap-2">
+          <h2 className="m-0 flex-1 text-[13px] font-semibold text-fg-muted">
+            Preview
+          </h2>
+          <button
+            type="button"
+            onClick={() => setPreviewKey((k) => k + 1)}
+            className="ui-btn-secondary h-[30px] px-2.5 text-xs font-normal"
+          >
+            Restart
+          </button>
+        </div>
+        <div className="h-[560px] overflow-hidden rounded-[14px] border border-line bg-white lg:h-auto lg:flex-1">
+          <PreviewIframe key={previewKey} public_id={data.public_id} fill />
+        </div>
+        <p className="m-0 text-xs text-fg-subtle">
+          Uses your saved settings. Save to see changes here.
+        </p>
+      </aside>
     </div>
   );
 };

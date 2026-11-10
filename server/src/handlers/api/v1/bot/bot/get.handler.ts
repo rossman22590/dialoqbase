@@ -154,7 +154,91 @@ export const getAllBotsHandler = async (
     },
   });
 
-  return bots;
+  if (bots.length === 0) {
+    return bots;
+  }
+
+  // Activity for the dashboard cards: chats in the last 7 days and when the
+  // bot last answered, across web, playground, WhatsApp and API.
+  // (Telegram and Discord history isn't stored per bot, so it isn't counted.)
+  try {
+    const ids = bots.map((b) => b.id);
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [webChats, webLast, playChats, playLast, waChats, waLast, apiRecent, apiLast] =
+      await Promise.all([
+        prisma.botWebHistory.groupBy({
+          by: ["bot_id", "chat_id"],
+          where: { bot_id: { in: ids }, createdAt: { gte: since } },
+        }),
+        prisma.botWebHistory.groupBy({
+          by: ["bot_id"],
+          where: { bot_id: { in: ids } },
+          _max: { createdAt: true },
+        }),
+        prisma.botPlayground.groupBy({
+          by: ["botId"],
+          where: { botId: { in: ids }, createdAt: { gte: since } },
+          _count: { _all: true },
+        }),
+        prisma.$queryRaw<{ botId: string; last: Date | null }[]>`
+          SELECT bp."botId" AS "botId", MAX(m."createdAt") AS "last"
+          FROM "BotPlaygroundMessage" m
+          JOIN "BotPlayground" bp ON bp."id" = m."botPlaygroundId"
+          WHERE bp."botId" = ANY(${ids})
+          GROUP BY bp."botId"`,
+        prisma.botWhatsappHistory.groupBy({
+          by: ["bot_id", "chat_id"],
+          where: { bot_id: { in: ids }, createdAt: { gte: since } },
+        }),
+        prisma.botWhatsappHistory.groupBy({
+          by: ["bot_id"],
+          where: { bot_id: { in: ids } },
+          _max: { createdAt: true },
+        }),
+        prisma.botApiHistory.groupBy({
+          by: ["bot_id"],
+          where: { bot_id: { in: ids }, createdAt: { gte: since } },
+          _count: { _all: true },
+        }),
+        prisma.botApiHistory.groupBy({
+          by: ["bot_id"],
+          where: { bot_id: { in: ids } },
+          _max: { createdAt: true },
+        }),
+      ]);
+
+    const chats = new Map<string, number>();
+    const last = new Map<string, Date>();
+    const addChats = (id: string | null | undefined, n: number) => {
+      if (!id) return;
+      chats.set(id, (chats.get(id) || 0) + n);
+    };
+    const touch = (id: string | null | undefined, at: Date | null | undefined) => {
+      if (!id || !at) return;
+      const prev = last.get(id);
+      if (!prev || at > prev) last.set(id, new Date(at));
+    };
+
+    webChats.forEach((r) => addChats(r.bot_id, 1));
+    waChats.forEach((r) => addChats(r.bot_id, 1));
+    playChats.forEach((r) => addChats(r.botId, r._count._all));
+    apiRecent.forEach((r) => addChats(r.bot_id, r._count._all));
+    webLast.forEach((r) => touch(r.bot_id, r._max.createdAt));
+    waLast.forEach((r) => touch(r.bot_id, r._max.createdAt));
+    apiLast.forEach((r) => touch(r.bot_id, r._max.createdAt));
+    playLast.forEach((r) => touch(r.botId, r.last));
+
+    return bots.map((bot) => ({
+      ...bot,
+      chats_7d: chats.get(bot.id) || 0,
+      last_active_at: last.get(bot.id) || null,
+    }));
+  } catch (err) {
+    // Activity is a nice-to-have; never fail the bot list over it.
+    request.log.error(err, "Failed to load bot activity");
+    return bots;
+  }
 };
 
 export const getCreateBotConfigHandler = async (

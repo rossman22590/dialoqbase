@@ -3,19 +3,30 @@ import React from "react";
 import api from "../../services/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { KeyIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 
 import { SettingsLayout } from "../../Layout/SettingsLayout";
 import { SkeletonLoading } from "../../components/Common/SkeletonLoading";
 import { useNavigate } from "react-router-dom";
 import { UserApiKey } from "../../components/Settings/Profile/ApiKey";
-import {
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  PageHeader,
-} from "../../components/ui";
+
+const CardTitle = ({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) => (
+  <div>
+    <h2 className="m-0 text-base font-semibold text-fg">{title}</h2>
+    <p className="mt-1 text-sm text-fg-muted">{description}</p>
+  </div>
+);
+
+const CardFooter = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex justify-end rounded-b-xl border-t border-line bg-app px-6 py-3">
+    {children}
+  </div>
+);
 
 export default function SettingsRoot() {
   const [form] = Form.useForm();
@@ -68,7 +79,9 @@ export default function SettingsRoot() {
   );
 
   const onUpdatePassword = async (values: any) => {
-    const response = await api.post("/user/update-password", values);
+    // confirmPassword is only checked here; the API takes the new password.
+    const { confirmPassword: _confirm, ...payload } = values || {};
+    const response = await api.post("/user/update-password", payload);
     return response.data;
   };
 
@@ -99,31 +112,28 @@ export default function SettingsRoot() {
 
   return (
     <SettingsLayout>
-      <PageHeader
-        eyebrow="Settings"
-        title="General"
-        description="Manage your profile, password and personal API keys."
-      />
       {status === "success" && (
-        <div className="space-y-6">
-          <Card className="animate-fade-up">
-            <CardHeader
-              icon={<UserCircleIcon />}
-              title="Profile"
-              description="Update your profile details."
-            />
-            <Form
-              form={form}
-              initialValues={{
-                ...data,
-              }}
-              layout="vertical"
-              onFinish={updateProfile}
-            >
-              <CardBody className="pb-1">
+        <>
+          <Form
+            form={form}
+            initialValues={{
+              ...data,
+            }}
+            layout="vertical"
+            requiredMark={false}
+            onFinish={updateProfile}
+            className="ui-card"
+          >
+            <div className="flex flex-col gap-4 px-6 py-5">
+              <CardTitle
+                title="Profile"
+                description="How you log in and where we send password resets."
+              />
+              <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
                 <Form.Item
                   label="Username"
                   name="username"
+                  className="!mb-4"
                   rules={[
                     {
                       required: true,
@@ -131,11 +141,12 @@ export default function SettingsRoot() {
                     },
                   ]}
                 >
-                  <Input size="large" type="text" />
+                  <Input size="large" type="text" autoComplete="username" />
                 </Form.Item>
                 <Form.Item
                   label="Email"
                   name="email"
+                  className="!mb-4"
                   rules={[
                     {
                       required: true,
@@ -143,32 +154,42 @@ export default function SettingsRoot() {
                     },
                   ]}
                 >
-                  <Input size="large" type="email" className="w-full" />
+                  <Input
+                    size="large"
+                    type="email"
+                    autoComplete="email"
+                    className="w-full"
+                  />
                 </Form.Item>
-              </CardBody>
-              <CardFooter>
-                <button
-                  disabled={isLoading}
-                  type="submit"
-                  className="ui-btn-primary"
-                >
-                  {isLoading ? "Saving..." : "Save"}
-                </button>
-              </CardFooter>
-            </Form>
-          </Card>
+              </div>
+            </div>
+            <CardFooter>
+              <button
+                disabled={isLoading}
+                type="submit"
+                className="ui-btn-primary"
+              >
+                {isLoading ? "Saving..." : "Save"}
+              </button>
+            </CardFooter>
+          </Form>
 
-          <Card className="animate-fade-up" style={{ animationDelay: "60ms" }}>
-            <CardHeader
-              icon={<KeyIcon />}
-              title="Password"
-              description="Update your password."
-            />
-            <Form layout="vertical" onFinish={updatePassowrd}>
-              <CardBody className="pb-1">
+          <Form
+            layout="vertical"
+            requiredMark={false}
+            onFinish={updatePassowrd}
+            className="ui-card"
+          >
+            <div className="flex flex-col gap-4 px-6 py-5">
+              <CardTitle
+                title="Password"
+                description="Forgot your current one? Set a new one here, or use the reset email from the login page."
+              />
+              <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
                 <Form.Item
-                  label="New Password"
+                  label="New password"
                   name="newPassword"
+                  className="!mb-4"
                   rules={[
                     {
                       required: true,
@@ -176,23 +197,42 @@ export default function SettingsRoot() {
                     },
                   ]}
                 >
-                  <Input.Password size="large" />
+                  <Input.Password size="large" autoComplete="new-password" />
                 </Form.Item>
-              </CardBody>
-              <CardFooter>
-                <button
-                  disabled={isPasswordLoading}
-                  type="submit"
-                  className="ui-btn-primary"
+                <Form.Item
+                  label="Confirm password"
+                  name="confirmPassword"
+                  dependencies={["newPassword"]}
+                  className="!mb-4"
+                  rules={[
+                    { required: true, message: "Please confirm your new password!" },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue("newPassword") === value) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(new Error("Passwords don't match."));
+                      },
+                    }),
+                  ]}
                 >
-                  {isPasswordLoading ? "Saving..." : "Save"}
-                </button>
-              </CardFooter>
-            </Form>
-          </Card>
+                  <Input.Password size="large" autoComplete="new-password" />
+                </Form.Item>
+              </div>
+            </div>
+            <CardFooter>
+              <button
+                disabled={isPasswordLoading}
+                type="submit"
+                className="ui-btn-secondary"
+              >
+                {isPasswordLoading ? "Saving..." : "Update password"}
+              </button>
+            </CardFooter>
+          </Form>
 
           <UserApiKey />
-        </div>
+        </>
       )}
       {status === "loading" && <SkeletonLoading />}
 

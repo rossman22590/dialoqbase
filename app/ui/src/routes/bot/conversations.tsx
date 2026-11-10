@@ -44,10 +44,8 @@ export default function BotConversationsRoot() {
   return (
     <>
       {status === "loading" && (
-        <div className="md:ml-14">
-          <div className="ui-page">
-            <SkeletonLoading className="mt-0" />
-          </div>
+        <div className="ui-page">
+          <SkeletonLoading className="mt-0" />
         </div>
       )}
       {status === "success" && (

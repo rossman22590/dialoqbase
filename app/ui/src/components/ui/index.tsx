@@ -26,11 +26,11 @@ export const PageHeader = ({
   >
     <div className="min-w-0">
       {eyebrow && (
-        <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-indigo-600 dark:text-indigo-400">
+        <p className="mb-1 text-xs font-medium text-fg-subtle">
           {eyebrow}
         </p>
       )}
-      <h1 className="text-2xl font-semibold tracking-tight text-fg sm:text-[26px]">
+      <h1 className="text-2xl font-semibold tracking-tight text-fg">
         {title}
       </h1>
       {description && (
@@ -140,9 +140,9 @@ export const EmptyState = ({
       <div className="relative mb-4">
         <div
           aria-hidden="true"
-          className="chat-hero-glow pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2"
+          className="hidden"
         />
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-surface text-indigo-600 shadow-raised dark:text-indigo-300 [&_svg]:h-6 [&_svg]:w-6">
+        <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 [&_svg]:h-6 [&_svg]:w-6">
           {icon}
         </div>
       </div>
@@ -182,12 +182,12 @@ export const StatTile = ({
   hint?: React.ReactNode;
   icon?: React.ReactNode;
 }) => (
-  <div className="ui-card h-full p-5">
+  <div className="ui-card h-full px-4 py-3.5">
     <div className="flex items-center justify-between gap-2">
       <p className="text-[13px] font-medium text-fg-muted">{label}</p>
       {icon && <div className="ui-icon-tile">{icon}</div>}
     </div>
-    <div className="mt-2 text-2xl font-semibold tabular-nums tracking-tight text-fg">
+    <div className="mt-1.5 text-2xl font-semibold tabular-nums tracking-tight text-fg">
       {value}
     </div>
     {hint && <div className="mt-1 text-xs text-fg-subtle">{hint}</div>}

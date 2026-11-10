@@ -1,6 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Prisma } from "@prisma/client";
-import { usesOwnKey } from "../../../../utils/billing";
+import {
+  INSUFFICIENT_CREDITS_MESSAGE,
+  SUSPENDED_MESSAGE,
+  answerBlockReason,
+  usesOwnKey,
+} from "../../../../utils/billing";
 
 // Admin-only oversight endpoints. Every route here is registered with
 // fastify.authenticateAdmin, so request.user is always an administrator.
@@ -168,21 +173,39 @@ export const adminUsersHandler = async (
   const { page, pageSize, skip } = pageParams((request.query as Query));
   const search = (request.query as Query).search?.trim();
   const status = (request.query as Query).status;
+  const zeroBalance = (request.query as Query).zero_balance === "true";
+
+  const searchWhere: Prisma.UserWhereInput = search
+    ? {
+        OR: [
+          { username: { contains: search, mode: "insensitive" } },
+          { email: { contains: search, mode: "insensitive" } },
+        ],
+      }
+    : {};
+  // No credit row counts as $0, like the balance returned below
+  const zeroBalanceWhere: Prisma.UserWhereInput = {
+    OR: [
+      { credit: { is: null } },
+      { credit: { is: { balance: { lte: 0 } } } },
+    ],
+  };
+  const suspendedWhere: Prisma.UserWhereInput = { isSuspended: true };
+  const adminWhere: Prisma.UserWhereInput = { isAdministrator: true };
 
   const where: Prisma.UserWhereInput = {
-    ...(search
-      ? {
-          OR: [
-            { username: { contains: search, mode: "insensitive" } },
-            { email: { contains: search, mode: "insensitive" } },
-          ],
-        }
-      : {}),
-    ...(status === "suspended" ? { isSuspended: true } : {}),
-    ...(status === "admin" ? { isAdministrator: true } : {}),
+    AND: [
+      searchWhere,
+      ...(status === "suspended" ? [suspendedWhere] : []),
+      ...(status === "admin" ? [adminWhere] : []),
+      ...(zeroBalance ? [zeroBalanceWhere] : []),
+    ],
   };
+  // Per-filter totals for the filter chips (search applied, other filters not)
+  const countWith = (filter: Prisma.UserWhereInput) =>
+    prisma.user.count({ where: { AND: [searchWhere, filter] } });
 
-  const [total, users] = await Promise.all([
+  const [total, users, all, zero_balance, suspended, admin] = await Promise.all([
     prisma.user.count({ where }),
     prisma.user.findMany({
       where,
@@ -191,6 +214,10 @@ export const adminUsersHandler = async (
       take: pageSize,
       include: { credit: true, _count: { select: { bots: true } } },
     }),
+    countWith({}),
+    countWith(zeroBalanceWhere),
+    countWith(suspendedWhere),
+    countWith(adminWhere),
   ]);
 
   const ids = users.map((user) => user.user_id);
@@ -212,6 +239,7 @@ export const adminUsersHandler = async (
     total,
     page,
     pageSize,
+    counts: { all, zero_balance, suspended, admin },
     data: users.map((user) => {
       const row = statsById.get(user.user_id) || {};
       return {
@@ -278,34 +306,80 @@ export const adminBotsHandler = async (
   const { page, pageSize, skip } = pageParams((request.query as Query));
   const search = (request.query as Query).search?.trim();
   const userId = (request.query as Query).user_id ? parseInt((request.query as Query).user_id, 10) : undefined;
+  const status = (request.query as Query).status;
 
-  const where: Prisma.BotWhereInput = {
-    ...(search
-      ? {
-          OR: [
-            { name: { contains: search, mode: "insensitive" } },
-            { id: search },
-            { publicId: search },
-            { User: { username: { contains: search, mode: "insensitive" } } },
-          ],
-        }
-      : {}),
-    ...(userId ? { user_id: userId } : {}),
-  };
+  // Filtering runs in SQL so the status filters can follow checkCanAnswer
+  // (utils/billing.ts) exactly, including usesOwnKey's trim.
+  const filters: Prisma.Sql[] = [];
+  if (search) {
+    const like = `%${search.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+    filters.push(Prisma.sql`(b.name ILIKE ${like} OR b.id = ${search}
+      OR b."publicId" = ${search} OR u.username ILIKE ${like})`);
+  }
+  if (userId) {
+    filters.push(Prisma.sql`b.user_id = ${userId}`);
+  }
+  // usesOwnKey: the key has a non-whitespace character
+  const ownKeySql = Prisma.sql`COALESCE(b.bot_model_api_key ~ '[^[:space:]]', false)`;
+  // Blocked for credits: has an owner who is not suspended, not on their own
+  // key, and no credit row or a balance at or below zero
+  const pausedSql = Prisma.sql`(b.user_id IS NOT NULL
+    AND NOT COALESCE(u."isSuspended", false)
+    AND NOT ${ownKeySql}
+    AND COALESCE(c.balance, 0) <= 0)`;
+  const statusSql =
+    status === "paused" ? pausedSql : status === "own_key" ? ownKeySql : undefined;
 
-  const [total, bots] = await Promise.all([
-    prisma.bot.count({ where }),
-    prisma.bot.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: pageSize,
-      include: {
-        User: { select: { user_id: true, username: true, email: true, isSuspended: true } },
-        _count: { select: { source: true } },
-      },
-    }),
+  const from = Prisma.sql`FROM "Bot" b
+    LEFT JOIN "User" u ON u.user_id = b.user_id
+    LEFT JOIN "UserCredit" c ON c.user_id = b.user_id`;
+  const whereOf = (conditions: Prisma.Sql[]) =>
+    conditions.length
+      ? Prisma.sql`WHERE ${Prisma.join(conditions, " AND ")}`
+      : Prisma.empty;
+
+  const [countRows, pageRows] = await Promise.all([
+    prisma.$queryRaw<any[]>`
+      SELECT COUNT(*) AS total,
+             COUNT(*) FILTER (WHERE ${pausedSql}) AS paused,
+             COUNT(*) FILTER (WHERE ${ownKeySql}) AS own_key
+      ${from}
+      ${whereOf(filters)}`,
+    prisma.$queryRaw<{ id: string }[]>`
+      SELECT b.id
+      ${from}
+      ${whereOf(statusSql ? [...filters, statusSql] : filters)}
+      ORDER BY b."createdAt" DESC, b.id DESC
+      LIMIT ${pageSize} OFFSET ${skip}`,
   ]);
+  const counts = {
+    all: num(countRows[0]?.total),
+    paused: num(countRows[0]?.paused),
+    own_key: num(countRows[0]?.own_key),
+  };
+  const total =
+    status === "paused" ? counts.paused : status === "own_key" ? counts.own_key : counts.all;
+
+  const pageIds = pageRows.map((row) => row.id);
+  const found = pageIds.length
+    ? await prisma.bot.findMany({
+        where: { id: { in: pageIds } },
+        include: {
+          User: {
+            select: {
+              user_id: true,
+              username: true,
+              email: true,
+              isSuspended: true,
+              credit: { select: { balance: true } },
+            },
+          },
+          _count: { select: { source: true } },
+        },
+      })
+    : [];
+  const byId = new Map(found.map((bot) => [bot.id, bot]));
+  const bots = pageIds.flatMap((id) => byId.get(id) || []);
 
   const ids = bots.map((bot) => bot.id);
   const since = sinceDays({ days: "30" }).since;
@@ -323,12 +397,21 @@ export const adminBotsHandler = async (
     : [];
   const statsById = new Map(stats.map((row) => [row.bot_id, row]));
 
+  const answerStatus = (bot: (typeof bots)[number]) => {
+    const reason = answerBlockReason(bot, bot.User);
+    if (reason === SUSPENDED_MESSAGE) return "owner_suspended";
+    if (reason === INSUFFICIENT_CREDITS_MESSAGE) return "paused";
+    return "answering";
+  };
+
   return {
     total,
     page,
     pageSize,
+    counts,
     data: bots.map((bot) => {
       const row = statsById.get(bot.id) || {};
+      const { credit, ...owner } = bot.User || ({} as NonNullable<typeof bot.User>);
       return {
         id: bot.id,
         publicId: bot.publicId,
@@ -336,9 +419,10 @@ export const adminBotsHandler = async (
         model: bot.model,
         embedding: bot.embedding,
         createdAt: bot.createdAt,
-        owner: bot.User,
+        owner: bot.User ? { ...owner, balance: num(credit?.balance) } : null,
         sources: bot._count.source,
         uses_own_key: usesOwnKey(bot),
+        answer_status: answerStatus(bot),
         messages_30d: num(row.messages_30d),
         credits_used_30d: num(row.credits_used_30d),
         messages_total: num(row.messages_total),

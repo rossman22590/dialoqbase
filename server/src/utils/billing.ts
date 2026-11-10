@@ -1,4 +1,5 @@
 import { ChatUsage } from "./usage-tracker";
+import { notifyIfLowBalance } from "./low-balance";
 
 export const INSUFFICIENT_CREDITS_MESSAGE = "Insufficient credits. Please top up.";
 export const SUSPENDED_MESSAGE = "This bot is currently unavailable.";
@@ -19,6 +20,15 @@ export const checkCanAnswer = async (
     where: { user_id: bot.user_id },
     include: { credit: true },
   });
+  return answerBlockReason(bot, owner);
+};
+
+// The rule behind checkCanAnswer, for a bot whose owner (with credit.balance)
+// is already loaded. Also used by the admin bot list to show bot status.
+export const answerBlockReason = (bot: any, owner: any): string | null => {
+  if (!bot.user_id) {
+    return null;
+  }
   if (owner?.isSuspended) {
     return SUSPENDED_MESSAGE;
   }
@@ -49,7 +59,7 @@ export const chargeChatUsage = async (
       await usage.totals(bot.model);
 
     if (!ownKey) {
-      await prisma.userCredit.update({
+      const updated = await prisma.userCredit.update({
         where: { user_id: bot.user_id },
         data: {
           balance: {
@@ -57,6 +67,12 @@ export const chargeChatUsage = async (
           },
         },
       });
+      void notifyIfLowBalance(
+        prisma,
+        bot.user_id,
+        Number(updated.balance),
+        Number(cost)
+      );
     }
 
     await prisma.userTransaction.create({

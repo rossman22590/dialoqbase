@@ -15,12 +15,10 @@ export default function Root() {
   }, []);
 
   return (
-    <div className="ui-page">
+    <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 pb-12 pt-8 sm:px-6">
       <PageHeader
-        className="animate-fade-up"
-        eyebrow="Workspace"
-        title="Your bots"
-        description="Every bot you've built, trained on your own data. Open one to chat with it, tune its settings or embed it anywhere."
+        title="Bots"
+        description="Each bot answers from the sources you give it."
         actions={<DashboardNewBtn />}
       />
       <DashboardGrid />

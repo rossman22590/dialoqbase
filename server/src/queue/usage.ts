@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { QSource } from "./type";
 import { countTokens } from "../utils/tokenizer";
+import { notifyIfLowBalance } from "../utils/low-balance";
 import { calculateEmbeddingCost, normalizeEmbeddingModelId } from "../utils/pricing";
 
 const getDocContent = (doc: any) =>
@@ -43,7 +44,7 @@ export const recordEmbeddingUsage = async (
 
   try {
     if (!usesOwnKey) {
-      await prisma.userCredit.update({
+      const updated = await prisma.userCredit.update({
         where: { user_id: source.bot_user_id },
         data: {
           balance: {
@@ -51,6 +52,12 @@ export const recordEmbeddingUsage = async (
           },
         },
       });
+      void notifyIfLowBalance(
+        prisma,
+        source.bot_user_id,
+        Number(updated.balance),
+        Number(cost)
+      );
     }
 
     await prisma.userTransaction.create({

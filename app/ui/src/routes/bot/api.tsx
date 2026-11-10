@@ -27,7 +27,7 @@ export default function BotIntegrationAPIRoot() {
   }, [status]);
 
   return (
-    <div className="ui-page">
+    <div className="px-4 pb-10 pt-6 sm:px-8 sm:pt-8">
       {status === "loading" && <SkeletonLoading className="mt-0" />}
       {status === "success" && <IntegrationAPIBody {...data} />}
     </div>

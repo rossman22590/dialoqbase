@@ -46,6 +46,7 @@ model Bot {
   bot_model_api_key             String?
   options                       Json?            @default("{}") @db.Json
   autoSyncDataSources           Boolean?         @default(false)
+  allowedDomains                String[]         @default([])
   BotAppearance                 BotAppearance[]
   document                      BotDocument[]
   BotIntegration                BotIntegration[]
@@ -88,6 +89,9 @@ model User {
   isAdministrator Boolean      @default(false)
   createdAt       DateTime     @default(now())
   isSuspended     Boolean      @default(false)
+  lowBalanceEmailEnabled Boolean   @default(true)
+  lowBalanceThreshold    Decimal   @default(1.0000) @db.Decimal(10, 4)
+  lowBalanceNotifiedAt   DateTime?
   bots            Bot[]
   apiKeys         UserApiKey[]
   credit          UserCredit?
@@ -221,6 +225,7 @@ model BotPlaygroundMessage {
   message         String
   isBot           Boolean       @default(false)
   sources         Json?
+  feedback        String?
   createdAt       DateTime      @default(now())
   botPlayground   BotPlayground @relation(fields: [botPlaygroundId], references: [id], onDelete: Cascade)
 }

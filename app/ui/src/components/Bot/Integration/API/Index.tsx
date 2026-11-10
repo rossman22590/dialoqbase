@@ -2,25 +2,27 @@ import React from "react";
 import NoApiKeyComponent from "./NoApiKeyComponent";
 import { BotIntegrationAPI } from "../../../../@types/bot";
 import ApiPlaygroundComponent from "./ApiPlaygroundComponent";
-import { PageHeader } from "../../../ui";
 
 const IntegrationAPIBody: React.FC<BotIntegrationAPI> = ({
   is_api_enabled,
   data,
 }) => {
   return (
-    <div>
-      <PageHeader
-        eyebrow="Developer"
-        title="API Integration"
-        description="Talk to your bot from any backend. Try requests live, then copy a ready-made snippet in your language."
-      />
-      <div className="mt-8">
-        {!is_api_enabled && <NoApiKeyComponent />}
-        {is_api_enabled && (
-          <ApiPlaygroundComponent data={data} is_api_enabled={is_api_enabled} />
-        )}
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="m-0 text-2xl font-semibold tracking-tight text-fg">
+          API
+        </h1>
+        <p className="m-0 mt-1.5 text-sm text-fg-muted">
+          Call your bot from your own code. Send a POST request with this
+          bot's API key in the <code className="text-[13px]">x-api-key</code>{" "}
+          header.
+        </p>
       </div>
+      {!is_api_enabled && <NoApiKeyComponent />}
+      {is_api_enabled && (
+        <ApiPlaygroundComponent data={data} is_api_enabled={is_api_enabled} />
+      )}
     </div>
   );
 };

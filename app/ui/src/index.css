@@ -3,20 +3,20 @@
    Colours are RGB channels so Tailwind can apply opacity
    (e.g. bg-surface/80). See tailwind.config.js for the class names. */
 :root {
-  --c-app: 248 248 250;
+  --c-app: 250 250 250;
   --c-canvas: 255 255 255;
   --c-chrome: 255 255 255;
-  --c-sidebar: 249 249 251;
+  --c-sidebar: 250 250 250;
   --c-surface: 255 255 255;
-  --c-surface-2: 245 245 248;
-  --c-surface-3: 236 236 241;
-  --c-line: 233 233 238;
-  --c-line-strong: 218 218 226;
+  --c-surface-2: 244 244 245;
+  --c-surface-3: 228 228 231;
+  --c-line: 231 231 234;
+  --c-line-strong: 212 212 216;
   --c-fg: 24 24 27;
   --c-fg-muted: 82 82 91;
-  --c-fg-subtle: 139 139 150;
+  --c-fg-subtle: 113 113 122;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial,
     "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", "Cascadia Code",
@@ -37,7 +37,7 @@
   --c-line-strong: 55 55 63;
   --c-fg: 244 244 246;
   --c-fg-muted: 168 168 178;
-  --c-fg-subtle: 113 113 122;
+  --c-fg-subtle: 140 140 150;
 
   color-scheme: dark;
 }
@@ -67,28 +67,29 @@ html {
 
 /* ---------- Shared UI components (see src/components/ui) ---------- */
 @layer components {
+  /* Flat, neutral look: hairline borders, 12px cards, one indigo accent. */
   .ui-card {
-    @apply rounded-2xl border border-line bg-surface shadow-soft;
+    @apply rounded-xl border border-line bg-surface;
   }
 
   .ui-card-hover {
-    @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-line-strong hover:shadow-raised;
+    @apply transition-colors duration-150 hover:border-line-strong;
   }
 
   .ui-icon-tile {
-    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20 [&_svg]:h-4 [&_svg]:w-4;
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-300 [&_svg]:h-4 [&_svg]:w-4;
   }
 
   .ui-btn {
-    @apply inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-3.5 text-sm font-medium transition-all duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50 [&_svg]:h-4 [&_svg]:w-4;
+    @apply inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50 [&_svg]:h-4 [&_svg]:w-4;
   }
 
   .ui-btn-primary {
-    @apply ui-btn bg-gradient-to-b from-indigo-500 to-indigo-600 text-white shadow-brand ring-1 ring-inset ring-white/10 hover:brightness-110;
+    @apply ui-btn bg-indigo-600 text-white hover:bg-indigo-700;
   }
 
   .ui-btn-secondary {
-    @apply ui-btn border border-line bg-surface text-fg shadow-soft hover:border-line-strong hover:bg-surface-2;
+    @apply ui-btn border border-line bg-surface text-fg hover:bg-surface-2;
   }
 
   .ui-btn-ghost {
@@ -96,47 +97,95 @@ html {
   }
 
   .ui-btn-danger {
-    @apply ui-btn bg-red-600 text-white shadow-soft hover:bg-red-500;
+    @apply ui-btn bg-red-600 text-white hover:bg-red-700;
+  }
+
+  .ui-btn-danger-outline {
+    @apply ui-btn border border-red-300 bg-surface text-red-700 hover:bg-red-50 dark:border-red-500/40 dark:text-red-300 dark:hover:bg-red-500/10;
   }
 
   .ui-input {
-    @apply block w-full rounded-xl border border-line-strong bg-surface px-3 py-2 text-sm text-fg shadow-soft transition placeholder:text-fg-subtle hover:border-fg-subtle/50 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 dark:bg-canvas;
+    @apply block h-10 w-full rounded-lg border border-line-strong bg-surface px-3 text-sm text-fg transition placeholder:text-fg-subtle focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 dark:bg-canvas;
+  }
+
+  textarea.ui-input {
+    @apply h-auto py-2.5 leading-relaxed;
   }
 
   .ui-label {
-    @apply block text-sm font-medium text-fg;
+    @apply block text-[13px] font-medium text-fg;
   }
 
   .ui-help {
     @apply mt-1 text-xs leading-relaxed text-fg-subtle;
   }
 
+  /* Uppercase group label used in sidebars and nav lists. */
+  .ui-eyebrow {
+    @apply px-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-fg-subtle;
+  }
+
   .ui-badge {
-    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset;
   }
 
   .ui-badge-neutral {
-    @apply bg-surface-2 text-fg-muted ring-line;
+    @apply bg-surface-2 text-fg-muted ring-line-strong;
   }
 
   .ui-badge-brand {
-    @apply bg-indigo-50 text-indigo-700 ring-indigo-600/15 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20;
+    @apply bg-indigo-50 text-indigo-800 ring-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20;
   }
 
   .ui-badge-success {
-    @apply bg-emerald-50 text-emerald-700 ring-emerald-600/15 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20;
+    @apply bg-green-50 text-green-800 ring-green-200 dark:bg-green-500/10 dark:text-green-300 dark:ring-green-400/20;
   }
 
   .ui-badge-warning {
-    @apply bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-400/20;
+    @apply bg-amber-50 text-amber-800 ring-amber-300 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-400/20;
   }
 
   .ui-badge-danger {
-    @apply bg-red-50 text-red-700 ring-red-600/15 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-400/20;
+    @apply bg-red-50 text-red-800 ring-red-200 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-400/20;
+  }
+
+  /* Segmented tabs with an underline, as in the mock. */
+  .ui-tab {
+    @apply -mb-px inline-flex min-h-[40px] items-center gap-1.5 whitespace-nowrap border-b-2 border-transparent px-2.5 text-sm text-fg-muted transition-colors hover:text-fg;
+  }
+
+  .ui-tab-active {
+    @apply border-indigo-600 font-medium text-fg dark:border-indigo-400;
+  }
+
+  /* Simple data tables. */
+  .ui-table {
+    @apply w-full border-collapse text-[13px];
+  }
+
+  .ui-table th {
+    @apply px-3 py-2.5 text-left font-medium text-fg-subtle first:pl-5 last:pr-5;
+  }
+
+  .ui-table td {
+    @apply border-t border-line px-3 py-3 align-middle first:pl-5 last:pr-5;
+  }
+
+  /* Toggle switch (button role="switch"). */
+  .ui-switch {
+    @apply relative inline-flex h-6 w-10 shrink-0 cursor-pointer items-center rounded-full bg-line-strong transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 aria-checked:bg-indigo-600;
+  }
+
+  .ui-switch > span {
+    @apply ml-[3px] h-[18px] w-[18px] rounded-full bg-white shadow transition-transform;
+  }
+
+  .ui-switch[aria-checked="true"] > span {
+    @apply translate-x-4;
   }
 
   .ui-page {
-    @apply mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8;
+    @apply mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8;
   }
 }
 
@@ -176,7 +225,7 @@ html {
 }
 
 ::selection {
-  background: rgb(124 58 237 / 0.2);
+  background: rgb(79 70 229 / 0.2);
 }
 
 @media (max-width: 720px) {
@@ -212,10 +261,10 @@ markdown-processing {
   --tw-prose-body: rgb(var(--c-fg) / 0.9);
   --tw-prose-headings: rgb(var(--c-fg));
   --tw-prose-bold: rgb(var(--c-fg));
-  --tw-prose-links: #7c3aed;
+  --tw-prose-links: #4f46e5;
   --tw-prose-code: rgb(var(--c-fg));
   --tw-prose-quotes: rgb(var(--c-fg-muted));
-  --tw-prose-quote-borders: rgb(124 58 237 / 0.35);
+  --tw-prose-quote-borders: rgb(79 70 229 / 0.35);
   --tw-prose-bullets: rgb(var(--c-fg-subtle));
   --tw-prose-counters: rgb(var(--c-fg-subtle));
   --tw-prose-hr: rgb(var(--c-line));
@@ -224,10 +273,10 @@ markdown-processing {
   --tw-prose-invert-body: rgb(var(--c-fg) / 0.88);
   --tw-prose-invert-headings: rgb(var(--c-fg));
   --tw-prose-invert-bold: rgb(var(--c-fg));
-  --tw-prose-invert-links: #a78bfa;
+  --tw-prose-invert-links: #818cf8;
   --tw-prose-invert-code: rgb(var(--c-fg));
   --tw-prose-invert-quotes: rgb(var(--c-fg-muted));
-  --tw-prose-invert-quote-borders: rgb(167 139 250 / 0.4);
+  --tw-prose-invert-quote-borders: rgb(129 140 248 / 0.4);
   --tw-prose-invert-bullets: rgb(var(--c-fg-subtle));
   --tw-prose-invert-counters: rgb(var(--c-fg-subtle));
   --tw-prose-invert-hr: rgb(var(--c-line));
@@ -297,7 +346,7 @@ markdown-processing {
   font-weight: 500;
   text-decoration: none;
   color: var(--tw-prose-links) !important;
-  border-bottom: 1px solid rgb(124 58 237 / 0.35);
+  border-bottom: 1px solid rgb(79 70 229 / 0.35);
   transition: border-color 0.15s;
 }
 
@@ -376,13 +425,13 @@ markdown-processing {
   font-weight: 500;
   padding: 0.15em 0.4em;
   border-radius: 0.375rem;
-  background: rgb(124 58 237 / 0.07);
-  border: 1px solid rgb(124 58 237 / 0.12);
+  background: rgb(79 70 229 / 0.07);
+  border: 1px solid rgb(79 70 229 / 0.12);
 }
 
 .dark .chat-prose :where(code):not(:where(pre *)) {
-  background: rgb(167 139 250 / 0.12);
-  border-color: rgb(167 139 250 / 0.18);
+  background: rgb(129 140 248 / 0.12);
+  border-color: rgb(129 140 248 / 0.18);
 }
 
 .chat-prose :where(code)::before,
@@ -396,7 +445,6 @@ markdown-processing {
   border-radius: 0.875rem;
   background: #111114 !important;
   border: 1px solid rgb(255 255 255 / 0.06);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 10px 30px -18px rgb(0 0 0 / 0.5);
 }
 
 .dark .chat-prose .code {
@@ -424,83 +472,41 @@ markdown-processing {
   line-height: 1.65 !important;
 }
 
-/* User bubble: white text on the brand gradient. */
+/* User bubble: plain text on the neutral surface-2 bubble. */
 .chat-prose.chat-prose-user {
-  --tw-prose-body: #fff;
-  --tw-prose-headings: #fff;
-  --tw-prose-bold: #fff;
-  --tw-prose-links: #fff;
-  --tw-prose-code: #fff;
-  --tw-prose-quotes: #fff;
-  --tw-prose-quote-borders: rgb(255 255 255 / 0.4);
-  --tw-prose-bullets: rgb(255 255 255 / 0.7);
-  --tw-prose-counters: rgb(255 255 255 / 0.7);
-  --tw-prose-hr: rgb(255 255 255 / 0.3);
-  color: #fff;
+  --tw-prose-body: rgb(var(--c-fg));
+  --tw-prose-invert-body: rgb(var(--c-fg));
+  color: rgb(var(--c-fg));
+  line-height: 1.5;
 }
 
 .chat-prose-user :where(p) {
   white-space: pre-wrap;
 }
 
-.chat-prose-user a,
-.dark .chat-prose-user a {
-  color: #fff !important;
-  border-bottom-color: rgb(255 255 255 / 0.6) !important;
-}
-
 .chat-prose-user :where(code):not(:where(pre *)),
 .dark .chat-prose-user :where(code):not(:where(pre *)) {
-  background: rgb(255 255 255 / 0.16);
-  border-color: rgb(255 255 255 / 0.2);
+  background: rgb(var(--c-surface));
 }
 
-/* Soft glowing dot at the end of a reply while it streams in. */
+/* Blinking caret at the end of a reply while it streams in. */
 .chat-streaming > .chat-prose > :last-child:not(ul):not(ol):not(div):not(pre):not(table)::after,
 .chat-streaming > .chat-prose > :is(ul, ol):last-child > li:last-child::after {
   content: "";
   display: inline-block;
-  width: 0.5em;
-  height: 0.5em;
-  margin-left: 0.35em;
-  vertical-align: middle;
-  border-radius: 9999px;
-  background: #7c3aed;
-  animation: chat-caret 1.2s ease-in-out infinite;
-}
-
-.dark .chat-streaming > .chat-prose > :last-child::after,
-.dark .chat-streaming > .chat-prose li:last-child::after {
-  background: #a78bfa;
+  width: 0.45em;
+  height: 1em;
+  margin-left: 0.2em;
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  background: rgb(var(--c-fg) / 0.7);
+  animation: chat-caret 1s steps(2, start) infinite;
 }
 
 @keyframes chat-caret {
-  0%,
-  100% {
-    transform: scale(0.8);
-    box-shadow: 0 0 0 0 rgb(124 58 237 / 0.45);
+  to {
+    visibility: hidden;
   }
-  50% {
-    transform: scale(1);
-    box-shadow: 0 0 0 5px rgb(124 58 237 / 0);
-  }
-}
-
-/* Light sweep across the thinking label. */
-.chat-shimmer-text {
-  background: linear-gradient(
-    90deg,
-    rgb(var(--c-fg-subtle)) 0%,
-    rgb(var(--c-fg-subtle)) 35%,
-    rgb(var(--c-fg)) 50%,
-    rgb(var(--c-fg-subtle)) 65%,
-    rgb(var(--c-fg-subtle)) 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmer 2.2s linear infinite;
 }
 
 /* Skeleton shimmer for loading states. */
@@ -573,7 +579,7 @@ markdown-processing {
 @keyframes chat-msg-in-user {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.96);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -581,37 +587,11 @@ markdown-processing {
   }
 }
 
-/* Halo around the assistant avatar while it is working. */
-.chat-avatar-live {
-  position: relative;
-}
-
-.chat-avatar-live::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: 0.7rem;
-  border: 2px solid rgb(124 58 237 / 0.45);
-  animation: chat-halo 1.6s ease-out infinite;
-  pointer-events: none;
-}
-
-@keyframes chat-halo {
-  from {
-    opacity: 1;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 0;
-    transform: scale(1.25);
-  }
-}
-
 /* Soft brand glow behind the empty-state hero. */
 .chat-hero-glow {
   background: radial-gradient(
     closest-side,
-    rgb(124 58 237 / 0.18),
+    rgb(79 70 229 / 0.18),
     rgb(217 70 239 / 0.08) 55%,
     transparent
   );
@@ -621,7 +601,7 @@ markdown-processing {
 .dark .chat-hero-glow {
   background: radial-gradient(
     closest-side,
-    rgb(139 92 246 / 0.28),
+    rgb(99 102 241 / 0.28),
     rgb(217 70 239 / 0.1) 55%,
     transparent
   );
@@ -631,9 +611,7 @@ markdown-processing {
   .chat-msg-in,
   .chat-msg-in-user,
   .typing-dot,
-  .chat-shimmer-text,
   .skeleton,
-  .chat-avatar-live::after,
   .chat-streaming > .chat-prose > *::after,
   .chat-streaming > .chat-prose li::after {
     animation: none !important;

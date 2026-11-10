@@ -27,9 +27,13 @@ export default function BotAppearanceRoot() {
   }, [status]);
 
   return (
-    <div className="ui-page">
-      {status === "loading" && <SkeletonLoading className="mt-0" />}
+    <>
+      {status === "loading" && (
+        <div className="max-w-3xl px-4 pt-6 sm:px-8 sm:pt-7">
+          <SkeletonLoading className="mt-0" />
+        </div>
+      )}
       {status === "success" && <AppearanceBody {...data} />}
-    </div>
+    </>
   );
 }

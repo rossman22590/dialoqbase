@@ -40,9 +40,9 @@ export const PlaygroundNewChat = ({
     <button
       type="button"
       onClick={handleClick}
-      className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-indigo-500 to-indigo-600 px-3 text-sm font-medium text-white shadow-brand ring-1 ring-inset ring-white/10 transition-all duration-150 hover:brightness-110 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+      className="flex h-[38px] min-w-0 flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-surface px-3 text-sm font-medium text-fg transition-colors hover:bg-surface-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
     >
-      <PlusIcon className="h-4 w-4" strokeWidth={2.25} aria-hidden="true" />
+      <PlusIcon className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
       New chat
     </button>
   );

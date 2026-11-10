@@ -1,13 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
 import React from "react";
 import { SkeletonLoading } from "../../components/Common/SkeletonLoading";
 import { Cooking } from "../../components/Common/Cooking";
 import { EmbedBoard } from "../../components/Bot/Embed/EmbedBoard";
-import { PreviewIframe } from "../../components/Bot/Preview/PreviewIFrame";
-import { Card, CardHeader, PageHeader } from "../../components/ui";
-import { EyeIcon } from "@heroicons/react/24/outline";
 
 export default function BotEmbedRoot() {
   const param = useParams<{ id: string }>();
@@ -34,35 +31,32 @@ export default function BotEmbedRoot() {
   }, [status]);
 
   return (
-    <div className="ui-page">
-      {status === "loading" && <SkeletonLoading />}
-      {status === "success" && data.inProgress && <Cooking />}
-      {status === "success" && !data.inProgress && (
-        <div>
-          <PageHeader
-            title="Embed"
-            description="Put your bot on any website or app. Tweak the widget, copy the snippet, and paste it into your page."
-          />
-          <div className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-            <section aria-label="Embed snippets" className="min-w-0 lg:col-span-2">
-              <EmbedBoard public_id={data.public_id} />
-            </section>
-            <section
-              aria-label="Live preview"
-              className="min-w-0 lg:sticky lg:top-20"
-            >
-              <Card className="overflow-hidden">
-                <CardHeader
-                  icon={<EyeIcon />}
-                  title="Live preview"
-                  description="How visitors will see your bot."
-                />
-                <PreviewIframe public_id={data.public_id} />
-              </Card>
-            </section>
+    <div className="px-4 pb-10 pt-6 sm:px-8 sm:pt-8">
+      <div className="max-w-[920px]">
+        {status === "loading" && <SkeletonLoading className="mt-0" />}
+        {status === "success" && data.inProgress && <Cooking />}
+        {status === "success" && !data.inProgress && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h1 className="m-0 text-2xl font-semibold tracking-tight text-fg">
+                Embed on a site
+              </h1>
+              <p className="m-0 mt-1.5 text-sm text-fg-muted">
+                Pick how it should show up, then paste the snippet into your
+                site. The bot's name and greeting come from{" "}
+                <Link
+                  to={`/bot/${param.id}/appearance`}
+                  className="text-indigo-700 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-200"
+                >
+                  Appearance
+                </Link>
+                .
+              </p>
+            </div>
+            <EmbedBoard public_id={data.public_id} />
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

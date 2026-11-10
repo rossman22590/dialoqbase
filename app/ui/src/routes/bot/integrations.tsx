@@ -52,9 +52,11 @@ export default function BotIntegrationRoot() {
   }, [status]);
 
   return (
-    <div className="ui-page">
-      {status === "loading" && <SkeletonLoading className="mt-0" />}
-      {status === "success" && <IntegrationGrid data={data.data} />}
+    <div className="px-4 pb-10 pt-6 sm:px-8 sm:pt-8">
+      <div className="max-w-[920px]">
+        {status === "loading" && <SkeletonLoading className="mt-0" />}
+        {status === "success" && <IntegrationGrid data={data.data} />}
+      </div>
     </div>
   );
 }

@@ -2,14 +2,16 @@ import { Form } from "antd";
 import { AppearanceType } from "./types";
 import React from "react";
 import { AppearanceForm } from "./AppearanceForm";
-import { AppearancePreview } from "./AppearancePreview";
-import { Card, CardHeader, PageHeader } from "../../ui";
-import { EyeIcon, SwatchIcon } from "@heroicons/react/24/outline";
+import {
+  AppearancePreview,
+  AppearanceWidgetPreview,
+} from "./AppearancePreview";
 
 type Props = AppearanceType;
 
 export const AppearanceBody = (props: Props) => {
   const [form] = Form.useForm();
+  const [mode, setMode] = React.useState<"site" | "page">("site");
 
   React.useEffect(() => {
     form.setFieldsValue({
@@ -18,40 +20,50 @@ export const AppearanceBody = (props: Props) => {
   }, [props.data]);
 
   return (
-    <div>
-      <PageHeader
-        title="Appearance"
-        description="Customize how your bot looks and sounds. Changes show up in the live preview as you type."
-      />
-      <div className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-5">
-        <section aria-label="Appearance settings" className="min-w-0 lg:col-span-3">
-          <Card>
-            <CardHeader
-              icon={<SwatchIcon />}
-              title="Bot appearance"
-              description="Name, greeting, chat bubble colours and voice."
-            />
-            <AppearanceForm initialData={props} form={form} />
-          </Card>
-        </section>
-        <section
-          aria-label="Live preview"
-          className="min-w-0 lg:sticky lg:top-20 lg:col-span-2"
-        >
-          <Card className="overflow-hidden">
-            <CardHeader
-              icon={<EyeIcon />}
-              title="Live preview"
-              description="A mock of the chat widget."
-            />
-            <div className="bg-surface-2 p-3 sm:p-4">
-              <div className="overflow-hidden rounded-xl border border-line shadow-soft">
-                <AppearancePreview form={form} />
-              </div>
-            </div>
-          </Card>
-        </section>
+    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col lg:flex-row">
+      <div className="min-w-0 flex-1 px-4 pb-8 pt-6 sm:px-8 sm:pt-7">
+        <div className="max-w-3xl">
+          <AppearanceForm initialData={props} form={form} />
+        </div>
       </div>
+      <aside
+        aria-label="Live preview"
+        className="flex flex-col gap-3 border-t border-line bg-surface-2 p-5 lg:sticky lg:top-14 lg:h-[calc(100dvh-3.5rem)] lg:w-[380px] lg:shrink-0 lg:overflow-y-auto lg:border-l lg:border-t-0"
+      >
+        <div
+          role="group"
+          aria-label="Preview mode"
+          className="flex self-start rounded-lg border border-line bg-surface p-0.5"
+        >
+          {(
+            [
+              ["site", "On a website"],
+              ["page", "Full page"],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={mode === key}
+              onClick={() => setMode(key)}
+              className={`h-[30px] rounded-md px-2.5 text-xs ${
+                mode === key
+                  ? "bg-surface-2 font-medium text-fg"
+                  : "text-fg-muted hover:text-fg"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="min-h-[600px] flex-1 overflow-hidden rounded-xl border border-line bg-white">
+          {mode === "site" ? (
+            <AppearanceWidgetPreview form={form} />
+          ) : (
+            <AppearancePreview form={form} />
+          )}
+        </div>
+      </aside>
     </div>
   );
 };

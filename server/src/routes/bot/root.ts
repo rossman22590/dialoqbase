@@ -15,6 +15,7 @@ import {
   chatTTSSchema,
   chatLoginSchema,
 } from "../../schema/bot";
+import { frameAncestorsPolicy } from "../../utils/allowed-domains";
 
 const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
   fastify.post(
@@ -83,6 +84,20 @@ const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
       },
     },
     async (request, reply) => {
+      // Only the bot's "Allowed sites" may show this page in an iframe.
+      const { id } = request.params as { id: string };
+      try {
+        const bot = await fastify.prisma.bot.findFirst({
+          where: { publicId: id },
+          select: { allowedDomains: true },
+        });
+        const policy = frameAncestorsPolicy(bot?.allowedDomains);
+        if (policy) {
+          reply.header("Content-Security-Policy", policy);
+        }
+      } catch (err) {
+        request.log.error(err, "Failed to load allowed sites for bot page");
+      }
       return reply.sendFile("bot.html");
     }
   );

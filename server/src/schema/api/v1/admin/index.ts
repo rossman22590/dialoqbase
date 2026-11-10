@@ -88,6 +88,7 @@ export const getAllUsersSchema: FastifySchema = {
           email: { type: "string" },
           is_admin: { type: "boolean" },
           bots: { type: "number" },
+          balance: { type: "number" },
           createdAt: { type: "string" },
         },
       },

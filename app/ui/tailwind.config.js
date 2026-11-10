@@ -10,19 +10,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        indigo: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
-          900: '#4c1d95',
-          950: '#2e1065',
-        },
         // Theme-aware tokens, defined in src/index.css (light + .dark).
         app: token('app'),
         canvas: token('canvas'),
@@ -53,9 +40,8 @@ export default {
           '0 1px 2px rgb(16 16 24 / 0.05), 0 8px 24px -12px rgb(16 16 24 / 0.18)',
         float:
           '0 2px 4px rgb(16 16 24 / 0.04), 0 16px 40px -16px rgb(16 16 24 / 0.28)',
-        brand:
-          '0 1px 2px rgb(76 29 149 / 0.25), 0 6px 16px -6px rgb(124 58 237 / 0.55)',
-        focus: '0 0 0 4px rgb(124 58 237 / 0.14)',
+        brand: '0 1px 2px rgb(16 16 24 / 0.06)',
+        focus: '0 0 0 4px rgb(79 70 229 / 0.14)',
       },
       transitionTimingFunction: {
         out: 'cubic-bezier(0.22, 1, 0.36, 1)',

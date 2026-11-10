@@ -4,6 +4,9 @@ export type Message = {
   isBot: boolean;
   message: string;
   sources: any[];
+  // Saved playground message id and its thumbs rating, when known.
+  id?: string;
+  feedback?: string | null;
 };
 
 export type History = {

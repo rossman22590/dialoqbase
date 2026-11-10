@@ -13,9 +13,9 @@ export default function PlaygroundFooter() {
           type="button"
           aria-label="Playground settings"
           onClick={() => setOpenModal(true)}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-fg-subtle shadow-soft transition-all duration-150 hover:text-fg hover:shadow-raised active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
-          <Cog6ToothIcon className="h-5 w-5" />
+          <Cog6ToothIcon className="h-[18px] w-[18px]" />
         </button>
       </Tooltip>
 

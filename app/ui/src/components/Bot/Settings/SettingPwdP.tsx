@@ -1,10 +1,9 @@
-import { Form, Switch, Input, notification } from "antd";
+import { Form, Input, notification } from "antd";
 import { useParams } from "react-router-dom";
 import api from "../../../services/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { LockClosedIcon } from "@heroicons/react/24/outline";
-import { Card, CardBody, CardFooter, CardHeader } from "../../ui";
+import { SwitchControl } from "./SettingsControls";
 
 type Props = {
   publicBotPwdProtected: boolean;
@@ -53,29 +52,34 @@ export const SettingsPwdP: React.FC<Props> = ({
         publicBotPwd,
       }}
       layout="vertical"
+      requiredMark={false}
       onFinish={mutate}
     >
-      <Card>
-        <CardHeader
-          icon={<LockClosedIcon />}
-          title="Password Protection"
-          description="Protect your bot's public access with a password."
-        />
-        <CardBody>
-          <div className="rounded-xl border border-line bg-surface-2/40 px-4 pt-3 [&_.ant-form-item]:mb-3">
-            <Form.Item
-              name="publicBotPwdProtected"
-              valuePropName="checked"
-              label="Enable Password Protection"
-            >
-              <Switch />
-            </Form.Item>
+      <section className="ui-card">
+        <div className="flex items-center gap-4 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <h2 className="m-0 flex items-center gap-2 text-sm font-medium text-fg">
+              Password protection
+              <span className="ui-badge ui-badge-brand">Preview</span>
+            </h2>
+            <p className="m-0 mt-0.5 text-[13px] text-fg-muted">
+              Ask for a password before anyone can use the public bot. Web
+              chat only for now.
+            </p>
           </div>
-
+          <Form.Item
+            name="publicBotPwdProtected"
+            valuePropName="checked"
+            noStyle
+          >
+            <SwitchControl label="Password protection" />
+          </Form.Item>
+        </div>
+        <div className="flex flex-col gap-3 border-t border-line px-4 py-4 sm:flex-row sm:items-start">
           <Form.Item
             name="publicBotPwd"
             label="Password"
-            className="mt-6"
+            className="mb-0 min-w-0 flex-1"
             rules={[
               {
                 required: isEnabled,
@@ -89,21 +93,15 @@ export const SettingsPwdP: React.FC<Props> = ({
               size="large"
             />
           </Form.Item>
-
-          <div className="flex items-start gap-2 rounded-xl bg-surface-2/60 px-3 py-2.5 text-xs leading-relaxed text-fg-muted">
-            <span className="ui-badge ui-badge-brand shrink-0">Preview</span>
-            <span>
-              This feature is in preview and only works with web interface for
-              now
-            </span>
-          </div>
-        </CardBody>
-        <CardFooter>
-          <button type="submit" className="ui-btn-primary">
-            {isLoading ? "Saving..." : "Save"}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="ui-btn-secondary h-10 shrink-0 self-start sm:mt-[30px]"
+          >
+            {isLoading ? "Saving..." : "Save password"}
           </button>
-        </CardFooter>
-      </Card>
+        </div>
+      </section>
     </Form>
   );
 };

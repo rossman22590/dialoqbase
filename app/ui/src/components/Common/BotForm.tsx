@@ -1,30 +1,16 @@
 import {
-  Col,
-  Divider,
+  ConfigProvider,
   Form,
   FormInstance,
   Input,
   InputNumber,
-  Row,
   Select,
   // Switch,
   Upload,
   message,
 } from "antd";
 import { RadioGroup } from "@headlessui/react";
-import {
-  DocumentArrowUpIcon,
-  DocumentTextIcon,
-  GlobeAltIcon,
-  InboxIcon,
-} from "@heroicons/react/24/outline";
-import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import React from "react";
-import { SpiderIcon } from "../Icons/SpiderIcon";
-// import { GithubIcon } from "../Icons/GithubIcon";
-// import { YoutubeIcon } from "../Icons/YoutubeIcon";
-import { ApiIcon } from "../Icons/ApiIcon";
-import { SitemapIcon } from "../Icons/SitemapIcon";
 import { useQuery } from "@tanstack/react-query";
 import api from "../../services/api";
 import { BotConfig } from "../../@types/bot";
@@ -37,10 +23,51 @@ type Props = {
   showEmbeddingAndModels: boolean;
   newSelectedSource?: any;
   botConfig: BotConfig;
+  // Shows a Cancel button next to the submit button when given.
+  onCancel?: () => void;
 };
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
+
+const formatSize = (bytes?: number) => {
+  if (!bytes && bytes !== 0) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+// antd Form tuned to the mock: 13px labels, tighter field spacing, small help.
+const formClass = [
+  "[&_.ant-form-item]:!mb-4",
+  "[&_.ant-form-item-label]:!pb-1.5",
+  "[&_.ant-form-item-label>label]:!h-auto",
+  "[&_.ant-form-item-label>label]:!text-[13px]",
+  "[&_.ant-form-item-label>label]:!font-medium",
+  "[&_.ant-form-item-label>label]:!text-fg",
+  "[&_.ant-form-item-explain]:!mt-1",
+  "[&_.ant-form-item-explain]:!text-xs",
+  "[&_.ant-form-item-extra]:!mt-1",
+  "[&_.ant-form-item-extra]:!min-h-0",
+  "[&_.ant-form-item-extra]:!text-xs",
+  "[&_.ant-form-item-extra]:!text-fg-subtle",
+].join(" ");
+
+const draggerClass = [
+  "[&_.ant-upload-drag]:!rounded-[10px]",
+  "[&_.ant-upload-drag]:!border-[1.5px]",
+  "[&_.ant-upload-drag]:!border-dashed",
+  "[&_.ant-upload-drag]:!border-line-strong",
+  "[&_.ant-upload-drag]:!bg-app",
+  "[&_.ant-upload-drag:hover]:!border-indigo-500",
+  "[&_.ant-upload-drag-hover]:!border-indigo-500",
+  "[&_.ant-upload-btn]:!px-4",
+  "[&_.ant-upload-btn]:!py-7",
+  "[&_.ant-upload-list]:!mt-2",
+  "[&_.ant-upload-list]:!flex",
+  "[&_.ant-upload-list]:!flex-col",
+  "[&_.ant-upload-list]:!gap-2",
+].join(" ");
 
 export const BotForm = ({
   createBot,
@@ -49,18 +76,138 @@ export const BotForm = ({
   form,
   showEmbeddingAndModels,
   botConfig,
+  onCancel,
 }: Props) => {
   const youtubeMode = Form.useWatch(["options", "youtube_mode"], form);
   const url = Form.useWatch(["content"], form);
+  // Listed in the order the mock shows them.
   const [availableSources] = React.useState([
+    {
+      id: 2,
+      value: "file",
+      title: "Files",
+      hint: "PDF, Word, CSV…",
+      formComponent: (
+        <Form.Item
+          name="file"
+          rules={[
+            {
+              required: true,
+              message: `Please upload your files (PDF, Docx, CSV, TXT, MP3, MP4)`,
+            },
+          ]}
+          getValueFromEvent={(e) => {
+            console.log("Upload event:", e);
+            if (Array.isArray(e)) {
+              return e;
+            }
+            return e?.fileList;
+          }}
+        >
+          <Upload.Dragger
+            className={draggerClass}
+            accept={`.pdf,.docx,.csv,.txt,.mp3,.mp4,.zip,.json`}
+            multiple={true}
+            maxCount={botConfig?.fileUploadSizeLimit}
+            itemRender={(_node, file, _list, actions) => (
+              <div className="flex items-center gap-2.5 rounded-lg border border-line px-3 py-2 text-[13px]">
+                <span className="min-w-0 flex-1 truncate text-fg">
+                  {file.name}
+                </span>
+                <span className="shrink-0 text-fg-subtle">
+                  {formatSize(file.size)}
+                </span>
+                <button
+                  type="button"
+                  aria-label={`Remove ${file.name}`}
+                  onClick={actions.remove}
+                  className="ui-btn-ghost h-7 w-7 shrink-0 px-0 text-base"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            beforeUpload={(file) => {
+              const allowedTypes = [
+                "application/pdf",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "text/csv",
+                "text/plain",
+                "audio/mpeg",
+                "audio/mp4",
+                "video/mp4",
+                "video/mpeg",
+                "application/zip",
+                "application/x-zip-compressed",
+                "application/json",
+              ]
+                .map((type) => type.toLowerCase())
+                .join(", ");
+
+              console.log("file type:", file.type.toLowerCase());
+
+              if (!allowedTypes.includes(file.type.toLowerCase())) {
+                message.error(
+                  `File type not supported. Please upload a ${allowedTypes} file.`
+                );
+                return Upload.LIST_IGNORE;
+              }
+
+              // if video or audio
+              if (
+                file.type.toLowerCase().includes("audio") ||
+                file.type.toLowerCase().includes("video")
+              ) {
+                message.warning(
+                  `Currently, Only support video and audio files with English audio`
+                );
+              }
+
+              return false;
+            }}
+          >
+            <div className="flex flex-col items-center gap-2 text-center">
+              <svg
+                aria-hidden="true"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-fg-muted"
+              >
+                <path d="M12 16V4M7 9l5-5 5 5" />
+                <path d="M4 16v4h16v-4" />
+              </svg>
+              <p className="text-sm text-fg">
+                Drag files here or{" "}
+                <span className="font-medium text-indigo-700 dark:text-indigo-300">
+                  choose files
+                </span>
+              </p>
+              <p className="text-xs text-fg-subtle">
+                PDF, Word, CSV, TXT, MP3, MP4, Zip or JSON
+                {botConfig?.fileUploadSizeLimit
+                  ? `, up to ${botConfig.fileUploadSizeLimit} files`
+                  : ""}
+              </p>
+            </div>
+          </Upload.Dragger>
+        </Form.Item>
+      ),
+    },
     {
       id: 1,
       value: "website",
-      title: "Webpage",
-      icon: GlobeAltIcon,
+      title: "Website",
+      hint: "One page",
       formComponent: (
         <Form.Item
           name="content"
+          label="Page URL"
           rules={[
             {
               required: true,
@@ -68,137 +215,20 @@ export const BotForm = ({
             },
           ]}
         >
-          <Input type="url" placeholder="Enter the webpage URL" />
+          <Input type="url" placeholder="https://example.com/page" />
         </Form.Item>
-      ),
-    },
-    {
-      id: 3,
-      value: "text",
-      title: "Text",
-      icon: DocumentTextIcon,
-      formComponent: (
-        <Form.Item
-          name="content"
-          rules={[
-            {
-              required: true,
-              message: "Please enter the text",
-            },
-          ]}
-        >
-          <Input.TextArea placeholder="Enter the text" rows={5} />
-        </Form.Item>
-      ),
-    },
-    {
-      id: 2,
-      value: "file",
-      title: "File",
-      icon: DocumentArrowUpIcon,
-      formComponent: (
-        <>
-          <Form.Item
-            name="file"
-            rules={[
-              {
-                required: true,
-                message: `Please upload your files (PDF, Docx, CSV, TXT, MP3, MP4)`,
-              },
-            ]}
-            getValueFromEvent={(e) => {
-              console.log("Upload event:", e);
-              if (Array.isArray(e)) {
-                return e;
-              }
-              return e?.fileList;
-            }}
-          >
-            <Upload.Dragger
-              accept={`.pdf,.docx,.csv,.txt,.mp3,.mp4,.zip,.json`}
-              multiple={true}
-              maxCount={botConfig?.fileUploadSizeLimit}
-              beforeUpload={(file) => {
-                const allowedTypes = [
-                  "application/pdf",
-                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                  "text/csv",
-                  "text/plain",
-                  "audio/mpeg",
-                  "audio/mp4",
-                  "video/mp4",
-                  "video/mpeg",
-                  "application/zip",
-                  "application/x-zip-compressed",
-                  "application/json",
-                ]
-                  .map((type) => type.toLowerCase())
-                  .join(", ");
-
-                console.log("file type:", file.type.toLowerCase());
-
-                if (!allowedTypes.includes(file.type.toLowerCase())) {
-                  message.error(
-                    `File type not supported. Please upload a ${allowedTypes} file.`
-                  );
-                  return Upload.LIST_IGNORE;
-                }
-
-                // if video or audio
-                if (
-                  file.type.toLowerCase().includes("audio") ||
-                  file.type.toLowerCase().includes("video")
-                ) {
-                  message.warning(
-                    `Currently, Only support video and audio files with English audio`
-                  );
-                }
-
-                return false;
-              }}
-            >
-              <div className="px-3 py-4">
-                <p className="ant-upload-drag-icon flex justify-center">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20">
-                    <InboxIcon className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                </p>
-                <p className="ant-upload-text">
-                  Click or drag PDF, Docx, CSV, TXT, MP3, MP4, Zip, or JSON
-                  files to this area
-                </p>
-                <p className="ant-upload-hint">
-                  {`Support is available for a single or bulk upload of up to ${botConfig?.fileUploadSizeLimit}
-                  files. Please note that file upload is in beta, so if you
-                  encounter any issues, kindly report them.`}
-                </p>
-              </div>
-            </Upload.Dragger>
-          </Form.Item>
-          <p className="text-xs leading-relaxed text-fg-subtle">
-            If you find any issues, please report them on{" "}
-            <a
-              href={`https://myapps.ai`}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-            >
-              Support
-            </a>
-            .
-          </p>
-        </>
       ),
     },
     {
       id: 4,
       value: "crawl",
-      title: "Crawler",
-      icon: SpiderIcon,
+      title: "Crawl",
+      hint: "A whole site",
       formComponent: (
         <>
           <Form.Item
             name="content"
+            label="Website URL"
             rules={[
               {
                 required: true,
@@ -206,221 +236,43 @@ export const BotForm = ({
               },
             ]}
           >
-            <Input type="url" placeholder="Enter the website URL" />
+            <Input type="url" placeholder="https://example.com" />
           </Form.Item>
-          <Form.Item
-            name="maxDepth"
-            help="The max depth of the website to crawl"
-            rules={[
-              {
-                required: true,
-                message: "Please input max depth!",
-              },
-            ]}
-          >
-            <InputNumber
-              placeholder="Enter the max depth"
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="maxLinks"
-            help="The max links to crawl"
-            rules={[
-              {
-                required: true,
-                message: "Please input max links count",
-              },
-            ]}
-          >
-            <InputNumber
-              placeholder="Enter the max depth"
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-
-          <p className="text-xs leading-relaxed text-fg-subtle">
-            If you find any issues, please report them on{" "}
-            <a
-              href={`https://myapps.ai`}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+          <div className="grid gap-x-4 sm:grid-cols-2">
+            <Form.Item
+              name="maxDepth"
+              label="Max depth"
+              extra="How many links deep to follow."
+              rules={[
+                {
+                  required: true,
+                  message: "Please input max depth!",
+                },
+              ]}
             >
-              Support
-            </a>
-            .
-          </p>
-        </>
-      ),
-    },
-    // {
-    //   id: 6,
-    //   value: "github",
-    //   title: "GitHub",
-    //   icon: GithubIcon,
-    //   formComponent: (
-    //     <>
-    //       <Form.Item
-    //         name="content"
-    //         rules={[
-    //           {
-    //             required: true,
-    //             message: "Please enter the public github repo URL",
-    //           },
-    //           {
-    //             pattern: new RegExp(
-    //               "^(https?://)?(www.)?github.com/([a-zA-Z0-9-]+)/([a-zA-Z0-9_-]+)(.git)?$"
-    //             ),
-    //             message: "Please enter a valid public github repo URL",
-    //           },
-    //         ]}
-    //       >
-    //         <Input type="url" placeholder="Enter the github repo URL" />
-    //       </Form.Item>
-    //       <Row gutter={16}>
-    //         <Col span={12}>
-    //           <Form.Item
-    //             name={["options", "branch"]}
-    //             label="Branch"
-    //             rules={[
-    //               {
-    //                 required: true,
-    //                 message: "Please input branch",
-    //               },
-    //             ]}
-    //           >
-    //             <Input placeholder="Enter the branch" />
-    //           </Form.Item>
-    //         </Col>
-    //         <Col span={12}>
-    //           <Form.Item label="Private repo?" name={["options", "is_private"]}>
-    //             <Switch className="mr-2" />
-    //           </Form.Item>
-    //         </Col>
-    //       </Row>
+              <InputNumber
+                placeholder="Enter the max depth"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
 
-    //       <p className="text-xs leading-relaxed text-fg-subtle">
-    //         If you find any issues, please report them on{" "}
-    //         <a
-    //           href={`https://myapps.ai`}
-    //           target="_blank"
-    //           rel="noreferrer"
-    //           className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-    //         >
-    //           Support
-    //         </a>
-    //         .
-    //       </p>
-    //     </>
-    //   ),
-    // },
-    // {
-    //   id: 7,
-    //   value: "youtube",
-    //   title: "Youtube",
-    //   icon: YoutubeIcon,
-    //   formComponent: (
-    //     <>
-    //       <Form.Item
-    //         name="content"
-    //         rules={[
-    //           {
-    //             required: true,
-    //             message: "Please enter a valid youtube URL",
-    //           },
-    //           {
-    //             pattern: new RegExp(
-    //               /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/
-    //             ),
-    //             message: "Please enter a valid youtube URL",
-    //           },
-    //         ]}
-    //       >
-    //         <Input
-    //           type="url"
-    //           size="large"
-    //           placeholder="Enter the youtube URL"
-    //         />
-    //       </Form.Item>
-
-    //       <Form.Item
-    //         name={["options", "youtube_mode"]}
-    //         label="Youtube mode"
-    //         rules={[
-    //           {
-    //             required: true,
-    //             message: "Please select a youtube mode",
-    //           },
-    //         ]}
-    //       >
-    //         <Select
-    //           options={[
-    //             {
-    //               label: "Transcribe using Whisper",
-    //               value: "whisper",
-    //             },
-    //             {
-    //               label: "Youtube Transcript",
-    //               value: "transcript",
-    //             },
-    //           ]}
-    //         />
-    //       </Form.Item>
-    //     </>
-    //   ),
-    // },
-    {
-      id: 8,
-      value: "rest",
-      title: "REST API",
-      icon: ApiIcon,
-      formComponent: (
-        <>
-          <Row gutter={24}>
-            <Col span={6}>
-              <Form.Item
-                name={["options", "method"]}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select a method",
-                  },
-                ]}
-              >
-                <Select
-                  options={[
-                    {
-                      label: "GET",
-                      value: "get",
-                    },
-                    {
-                      label: "POST",
-                      value: "post",
-                    },
-                  ]}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={18}>
-              <Form.Item
-                name="content"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter a valid REST API URL",
-                  },
-                  {
-                    pattern: new RegExp(/^(https?:\/\/)?(www\.)?(.+)\.(.+)$/),
-                    message: "Please enter a valid REST API URL",
-                  },
-                ]}
-              >
-                <Input type="url" placeholder="Enter the REST API URL" />
-              </Form.Item>
-            </Col>
-          </Row>
+            <Form.Item
+              name="maxLinks"
+              label="Max links"
+              extra="The most pages to read."
+              rules={[
+                {
+                  required: true,
+                  message: "Please input max links count",
+                },
+              ]}
+            >
+              <InputNumber
+                placeholder="Enter the max links"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </div>
         </>
       ),
     },
@@ -428,10 +280,11 @@ export const BotForm = ({
       id: 9,
       value: "sitemap",
       title: "Sitemap",
-      icon: SitemapIcon,
+      hint: "sitemap.xml",
       formComponent: (
         <Form.Item
           name="content"
+          label="Sitemap URL"
           rules={[
             {
               required: true,
@@ -439,14 +292,88 @@ export const BotForm = ({
             },
           ]}
         >
-          <Input type="url" placeholder="Enter the sitemap URL" />
+          <Input type="url" placeholder="https://example.com/sitemap.xml" />
         </Form.Item>
+      ),
+    },
+    {
+      id: 3,
+      value: "text",
+      title: "Text",
+      hint: "Paste it in",
+      formComponent: (
+        <Form.Item
+          name="content"
+          label="Text"
+          rules={[
+            {
+              required: true,
+              message: "Please enter the text",
+            },
+          ]}
+        >
+          <Input.TextArea placeholder="Paste the text your bot should know" rows={6} />
+        </Form.Item>
+      ),
+    },
+    // GitHub and YouTube sources are switched off for now.
+    {
+      id: 8,
+      value: "rest",
+      title: "REST API",
+      hint: "JSON endpoint",
+      formComponent: (
+        <div className="flex gap-3">
+          <Form.Item
+            name={["options", "method"]}
+            label="Method"
+            className="w-28 shrink-0"
+            rules={[
+              {
+                required: true,
+                message: "Please select a method",
+              },
+            ]}
+          >
+            <Select
+              options={[
+                {
+                  label: "GET",
+                  value: "get",
+                },
+                {
+                  label: "POST",
+                  value: "post",
+                },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item
+            name="content"
+            label="Endpoint URL"
+            className="min-w-0 flex-1"
+            rules={[
+              {
+                required: true,
+                message: "Please enter a valid REST API URL",
+              },
+              {
+                pattern: new RegExp(/^(https?:\/\/)?(www\.)?(.+)\.(.+)$/),
+                message: "Please enter a valid REST API URL",
+              },
+            ]}
+          >
+            <Input type="url" placeholder="https://api.example.com/data" />
+          </Form.Item>
+        </div>
       ),
     },
   ]);
 
   const [selectedSource, _setSelectedSource] = React.useState<any>(
-    showEmbeddingAndModels ? null : availableSources[0]
+    showEmbeddingAndModels
+      ? null
+      : availableSources.find((s) => s.value === "website")
   );
   const { data: transcripts, isLoading: isFetchingTranscript } = useQuery({
     queryKey: [
@@ -474,13 +401,28 @@ export const BotForm = ({
       selectedSource?.value === "youtube",
   });
 
+  const modelSelectProps = {
+    showSearch: true,
+    filterOption: (input: string, option?: { label?: string; value?: string }) =>
+      (option?.label?.toLowerCase() ?? "").includes(input?.toLowerCase()) ||
+      (option?.value?.toLowerCase() ?? "").includes(input?.toLowerCase()),
+    filterSort: (
+      optionA: { label?: string },
+      optionB: { label?: string }
+    ) =>
+      (optionA?.label ?? "")
+        .toLowerCase()
+        .localeCompare((optionB?.label ?? "").toLowerCase()),
+  };
+
   return (
-    <>
+    <ConfigProvider theme={{ token: { controlHeight: 40 } }}>
       <Form
         layout="vertical"
         onFinish={createBot}
         form={form}
-        className="space-y-6"
+        requiredMark={false}
+        className={formClass}
         initialValues={{
           embedding:
             botConfig?.defaultEmbeddingModel ||
@@ -498,83 +440,63 @@ export const BotForm = ({
           },
         }}
       >
-        <RadioGroup
-          value={selectedSource}
-          onChange={(e: any) => {
-            _setSelectedSource(e);
-            setSelectedSource(e);
-          }}
-        >
-          <RadioGroup.Label className="block text-sm font-semibold tracking-tight text-fg">
-            Select a data source
-          </RadioGroup.Label>
-          <p className="mt-0.5 text-sm leading-relaxed text-fg-muted">
-            Where should your bot learn from?
-          </p>
+        <div className="flex flex-col gap-4 px-5 py-5 sm:px-6">
+          <RadioGroup
+            value={selectedSource}
+            onChange={(e: any) => {
+              _setSelectedSource(e);
+              setSelectedSource(e);
+            }}
+          >
+            <RadioGroup.Label
+              as="h2"
+              className="text-base font-semibold text-fg"
+            >
+              Where should it learn from?
+            </RadioGroup.Label>
+            <p className="mt-1 text-sm text-fg-muted">Pick one to start.</p>
 
-          <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
-            {availableSources.map((source) => (
-              <RadioGroup.Option
-                key={source.id}
-                value={source}
-                className={({ checked, active }) =>
-                  classNames(
-                    checked
-                      ? "border-indigo-500 bg-indigo-50/60 shadow-soft ring-1 ring-indigo-500 dark:border-indigo-400 dark:bg-indigo-500/10 dark:ring-indigo-400"
-                      : "border-line bg-surface shadow-soft hover:-translate-y-0.5 hover:border-line-strong hover:shadow-raised",
-                    active && !checked ? "ring-2 ring-indigo-500/30" : "",
-                    "group relative flex cursor-pointer flex-col items-start gap-3 rounded-xl border p-3.5 transition-all duration-200 ease-out focus:outline-none"
-                  )
-                }
-              >
-                {({ checked }) => (
-                  <>
-                    <span
-                      className={classNames(
-                        checked
-                          ? "bg-indigo-600 text-white ring-indigo-600 dark:bg-indigo-500 dark:ring-indigo-500"
-                          : "bg-surface-2 text-fg-muted ring-line group-hover:text-indigo-600 dark:group-hover:text-indigo-300",
-                        "flex h-8 w-8 items-center justify-center rounded-lg ring-1 ring-inset transition-colors"
-                      )}
-                    >
-                      <source.icon className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <RadioGroup.Label
-                      as="span"
-                      className={classNames(
-                        checked
-                          ? "text-indigo-700 dark:text-indigo-200"
-                          : "text-fg",
-                        "block text-sm font-medium"
-                      )}
-                    >
-                      {source.title}
-                    </RadioGroup.Label>
+            <div className="mt-4 grid gap-2 [grid-template-columns:repeat(auto-fill,minmax(130px,1fr))]">
+              {availableSources.map((source) => (
+                <RadioGroup.Option
+                  key={source.id}
+                  value={source}
+                  className={({ checked, active }) =>
+                    classNames(
+                      checked
+                        ? "border-[1.5px] border-indigo-600 ring-[3px] ring-indigo-50 dark:border-indigo-400 dark:ring-indigo-500/15"
+                        : "border border-line hover:border-line-strong",
+                      active && !checked ? "ring-2 ring-indigo-500/30" : "",
+                      "flex min-h-[56px] cursor-pointer flex-col items-start gap-0.5 rounded-[10px] bg-surface px-3 py-2.5 text-left transition-colors focus:outline-none"
+                    )
+                  }
+                >
+                  <RadioGroup.Label
+                    as="span"
+                    className="text-sm font-medium text-fg"
+                  >
+                    {source.title}
+                  </RadioGroup.Label>
+                  <RadioGroup.Description
+                    as="span"
+                    className="text-xs text-fg-subtle"
+                  >
+                    {source.hint}
+                  </RadioGroup.Description>
+                </RadioGroup.Option>
+              ))}
+            </div>
+          </RadioGroup>
 
-                    <CheckCircleIcon
-                      className={classNames(
-                        checked ? "scale-100 opacity-100" : "scale-75 opacity-0",
-                        "pointer-events-none absolute right-2.5 top-2.5 h-4 w-4 text-indigo-600 transition-all duration-200 ease-out dark:text-indigo-400"
-                      )}
-                      aria-hidden="true"
-                    />
-                  </>
-                )}
-              </RadioGroup.Option>
-            ))}
-          </div>
-        </RadioGroup>
+          {selectedSource && (
+            <div className="-mb-4">{selectedSource.formComponent}</div>
+          )}
 
-        {selectedSource && selectedSource.formComponent}
-
-        {selectedSource && selectedSource.value === "rest" && (
-          <Row gutter={24}>
-            <Col span={12}>
+          {selectedSource && selectedSource.value === "rest" && (
+            <div className="-mb-4 grid gap-x-4 sm:grid-cols-2">
               <Form.Item name={["options", "headers"]} label="Headers">
                 <Input.TextArea placeholder="Enter the headers" />
               </Form.Item>
-            </Col>
-            <Col span={12}>
               <Form.Item
                 name={["options", "body"]}
                 label="Body (JSON)"
@@ -587,115 +509,91 @@ export const BotForm = ({
               >
                 <Input.TextArea placeholder="Enter the body" />
               </Form.Item>
-            </Col>
-          </Row>
-        )}
-
-        {selectedSource &&
-          selectedSource.value === "youtube" &&
-          youtubeMode === "transcript" && (
-            <>
-              <Form.Item
-                name={["options", "language_code"]}
-                label="Select language"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select a language",
-                  },
-                ]}
-              >
-                <Select
-                  loading={isFetchingTranscript}
-                  placeholder="Select language"
-                  options={transcripts?.map((transcript) => ({
-                    label: transcript.name.simpleText,
-                    value: transcript.languageCode,
-                  }))}
-                />
-              </Form.Item>
-
-              <p className="text-xs leading-relaxed text-fg-subtle">
-                If you find any issues, please report them on{" "}
-                <a
-                  href={`https://myapps.ai`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-                >
-                  Support
-                </a>
-                .
-              </p>
-            </>
+            </div>
           )}
 
-        <Form.Item hidden={!showEmbeddingAndModels} noStyle>
-          <Divider />
-        </Form.Item>
+          {selectedSource &&
+            selectedSource.value === "youtube" &&
+            youtubeMode === "transcript" && (
+              <div className="-mb-4">
+                <Form.Item
+                  name={["options", "language_code"]}
+                  label="Select language"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select a language",
+                    },
+                  ]}
+                >
+                  <Select
+                    loading={isFetchingTranscript}
+                    placeholder="Select language"
+                    options={transcripts?.map((transcript) => ({
+                      label: transcript.name.simpleText,
+                      value: transcript.languageCode,
+                    }))}
+                  />
+                </Form.Item>
+              </div>
+            )}
+        </div>
 
-        <Form.Item
-          hidden={!showEmbeddingAndModels}
-          label={
-            <span className="text-sm font-medium text-fg">
-              Chat Model
-            </span>
+        <div
+          className={
+            showEmbeddingAndModels
+              ? "flex flex-col gap-4 border-t border-line px-5 pb-1 pt-5 sm:px-6"
+              : "hidden"
           }
-          name="model"
         >
-          <Select
-            showSearch
-            filterOption={(input, option) =>
-              (option?.label?.toLowerCase() ?? "").includes(
-                input?.toLowerCase()
-              ) ||
-              (option?.value?.toLowerCase() ?? "").includes(
-                input?.toLowerCase()
-              )
-            }
-            filterSort={(optionA, optionB) =>
-              (optionA?.label ?? "")
-                .toLowerCase()
-                .localeCompare((optionB?.label ?? "").toLowerCase())
-            }
-            placeholder="Select a Chat Model"
-            options={botConfig.chatModel}
-          />
-        </Form.Item>
-        <Form.Item
-          hidden={!showEmbeddingAndModels}
-          label={
-            <span className="text-sm font-medium text-fg">
-              Embedding model
-            </span>
-          }
-          name="embedding"
-        >
-          <Select
-            showSearch
-            filterOption={(input, option) =>
-              (option?.label?.toLowerCase() ?? "").includes(
-                input?.toLowerCase()
-              ) ||
-              (option?.value?.toLowerCase() ?? "").includes(
-                input?.toLowerCase()
-              )
-            }
-            filterSort={(optionA, optionB) =>
-              (optionA?.label ?? "")
-                .toLowerCase()
-                .localeCompare((optionB?.label ?? "").toLowerCase())
-            }
-            options={botConfig.embeddingModel}
-            placeholder="Select an Embedding Model"
-          />
-        </Form.Item>
+          <div>
+            <h2 className="text-base font-semibold text-fg">Pick a model</h2>
+            <p className="mt-1 text-sm text-fg-muted">
+              You can change both later in the bot's settings.
+            </p>
+          </div>
+          <div className="grid gap-x-4 sm:grid-cols-2">
+            <Form.Item
+              hidden={!showEmbeddingAndModels}
+              label="Chat model"
+              extra="Writes the answers."
+              name="model"
+            >
+              <Select
+                {...modelSelectProps}
+                placeholder="Select a Chat Model"
+                options={botConfig.chatModel}
+              />
+            </Form.Item>
+            <Form.Item
+              hidden={!showEmbeddingAndModels}
+              label="Embedding model"
+              extra="Indexes your sources for search."
+              name="embedding"
+            >
+              <Select
+                {...modelSelectProps}
+                options={botConfig.embeddingModel}
+                placeholder="Select an Embedding Model"
+              />
+            </Form.Item>
+          </div>
+        </div>
 
-        <Form.Item>
+        <div className="flex flex-wrap justify-end gap-2 border-t border-line px-5 py-3.5 sm:px-6">
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="ui-btn-secondary h-10 px-4"
+            >
+              Cancel
+            </button>
+          )}
           <button
             type="submit"
             disabled={isLoading}
-            className="ui-btn-primary h-10 w-full"
+            className="ui-btn-primary h-10 px-4"
           >
             {isLoading && (
               <span
@@ -703,10 +601,10 @@ export const BotForm = ({
                 className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
               />
             )}
-            {isLoading ? "Creating..." : "Create"}
+            {isLoading ? "Creating..." : "Create bot"}
           </button>
-        </Form.Item>
+        </div>
       </Form>
-    </>
+    </ConfigProvider>
   );
 };

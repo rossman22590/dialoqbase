@@ -39,14 +39,17 @@ export const getAllUsersHandler = async (
 
   const users = await prisma.user.findMany({
     include: {
-      bots: true,
+      _count: { select: { bots: true } },
+      credit: { select: { balance: true } },
     },
   });
 
-  return users.map((user) => ({
+  return users.map(({ _count, credit, ...user }) => ({
     ...user,
     is_admin: user.isAdministrator,
     password: undefined,
-    bots: user.bots.length,
+    bots: _count.bots,
+    // Credit balance in dollars; a user without a credit row has none
+    balance: Number(credit?.balance ?? 0),
   }));
 };

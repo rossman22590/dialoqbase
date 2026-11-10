@@ -20,6 +20,7 @@ export type BotPlaygroundHistory = {
 export type PlaygroundHistory = {
   title: string;
   id: string;
+  createdAt?: string;
 };
 
 export type BotPlaygroundMessageType = {

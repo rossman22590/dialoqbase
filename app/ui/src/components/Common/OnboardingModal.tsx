@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button } from "antd";
-import { motion, AnimatePresence } from "framer-motion";
+import { Modal } from "antd";
 import {
     RocketLaunchIcon,
     CpuChipIcon,
@@ -8,96 +7,57 @@ import {
     PaintBrushIcon,
     GlobeAltIcon,
     CheckCircleIcon,
-    SparklesIcon,
-    ChevronRightIcon,
-    ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
-
-const Celebration = () => {
-    return (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-            {[...Array(30)].map((_, i) => (
-                <motion.div
-                    key={i}
-                    className="absolute w-1 h-1 rounded-full"
-                    style={{
-                        backgroundColor: ['#A855F7', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'][i % 5],
-                        left: `${Math.random() * 100}%`,
-                        top: `-5%`,
-                        boxShadow: '0 0 10px currentColor'
-                    }}
-                    animate={{
-                        top: '105%',
-                        left: `${(Math.random() - 0.5) * 50 + (i / 30) * 100}%`,
-                        opacity: [0, 1, 1, 0]
-                    }}
-                    transition={{
-                        duration: Math.random() * 3 + 2,
-                        repeat: Infinity,
-                        delay: Math.random() * 5,
-                        ease: "easeInOut",
-                    }}
-                />
-            ))}
-        </div>
-    );
-};
 
 const steps = [
     {
         id: "welcome",
-        subtitle: "The Future of Engagement",
-        title: "Intelligence, Evolved.",
-        description: "Welcome to Botcraft Pro. We've redefined how businesses interact with information and customers. Your journey to artificial mastery starts here.",
-        icon: <RocketLaunchIcon className="h-12 w-12 text-white" />,
-        color: "from-purple-600 to-indigo-600",
-        glow: "bg-purple-500/20"
-    },
-    {
-        id: "brain",
-        subtitle: "Step 01: Core Logic",
-        title: "Neural Architect",
-        description: "Deploy the world's most sophisticated LLMs. Whether it's GPT-4o, Claude 3.5, or Gemini, you control the logic, the tone, and the temperment of your agent.",
-        icon: <CpuChipIcon className="h-12 w-12 text-white" />,
-        color: "from-blue-600 to-cyan-500",
-        glow: "bg-blue-500/20"
+        eyebrow: "Welcome",
+        title: "Welcome to Botcraft Pro",
+        description:
+            "Build chat bots that answer from your own material: course notes, documents and websites. Here's how it works in four short steps.",
+        icon: RocketLaunchIcon,
     },
     {
         id: "data",
-        subtitle: "Step 02: Knowledge base",
-        title: "Bespoke Wisdom",
-        description: "Feed your bot anything: PDFs, URLs, GitHub repositories. Our RAG engine processes data into a specialized vector store, ensuring answers are grounded in 100% factual context.",
-        icon: <CircleStackIcon className="h-12 w-12 text-white" />,
-        color: "from-emerald-600 to-teal-500",
-        glow: "bg-emerald-500/20"
+        eyebrow: "Step 1 of 4",
+        title: "Add your sources",
+        description:
+            "Upload files (PDF, Word, CSV, text, audio or video) or point a bot at a web page, a whole site, a sitemap or a REST API. Your bot answers from what you give it.",
+        icon: CircleStackIcon,
+    },
+    {
+        id: "brain",
+        eyebrow: "Step 2 of 4",
+        title: "Pick a model",
+        description:
+            "Choose the chat model that writes the answers. You can change it, along with the bot's instructions, any time in its settings.",
+        icon: CpuChipIcon,
     },
     {
         id: "style",
-        subtitle: "Step 03: interface",
-        title: "Signature Aesthetics",
-        description: "Your bot is an extension of your brand. Customize every pixel—from Chat Bubbles and Avatars to unique color palettes—to create a truly premium user experience.",
-        icon: <PaintBrushIcon className="h-12 w-12 text-white" />,
-        color: "from-pink-600 to-rose-500",
-        glow: "bg-pink-500/20"
+        eyebrow: "Step 3 of 4",
+        title: "Make it yours",
+        description:
+            "Change how the chat widget looks in Appearance so it fits your site.",
+        icon: PaintBrushIcon,
     },
     {
         id: "deploy",
-        subtitle: "Step 04: Omnipresence",
-        title: "Seamless Reach",
-        description: "Activate your bot across Telegram, Discord, and WhatsApp instantly. Or embed it into your site with our high-performance Next.js and HTML components.",
-        icon: <GlobeAltIcon className="h-12 w-12 text-white" />,
-        color: "from-amber-500 to-orange-600",
-        glow: "bg-amber-500/20"
+        eyebrow: "Step 4 of 4",
+        title: "Put it to work",
+        description:
+            "Embed it on your website, or connect it to Telegram, Discord or WhatsApp. Every answer uses credits, which you can track on Usage & billing.",
+        icon: GlobeAltIcon,
     },
     {
         id: "finish",
-        subtitle: "Ready for Launch",
-        title: "Ignite Your Vision.",
-        description: "The platform is ready. Your data is waiting. Go ahead and build the next generation of conversational AI. We're here for the journey.",
-        icon: <CheckCircleIcon className="h-14 w-14 text-white" />,
-        color: "from-green-500 to-emerald-600",
-        glow: "bg-green-500/20"
-    }
+        eyebrow: "All set",
+        title: "You're ready to build",
+        description:
+            "Start by creating your first bot. You can come back to any of these steps later.",
+        icon: CheckCircleIcon,
+    },
 ];
 
 export const OnboardingModal: React.FC = () => {
@@ -133,145 +93,110 @@ export const OnboardingModal: React.FC = () => {
     };
 
     const current = steps[currentStep];
+    const Icon = current.icon;
+    const isLast = currentStep === steps.length - 1;
 
     return (
         <Modal
             open={isVisible}
             onCancel={handleFinish}
             footer={null}
-            width={900}
+            width={720}
             centered
             maskClosable={false}
-            className="premium-onboarding"
-            styles={{ body: { padding: 0 } }}
-            closeIcon={null} // Cleaner look
+            closeIcon={null}
+            styles={{
+                content: { padding: 0, overflow: "hidden", borderRadius: 12 },
+                body: { padding: 0 },
+            }}
         >
-            <div className="flex flex-col lg:flex-row min-h-[580px] bg-surface overflow-hidden rounded-[28px] border border-line shadow-float">
-
-                {/* Left Side: Visual / Mood */}
-                <div className={`relative w-full lg:w-[400px] bg-gradient-to-br ${current.color} overflow-hidden flex flex-col items-center justify-center p-12 transition-all duration-700 ease-in-out`}>
-                    {/* Background Texture/Animation */}
-                    <div className="absolute inset-0 opacity-20 pointer-events-none">
-                        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent)] scale-[2]" />
-                        {currentStep === steps.length - 1 && <Celebration />}
-                    </div>
-
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={currentStep}
-                            initial={{ scale: 0.8, opacity: 0, rotate: -15 }}
-                            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                            exit={{ scale: 1.2, opacity: 0, rotate: 15 }}
-                            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                            className="relative z-10"
-                        >
-                            <div className="p-8 bg-white/10 backdrop-blur-3xl rounded-[40px] border border-white/20 shadow-2xl overflow-hidden relative group">
-                                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                {current.icon}
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
-
-                    {/* Custom Vertical Steps for Desktop */}
-                    <div className="hidden lg:flex flex-col gap-3 mt-12 relative z-10">
-                        {steps.map((_, i) => (
-                            <motion.div
-                                key={i}
-                                animate={{
-                                    width: currentStep === i ? 40 : 8,
-                                    opacity: currentStep === i ? 1 : 0.4
-                                }}
-                                className="h-1 bg-white rounded-full transition-all duration-300"
-                            />
+            <div className="flex flex-col bg-surface sm:min-h-[400px] sm:flex-row">
+                {/* Step rail */}
+                <div className="flex shrink-0 flex-row items-center justify-between gap-4 border-b border-line bg-app px-6 py-5 sm:w-[220px] sm:flex-col sm:items-start sm:justify-start sm:border-b-0 sm:border-r sm:py-8">
+                    <span
+                        aria-hidden="true"
+                        className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300"
+                    >
+                        <Icon className="h-6 w-6" />
+                    </span>
+                    <ol
+                        aria-label="Onboarding steps"
+                        className="flex gap-1.5 sm:mt-6 sm:flex-col sm:gap-2"
+                    >
+                        {steps.map((step, i) => (
+                            <li
+                                key={step.id}
+                                aria-current={i === currentStep ? "step" : undefined}
+                                className="flex items-center gap-2 text-[13px]"
+                            >
+                                <span
+                                    aria-hidden="true"
+                                    className={`h-1.5 rounded-full transition-all ${
+                                        i === currentStep
+                                            ? "w-5 bg-indigo-600 dark:bg-indigo-400"
+                                            : i < currentStep
+                                            ? "w-1.5 bg-indigo-300 dark:bg-indigo-500/60"
+                                            : "w-1.5 bg-line-strong"
+                                    }`}
+                                />
+                                <span
+                                    className={`hidden sm:inline ${
+                                        i === currentStep
+                                            ? "font-medium text-fg"
+                                            : "text-fg-subtle"
+                                    }`}
+                                >
+                                    {step.title}
+                                </span>
+                                <span className="sr-only sm:hidden">{step.title}</span>
+                            </li>
                         ))}
-                    </div>
+                    </ol>
                 </div>
 
-                {/* Right Side: Content */}
-                <div className="flex-1 flex flex-col p-8 sm:p-10 lg:p-14 relative bg-surface">
-
-                    {/* Header / Subtitle */}
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={currentStep}
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -20, opacity: 0 }}
-                            transition={{ delay: 0.1 }}
-                        >
-                            <span className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
-                                {current.subtitle}
-                            </span>
-                            <h2 className="mb-5 text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
-                                {current.title}
-                            </h2>
-
-                            <div className="max-w-md">
-                                <p className="text-base leading-relaxed text-fg-muted sm:text-[17px]">
-                                    {current.description}
-                                </p>
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
-
-                    {/* Interactive Preview Concept (Static but looks dynamic) */}
-                    <div className={`mt-auto mb-12 p-6 rounded-3xl border border-line bg-surface-2/60 flex items-center gap-4 transition-all duration-700 ${current.glow}`}>
-                        <div className={`p-2 rounded-xl bg-gradient-to-br ${current.color} shadow-lg`}>
-                            <SparklesIcon className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                            <div className="skeleton mb-2 h-2 w-1/3 rounded-full" />
-                            <div className="skeleton h-2 w-2/3 rounded-full" />
-                        </div>
+                {/* Content */}
+                <div className="flex min-w-0 flex-1 flex-col p-6 sm:p-8">
+                    <div key={current.id} className="animate-fade-in" aria-live="polite">
+                        <p className="text-xs font-semibold text-fg-subtle">
+                            {current.eyebrow}
+                        </p>
+                        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.01em] text-fg">
+                            {current.title}
+                        </h2>
+                        <p className="mt-2 max-w-md text-sm leading-relaxed text-fg-muted">
+                            {current.description}
+                        </p>
                     </div>
 
-                    {/* Footer / Controls */}
-                    <div className="flex items-center justify-between mt-auto">
-                        <Button
-                            type="text"
+                    <div className="mt-8 flex flex-wrap items-center justify-between gap-3 sm:mt-auto">
+                        <button
+                            type="button"
                             onClick={handleFinish}
-                            className="p-0 text-xs font-medium uppercase tracking-widest text-fg-subtle hover:!text-fg"
+                            className="ui-btn-ghost -ml-3"
                         >
-                            Skip to App
-                        </Button>
+                            Skip
+                        </button>
 
-                        <div className="flex gap-4">
+                        <div className="flex gap-2">
                             {currentStep > 0 && (
                                 <button
+                                    type="button"
                                     onClick={handleBack}
-                                    className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-fg-subtle shadow-soft transition-all hover:border-line-strong hover:text-fg active:scale-95"
+                                    className="ui-btn-secondary h-10 px-4"
                                 >
-                                    <ChevronLeftIcon className="h-5 w-5" />
+                                    Back
                                 </button>
                             )}
-
                             <button
+                                type="button"
                                 onClick={handleNext}
-                                className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-indigo-500 to-indigo-600 px-7 py-3 font-medium text-white shadow-brand ring-1 ring-inset ring-white/10 transition-all hover:brightness-110 active:scale-95"
+                                className="ui-btn-primary h-10 px-4"
                             >
-                                <span className="relative z-10">
-                                    {currentStep === steps.length - 1 ? "Get Started" : "Continue"}
-                                </span>
-                                <ChevronRightIcon className="h-5 w-5 relative z-10 group-hover:translate-x-1 transition-transform" />
-
-                                {/* Shimmer Effect */}
-                                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                                {isLast ? "Get started" : "Continue"}
                             </button>
                         </div>
                     </div>
                 </div>
-
-                {/* Global Modal Overrides for this component only */}
-                <style dangerouslySetInnerHTML={{
-                    __html: `
-            .premium-onboarding .ant-modal-content {
-                background: transparent !important;
-                box-shadow: none !important;
-            }
-            .premium-onboarding .ant-modal-body {
-                background: transparent !important;
-            }
-        `}} />
             </div>
         </Modal>
     );

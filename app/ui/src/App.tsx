@@ -48,6 +48,14 @@ const router = createHashRouter([
     path: "/new",
   },
   {
+    element: (
+      <DashboardLayout>
+        <UsageRoot />
+      </DashboardLayout>
+    ),
+    path: "/usage",
+  },
+  {
     path: "/bot/:id/embed",
     element: (
       <BotLayout>
@@ -233,9 +241,9 @@ export default function App() {
           mode === "dark" ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
           fontFamily:
-            'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-          colorPrimary: "#7c3aed",
-          colorLink: "#7c3aed",
+            'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+          colorPrimary: "#4f46e5",
+          colorLink: "#4f46e5",
           borderRadius: 8,
           borderRadiusLG: 14,
           controlHeight: 36,
@@ -261,19 +269,18 @@ export default function App() {
         components: {
           Button: {
             fontWeight: 500,
-            primaryShadow:
-              "0 1px 2px rgb(76 29 149 / 0.25), 0 4px 12px -4px rgb(124 58 237 / 0.5)",
-            defaultShadow: "0 1px 2px rgb(16 16 24 / 0.05)",
+            primaryShadow: "none",
+            defaultShadow: "none",
           },
           Input: {
-            activeShadow: "0 0 0 4px rgb(124 58 237 / 0.12)",
+            activeShadow: "0 0 0 4px rgb(79 70 229 / 0.12)",
           },
           InputNumber: {
-            activeShadow: "0 0 0 4px rgb(124 58 237 / 0.12)",
+            activeShadow: "0 0 0 4px rgb(79 70 229 / 0.12)",
           },
           Select: {
             optionSelectedBg:
-              mode === "dark" ? "rgb(139 92 246 / 0.16)" : "#f5f3ff",
+              mode === "dark" ? "rgb(99 102 241 / 0.16)" : "#eef2ff",
           },
           Card: {
             headerFontSize: 15,
@@ -290,8 +297,8 @@ export default function App() {
             borderColor: mode === "dark" ? "#27272d" : "#ececf1",
           },
           Tabs: {
-            itemSelectedColor: mode === "dark" ? "#c4b5fd" : "#6d28d9",
-            inkBarColor: "#7c3aed",
+            itemSelectedColor: mode === "dark" ? "#a5b4fc" : "#4338ca",
+            inkBarColor: "#4f46e5",
             titleFontSize: 14,
           },
           Segmented: {

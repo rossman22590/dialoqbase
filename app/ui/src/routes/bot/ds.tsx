@@ -4,7 +4,7 @@ import React from "react";
 import { SkeletonLoading } from "../../components/Common/SkeletonLoading";
 import { DsTable } from "../../components/Bot/DS/DsTable";
 import api from "../../services/api";
-import { Input, Pagination } from "antd";
+import { Pagination } from "antd";
 
 export default function BotDSRoot() {
   const param = useParams<{ id: string }>();
@@ -32,6 +32,8 @@ export default function BotDSRoot() {
           type: string;
           content: string;
           status: string;
+          createdAt?: string;
+          updatedAt?: string;
         }[];
         limit: number;
         page: number;
@@ -51,44 +53,55 @@ export default function BotDSRoot() {
   }, [status]);
 
   return (
-    <div className="ui-page">
-      {status === "loading" && <SkeletonLoading />}
-      {status === "success" && (
-        <div>
+    <div className="px-4 pb-10 pt-6 sm:px-8 sm:pt-8">
+      <div className="max-w-[1040px]">
+        {status === "loading" && <SkeletonLoading className="mt-0" />}
+        {status === "success" && (
           <DsTable
             data={botData.data}
+            total={botData.total}
             searchNode={
-              <div className="w-full sm:w-72">
-                <Input.Search
-                  value={search}
-                  onSearch={(value) => setSearchValue(value)}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search sources"
-                  className="w-full"
+              <input
+                type="search"
+                aria-label="Search sources"
+                placeholder="Search sources"
+                value={search ?? ""}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  // Clearing the box resets the list, like Input.Search's clear.
+                  if (e.target.value === "") setSearchValue(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setSearchValue(search);
+                  }
+                }}
+                className="ui-input h-[34px] w-full border-line text-[13px] sm:w-[200px]"
+              />
+            }
+            paginationNode={
+              botData.total >= 10 ? (
+                <Pagination
+                  size="small"
+                  onShowSizeChange={(current, size) => {
+                    setPage(current);
+                    setLimit(size);
+                  }}
+                  total={botData.total}
+                  current={botData.page}
+                  pageSize={botData.limit}
+                  showSizeChanger
+                  onChange={(page, pageSize) => {
+                    setPage(page);
+                    setLimit(pageSize);
+                  }}
                 />
-              </div>
+              ) : null
             }
           />
-          {botData.total >= 10 && (
-            <div className="mt-4 flex items-center justify-end">
-              <Pagination
-                onShowSizeChange={(current, size) => {
-                  setPage(current);
-                  setLimit(size);
-                }}
-                total={botData.total}
-                current={botData.page}
-                pageSize={botData.limit}
-                showSizeChanger
-                onChange={(page, pageSize) => {
-                  setPage(page);
-                  setLimit(pageSize);
-                }}
-              />
-            </div>
-          )}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

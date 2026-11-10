@@ -132,7 +132,7 @@ export const chatRequestHandler = async (
     const documents =
       retrievedDocuments ??
       (await retriever.getRelevantDocuments(sanitizedQuestion));
-    const historyId = await saveChatHistory(
+    const { historyId, messageId } = await saveChatHistory(
       prisma,
       bot.id,
       message,
@@ -150,6 +150,7 @@ export const chatRequestHandler = async (
         { type: "ai", text: botResponse },
       ],
       history_id: historyId,
+      message_id: messageId,
     };
   } catch (e) {
     console.error(e);
@@ -306,7 +307,7 @@ export const chatRequestStreamHandler = async (
     const documents =
       retrievedDocuments ??
       (await retriever.getRelevantDocuments(sanitizedQuestion));
-    const historyId = await saveChatHistory(
+    const { historyId, messageId } = await saveChatHistory(
       prisma,
       bot.id,
       message,
@@ -327,6 +328,7 @@ export const chatRequestStreamHandler = async (
           { type: "ai", text: response },
         ],
         history_id: historyId,
+      message_id: messageId,
       }),
     });
 

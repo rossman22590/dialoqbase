@@ -110,7 +110,7 @@ export const saveChatHistory = async (
     data: { type: "human", message, botPlaygroundId: historyId },
   });
 
-  await prisma.botPlaygroundMessage.create({
+  const botMessage = await prisma.botPlaygroundMessage.create({
     data: {
       type: "ai",
       message: response,
@@ -120,5 +120,6 @@ export const saveChatHistory = async (
     },
   });
 
-  return historyId;
+  // messageId lets the playground rate this answer (thumbs up/down).
+  return { historyId, messageId: botMessage.id };
 };
