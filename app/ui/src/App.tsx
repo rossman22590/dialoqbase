@@ -247,6 +247,8 @@ export default function App() {
           borderRadius: 8,
           borderRadiusLG: 14,
           controlHeight: 36,
+          // Large inputs/selects match ui-input and the 40px buttons beside them.
+          controlHeightLG: 40,
           boxShadowSecondary:
             "0 2px 4px rgb(16 16 24 / 0.04), 0 16px 40px -16px rgb(16 16 24 / 0.28)",
           ...(mode === "dark"

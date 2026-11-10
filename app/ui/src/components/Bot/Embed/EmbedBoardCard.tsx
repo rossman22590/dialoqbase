@@ -115,7 +115,7 @@ export function WidgetOptionsForm({ form }: { form: FormInstance }) {
         Widget options
       </h2>
       <Form
-        className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 [&_.ant-form-item]:mb-0"
+        className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 [&_.ant-form-item]:!mb-0"
         form={form}
         initialValues={WIDGET_INITIAL_VALUES}
         layout="vertical"

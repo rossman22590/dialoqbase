@@ -256,7 +256,7 @@ export const SettingsBody: React.FC<BotSettings> = ({
               if (target) setTab(target);
             }}
             layout="vertical"
-            className="[&_.ant-form-item]:mb-0"
+            className="[&_.ant-form-item]:!mb-0"
           >
             {/* Behavior */}
             <div role="tabpanel" className={panel("behavior")}>

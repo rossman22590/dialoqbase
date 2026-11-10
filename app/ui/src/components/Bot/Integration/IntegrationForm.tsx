@@ -139,7 +139,7 @@ export const IntegrationForm: React.FC<Props> = ({ onClose, data }) => {
         }}
         layout="vertical"
         requiredMark={false}
-        className="flex flex-col gap-4 [&_.ant-form-item]:mb-0"
+        className="flex flex-col gap-4 [&_.ant-form-item]:!mb-0"
         onFinish={updateIntegration}
       >
         {data.fields.map((field, index) => {

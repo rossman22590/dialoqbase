@@ -206,7 +206,7 @@ export const NewDsForm = ({
       <div className="flex flex-wrap items-start gap-2">
         <Form.Item
           name="content"
-          className="mb-0 min-w-0 flex-[1_1_280px]"
+          className="!mb-0 min-w-0 flex-[1_1_280px]"
           rules={[{ required: true, message: requiredMessage }]}
         >
           <Input
@@ -248,7 +248,7 @@ export const NewDsForm = ({
           </label>
           <Form.Item
             name="content"
-            className="mb-0"
+            className="!mb-0"
             rules={[
               { required: true, message: "Please enter the website URL" },
             ]}
@@ -264,7 +264,7 @@ export const NewDsForm = ({
             <Form.Item
               name="maxDepth"
               label="Max depth"
-              className="mb-0"
+              className="!mb-0"
               help="The max depth of the website to crawl"
               rules={[{ required: true, message: "Please input max depth!" }]}
             >
@@ -277,7 +277,7 @@ export const NewDsForm = ({
             <Form.Item
               name="maxLinks"
               label="Max links"
-              className="mb-0"
+              className="!mb-0"
               help="The max links to crawl"
               rules={[
                 { required: true, message: "Please input max links count" },
@@ -305,7 +305,7 @@ export const NewDsForm = ({
           </label>
           <Form.Item
             name="content"
-            className="mb-0"
+            className="!mb-0"
             rules={[{ required: true, message: "Please enter the text" }]}
           >
             <Input.TextArea
@@ -326,7 +326,7 @@ export const NewDsForm = ({
         <>
           <Form.Item
             name="file"
-            className="mb-0"
+            className="!mb-0"
             rules={[
               {
                 required: true,
@@ -395,7 +395,7 @@ export const NewDsForm = ({
           <div className="flex flex-wrap items-start gap-2">
             <Form.Item
               name={["options", "method"]}
-              className="mb-0 w-28"
+              className="!mb-0 w-28"
               rules={[{ required: true, message: "Please select a method" }]}
             >
               <Select
@@ -409,7 +409,7 @@ export const NewDsForm = ({
             </Form.Item>
             <Form.Item
               name="content"
-              className="mb-0 min-w-0 flex-[1_1_240px]"
+              className="!mb-0 min-w-0 flex-[1_1_240px]"
               rules={[
                 {
                   required: true,
@@ -433,14 +433,14 @@ export const NewDsForm = ({
             <Form.Item
               name={["options", "headers"]}
               label="Headers"
-              className="mb-0"
+              className="!mb-0"
             >
               <Input.TextArea placeholder="Enter the headers" />
             </Form.Item>
             <Form.Item
               name={["options", "body"]}
               label="Body (JSON)"
-              className="mb-0"
+              className="!mb-0"
               rules={[{ required: true, message: "Please enter a valid JSON" }]}
             >
               <Input.TextArea placeholder="Enter the body" />
@@ -463,7 +463,7 @@ export const NewDsForm = ({
         onFinish={createBot}
         form={form}
         requiredMark={false}
-        className="flex flex-col gap-2 px-5 pb-5 pt-4"
+        className="flex flex-col gap-2 !px-5 !pb-5 !pt-4"
         initialValues={{
           embedding:
             botConfig?.defaultEmbeddingModel ||

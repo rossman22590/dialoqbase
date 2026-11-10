@@ -42,7 +42,7 @@ const ColorField = ({
   <Form.Item
     name={name}
     label={<span className="text-xs text-fg-muted">{label}</span>}
-    className="mb-0"
+    className="!mb-0"
     rules={[
       {
         required: true,
@@ -138,7 +138,7 @@ export const AppearanceForm = ({
       layout="vertical"
       form={form}
       onFinish={updateAppearance}
-      className="flex flex-col gap-[22px] [&_.ant-form-item]:mb-0"
+      className="flex flex-col gap-[22px] [&_.ant-form-item]:!mb-0"
     >
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">

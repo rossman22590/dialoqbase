@@ -158,7 +158,7 @@ const ApiPlaygroundComponent: React.FC<BotIntegrationAPI> = ({ data }) => {
             layout="vertical"
             requiredMark={false}
             onFinish={showResponse}
-            className="flex flex-col gap-3 [&_.ant-form-item]:mb-0"
+            className="flex flex-col gap-3 [&_.ant-form-item]:!mb-0"
             initialValues={{
               stream: true,
               history: [],

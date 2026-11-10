@@ -79,7 +79,7 @@ export const SettingsPwdP: React.FC<Props> = ({
           <Form.Item
             name="publicBotPwd"
             label="Password"
-            className="mb-0 min-w-0 flex-1"
+            className="!mb-0 min-w-0 flex-1"
             rules={[
               {
                 required: isEnabled,
