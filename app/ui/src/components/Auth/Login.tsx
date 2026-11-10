@@ -125,27 +125,10 @@ export const AuthLogin = () => {
           {isLoading ? "Logging in..." : "Log in"}
         </button>
       </Form>
-      {SSO_LOGIN_URL && (
-        <>
-          <div className="my-4 flex items-center gap-3 text-xs text-fg-subtle">
-            <span className="h-px flex-1 bg-line" />
-            or
-            <span className="h-px flex-1 bg-line" />
-          </div>
-          <a href={SSO_LOGIN_URL} className="ui-btn-secondary h-11 w-full">
-            {SSO_LOGIN_LABEL}
-          </a>
-        </>
-      )}
     </AuthShell>
   );
 };
 
-// School-account sign-in goes through MyApps, which sends people back here via
-// the SSO route. The button only shows when the build sets this URL.
-const SSO_LOGIN_URL: string | undefined = import.meta.env.VITE_SSO_LOGIN_URL;
-const SSO_LOGIN_LABEL: string =
-  import.meta.env.VITE_SSO_LOGIN_LABEL || "Continue with your school account";
 
 export const AuthSpinner = () => (
   <span
