@@ -132,16 +132,19 @@ const ownEntry = <T>(table: Record<string, T>, key: string): T | undefined =>
         ? table[key]
         : undefined;
 
-// Billed USD per 1M tokens (markup included) for a model, as shown in the
-// model settings. Prices are null when the model is not in our tables (it
-// is then charged at the default rate).
+// What a user's balance is charged per 1M tokens for a model, as shown in the
+// model settings: provider cost x PRICE_MARKUP x COST_MULTIPLIER, the same
+// units calculateChatCost / calculateEmbeddingCost deduct. Prices are null
+// when the model is not in our tables (it is then charged at the default rate).
 export const listedModelPrices = (modelId: string, modelType: string) => {
+    const billed = (usd: number | null | undefined) =>
+        usd === null || usd === undefined ? null : usd * COST_MULTIPLIER;
     if (modelType === "embedding") {
         const pricing =
             ownEntry(EMBEDDING_PRICING, modelId) ??
             ownEntry(EMBEDDING_PRICING, normalizeEmbeddingModelId(modelId));
         return {
-            input_price_per_1m: pricing ? pricing.input : null,
+            input_price_per_1m: billed(pricing?.input),
             output_price_per_1m: null,
             request_price: null,
             price_tiers: [],
@@ -151,13 +154,13 @@ export const listedModelPrices = (modelId: string, modelType: string) => {
         ownEntry(MODEL_PRICING, modelId) ??
         ownEntry(MODEL_PRICING, normalizeChatModelId(modelId));
     return {
-        input_price_per_1m: pricing ? pricing.input : null,
-        output_price_per_1m: pricing ? pricing.output : null,
-        request_price: pricing?.request ?? null,
+        input_price_per_1m: billed(pricing?.input),
+        output_price_per_1m: billed(pricing?.output),
+        request_price: billed(pricing?.request),
         price_tiers: (pricing?.tiers || []).map((tier) => ({
             min_prompt_tokens: tier.minPromptTokens,
-            input_price_per_1m: tier.input,
-            output_price_per_1m: tier.output,
+            input_price_per_1m: billed(tier.input),
+            output_price_per_1m: billed(tier.output),
         })),
     };
 };

@@ -39,4 +39,5 @@ export type GetAllModelResponse = {
     createdAt: string;
   } & ModelPrices)[];
   price_markup?: number;
+  cost_multiplier?: number;
 };

@@ -25,9 +25,17 @@ export const normalizeDomain = (input: string): string | null => {
 
 // Content-Security-Policy value that only lets the listed sites (and their
 // subdomains) put the bot page in an iframe. Null means no restriction.
+// Each domain is allowed over http and https on any port, since owners enter
+// a hostname ("intranet.school.edu", "example.edu:8443") and a CSP source
+// without an explicit scheme or port would silently block those pages.
 export const frameAncestorsPolicy = (domains: string[] | null | undefined) => {
   const list = (domains || []).filter(Boolean);
   if (list.length === 0) return null;
-  const sources = list.flatMap((d) => [`https://${d}`, `https://*.${d}`]);
+  const sources = list.flatMap((d) => [
+    `https://${d}:*`,
+    `https://*.${d}:*`,
+    `http://${d}:*`,
+    `http://*.${d}:*`,
+  ]);
   return `frame-ancestors 'self' ${sources.join(" ")}`;
 };

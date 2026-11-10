@@ -2,6 +2,13 @@ import { sendEmail } from "./mailer";
 
 const money = (value: number) => `$${value.toFixed(2)}`;
 
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
 // Emails a user when a charge takes their balance below their alert threshold,
 // and again when it reaches $0 (their bots stop answering then). Only fires on
 // the charge that crosses the line, so one email per crossing.
@@ -51,7 +58,7 @@ export const notifyIfLowBalance = async (
       to: user.email,
       subject,
       text: `Hi ${user.username},\n\n${body}\n\nYou can turn these emails off on the Usage page.`,
-      html: `<p>Hi ${user.username},</p><p>${body}</p><p style="color:#71717a">You can turn these emails off on the Usage page.</p>`,
+      html: `<p>Hi ${escapeHtml(user.username)},</p><p>${body}</p><p style="color:#71717a">You can turn these emails off on the Usage page.</p>`,
     });
   } catch (err) {
     console.error("Failed to send low-balance email", err);

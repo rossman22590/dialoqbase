@@ -165,7 +165,14 @@ export const AppHeader = ({
         )}
 
         <div className="flex flex-1 items-center justify-end gap-3">
-          {mode === "app" && <CreditsPill balance={balance} />}
+          {/* Inside a bot the full-width banner would push the full-height
+              playground off screen, so low/empty credit shows here instead. */}
+          {(mode === "app" ||
+            (balance !== undefined &&
+              balance !== null &&
+              balanceState(balance) !== "ok")) && (
+            <CreditsPill balance={balance} />
+          )}
           <ApplicationMenu />
         </div>
       </div>

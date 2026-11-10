@@ -158,14 +158,15 @@ export const getAllBotsHandler = async (
     return bots;
   }
 
-  // Activity for the dashboard cards: chats in the last 7 days and when the
-  // bot last answered, across web, playground, WhatsApp and API.
-  // (Telegram and Discord history isn't stored per bot, so it isn't counted.)
+  // Activity for the dashboard cards: conversations in the last 7 days (web,
+  // playground, WhatsApp) and when the bot last answered (those plus API).
+  // API history has no conversation id, so API calls only count toward
+  // "last active". Telegram and Discord history isn't stored per bot.
   try {
     const ids = bots.map((b) => b.id);
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-    const [webChats, webLast, playChats, playLast, waChats, waLast, apiRecent, apiLast] =
+    const [webChats, webLast, playChats, playLast, waChats, waLast, apiLast] =
       await Promise.all([
         prisma.botWebHistory.groupBy({
           by: ["bot_id", "chat_id"],
@@ -198,11 +199,6 @@ export const getAllBotsHandler = async (
         }),
         prisma.botApiHistory.groupBy({
           by: ["bot_id"],
-          where: { bot_id: { in: ids }, createdAt: { gte: since } },
-          _count: { _all: true },
-        }),
-        prisma.botApiHistory.groupBy({
-          by: ["bot_id"],
           where: { bot_id: { in: ids } },
           _max: { createdAt: true },
         }),
@@ -223,7 +219,6 @@ export const getAllBotsHandler = async (
     webChats.forEach((r) => addChats(r.bot_id, 1));
     waChats.forEach((r) => addChats(r.bot_id, 1));
     playChats.forEach((r) => addChats(r.botId, r._count._all));
-    apiRecent.forEach((r) => addChats(r.bot_id, r._count._all));
     webLast.forEach((r) => touch(r.bot_id, r._max.createdAt));
     waLast.forEach((r) => touch(r.bot_id, r._max.createdAt));
     apiLast.forEach((r) => touch(r.bot_id, r._max.createdAt));

@@ -20,10 +20,10 @@ import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { AppHeader, balanceState, formatBalance, BrandLink } from "./AppHeader";
-import { CreditsBanner } from "./index";
 import { useSettings } from "../hooks/useSettings";
 import { OnboardingModal } from "../components/Common/OnboardingModal";
 import api from "../services/api";
+import { useStoreMessage } from "../store";
 
 type NavItem = {
   name: string;
@@ -353,6 +353,19 @@ export default function BotLayout({
     setSidebarOpen(false);
   }, [location.pathname]);
 
+  // Switching bots keeps the same route mounted, so clear the playground chat
+  // left over from the previous bot. (The page itself remounts via key below.)
+  const { setMessages, setHistory, setHistoryId } = useStoreMessage();
+  const previousId = React.useRef(params.id);
+  React.useEffect(() => {
+    if (previousId.current !== params.id) {
+      previousId.current = params.id;
+      setMessages([]);
+      setHistory([]);
+      setHistoryId(null);
+    }
+  }, [params.id]);
+
   const id = params.id!;
   const botList: any[] = Array.isArray(bots) ? bots : [];
   const current = botList.find((b) => b.id === id);
@@ -427,12 +440,14 @@ export default function BotLayout({
           crumb={active?.name}
           onOpenNav={() => setSidebarOpen(true)}
         />
-        <CreditsBanner balance={creditData?.balance} />
         <div className="flex flex-1">
           <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-60 shrink-0 overflow-y-auto border-r border-line bg-sidebar md:block">
             {sidebar}
           </aside>
-          <main className="min-w-0 flex-1">{children}</main>
+          {/* key: a different bot gets fresh forms, never the last bot's values */}
+          <main key={id} className="min-w-0 flex-1">
+            {children}
+          </main>
         </div>
       </div>
     </>

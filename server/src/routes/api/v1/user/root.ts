@@ -169,6 +169,8 @@ const root: FastifyPluginAsync = async (fastify, _): Promise<void> => {
             type: "object",
             properties: {
               balance: { type: "number" },
+              total: { type: "number" },
+              last_top_up_at: { type: ["string", "null"] },
             },
           },
         },

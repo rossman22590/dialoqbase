@@ -118,6 +118,7 @@ export default function SettingsModelRoot() {
 
   const colCount = modelType === "llm" ? 7 : 5;
   const markup = data?.price_markup ?? 1.5;
+  const multiplier = data?.cost_multiplier ?? 500;
 
   return (
     <SettingsLayout>
@@ -304,8 +305,9 @@ export default function SettingsModelRoot() {
             </div>
           </section>
           <p className="m-0 text-xs text-fg-subtle">
-            Prices include the {markup}× markup on the provider's cost.
-            Built-in models can be hidden but not deleted.
+            Prices are what a user's balance is charged: the provider's cost ×{" "}
+            {markup} markup × {multiplier}. Built-in models can be hidden but
+            not deleted.
           </p>
 
           <Modal

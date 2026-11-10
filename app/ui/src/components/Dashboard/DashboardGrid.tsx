@@ -58,7 +58,7 @@ const sourcesLine = (bot: any) => {
 const createdLine = (bot: any) =>
   bot.createdAt ? `Created ${dayjs(bot.createdAt).format("MMM D, YYYY")}` : "";
 
-// "214 chats this week" (web, playground, WhatsApp and API).
+// "214 chats this week" (web, playground and WhatsApp conversations).
 const chatsLine = (bot: any) => {
   if (typeof bot.chats_7d !== "number") return "";
   if (bot.chats_7d === 0) return "No chats this week";

@@ -105,6 +105,34 @@ export const useMessage = () => {
       },
     ];
     setMessages(newMessage);
+    const appendingIndex = newMessage.length - 1;
+
+    try {
+      await readStream(newMessage, appendingIndex, message);
+    } catch (e: any) {
+      // The user pressed Stop: keep what arrived, drop the cursor, and
+      // finish normally instead of showing a failure.
+      if (e?.name === "AbortError") {
+        const partial = newMessage[appendingIndex].message.replace(/▋$/, "");
+        newMessage[appendingIndex].message = partial.trim()
+          ? partial
+          : "_Stopped._";
+        setMessages([...newMessage]);
+        setIsProcessing(false);
+        return;
+      }
+      setIsProcessing(false);
+      throw e;
+    } finally {
+      abortControllerRef.current = null;
+    }
+  };
+
+  const readStream = async (
+    newMessage: Message[],
+    appendingIndex: number,
+    message: string
+  ) => {
     const response = await fetch(`${baseURL}/${getUrl()}/stream`, {
       method: "POST",
       body: JSON.stringify({
@@ -115,7 +143,7 @@ export const useMessage = () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${getToken()}`,
       },
-      signal: abortControllerRef.current.signal,
+      signal: abortControllerRef.current?.signal,
     });
 
     if (!response.ok) {
@@ -130,7 +158,6 @@ export const useMessage = () => {
 
     const decoder = new TextDecoder("utf-8");
 
-    const appendingIndex = newMessage.length - 1;
     let count = 0;
 
     while (true) {
